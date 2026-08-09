@@ -1,0 +1,88 @@
+const technicalSkills = [
+  {
+    id: "html",
+    name: "HTML",
+    category: "Frontend",
+    level: "Beginner",
+    demand: "High",
+  },
+  {
+    id: "css",
+    name: "CSS",
+    category: "Frontend",
+    level: "Beginner",
+    demand: "High",
+  },
+  {
+    id: "javascript",
+    name: "JavaScript",
+    category: "Frontend",
+    level: "Intermediate",
+    demand: "Very High",
+  },
+  {
+    id: "react",
+    name: "React.js",
+    category: "Frontend",
+    level: "Intermediate",
+    demand: "Very High",
+  },
+  {
+    id: "java",
+    name: "Java",
+    category: "Programming",
+    level: "Intermediate",
+    demand: "High",
+  },
+  {
+    id: "python",
+    name: "Python",
+    category: "Programming",
+    level: "Intermediate",
+    demand: "Very High",
+  },
+  {
+    id: "sql",
+    name: "SQL",
+    category: "Database",
+    level: "Intermediate",
+    demand: "High",
+  },
+  {
+    id: "springboot",
+    name: "Spring Boot",
+    category: "Backend",
+    level: "Advanced",
+    demand: "High",
+  },
+  {
+    id: "nodejs",
+    name: "Node.js",
+    category: "Backend",
+    level: "Intermediate",
+    demand: "High",
+  },
+  {
+    id: "aws",
+    name: "AWS",
+    category: "Cloud",
+    level: "Advanced",
+    demand: "High",
+  },
+  {
+    id: "dsa",
+    name: "Data Structures & Algorithms",
+    category: "Programming",
+    level: "Advanced",
+    demand: "Very High",
+  },
+  {
+    id: "machine-learning",
+    name: "Machine Learning",
+    category: "AI",
+    level: "Advanced",
+    demand: "Very High",
+  },
+];
+
+export default technicalSkills;

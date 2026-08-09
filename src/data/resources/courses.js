@@ -1,0 +1,123 @@
+const courses = [
+  {
+    id: "html-css",
+    title: "HTML & CSS Complete Course",
+    category: "Frontend",
+    platform: "freeCodeCamp",
+    type: "Free",
+    duration: "20 Hours",
+    level: "Beginner",
+    url: "https://www.freecodecamp.org/",
+    skills: ["HTML", "CSS"],
+  },
+
+  {
+    id: "javascript",
+    title: "JavaScript Complete Guide",
+    category: "Frontend",
+    platform: "freeCodeCamp",
+    type: "Free",
+    duration: "40 Hours",
+    level: "Beginner",
+    url: "https://www.freecodecamp.org/",
+    skills: ["JavaScript"],
+  },
+
+  {
+    id: "react",
+    title: "React JS",
+    category: "Frontend",
+    platform: "React Docs",
+    type: "Free",
+    duration: "25 Hours",
+    level: "Intermediate",
+    url: "https://react.dev/",
+    skills: ["React"],
+  },
+
+  {
+    id: "python",
+    title: "Python Programming",
+    category: "Programming",
+    platform: "freeCodeCamp",
+    type: "Free",
+    duration: "30 Hours",
+    level: "Beginner",
+    url: "https://www.freecodecamp.org/",
+    skills: ["Python"],
+  },
+
+  {
+    id: "java",
+    title: "Java Programming",
+    category: "Programming",
+    platform: "Oracle",
+    type: "Free",
+    duration: "35 Hours",
+    level: "Intermediate",
+    url: "https://dev.java/",
+    skills: ["Java"],
+  },
+
+  {
+    id: "sql",
+    title: "SQL Database",
+    category: "Database",
+    platform: "W3Schools",
+    type: "Free",
+    duration: "12 Hours",
+    level: "Beginner",
+    url: "https://www.w3schools.com/sql/",
+    skills: ["SQL"],
+  },
+
+  {
+    id: "dsa",
+    title: "Data Structures & Algorithms",
+    category: "Programming",
+    platform: "GeeksforGeeks",
+    type: "Free",
+    duration: "60 Hours",
+    level: "Intermediate",
+    url: "https://www.geeksforgeeks.org/",
+    skills: ["DSA"],
+  },
+
+  {
+    id: "springboot",
+    title: "Spring Boot",
+    category: "Backend",
+    platform: "Spring",
+    type: "Free",
+    duration: "30 Hours",
+    level: "Intermediate",
+    url: "https://spring.io/",
+    skills: ["Spring Boot"],
+  },
+
+  {
+    id: "machine-learning",
+    title: "Machine Learning",
+    category: "AI",
+    platform: "Coursera",
+    type: "Free/Paid",
+    duration: "50 Hours",
+    level: "Advanced",
+    url: "https://www.coursera.org/",
+    skills: ["Machine Learning"],
+  },
+
+  {
+    id: "aws",
+    title: "AWS Cloud",
+    category: "Cloud",
+    platform: "AWS Skill Builder",
+    type: "Free",
+    duration: "40 Hours",
+    level: "Intermediate",
+    url: "https://explore.skillbuilder.aws/",
+    skills: ["AWS"],
+  },
+];
+
+export default courses;

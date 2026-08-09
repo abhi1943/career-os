@@ -1,4 +1,3 @@
-import Navbar from "../../components/layout/Navbar";
 import HeroSection from "../../components/sections/HeroSection";
 import StudentForm from "../../components/forms/StudentForm";
 import CareerExplorer from "../../components/careers/CareerExplorer";
@@ -8,25 +7,32 @@ import CategoriesSection from "../../components/sections/CategoriesSection";
 import ExamsSection from "../../components/sections/ExamsSection";
 
 function Home() {
-  return (
-    <>
-      <Navbar />
+return ( <main>
 
-      <HeroSection />
+  {/* Main introduction */}
+  <HeroSection />
 
-      <StatsSection />
+  {/* CareerOS platform statistics */}
+  <StatsSection />
 
-      <StudentForm />
+  {/* Personalized career profile */}
+  <StudentForm />
 
-      <CareerExplorer />
-      
-      <CategoriesSection />
+  {/* Recommended career paths */}
+  <CareerExplorer />
 
-      <CompaniesSection />
+  {/* Career categories */}
+  <CategoriesSection />
 
-      <ExamsSection />
-    </>
-  );
+  {/* Companies & opportunities */}
+  <CompaniesSection />
+
+  {/* Education & entrance exams */}
+  <ExamsSection />
+
+</main>
+
+);
 }
 
 export default Home;

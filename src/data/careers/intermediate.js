@@ -1,22 +1,25 @@
 const intermediate = [
   {
     id: "mpc",
-
     name: "MPC (Mathematics, Physics, Chemistry)",
-
+    icon: "🧮",
+    category: "Science",
     duration: "2 Years",
-
     eligibility: "10th Pass",
 
-    description:
-      "Best stream for Engineering, Technology, Defence, Research and Data Science careers.",
+    averageSalary: "₹6 LPA - ₹35 LPA",
+    growth: "Excellent",
+    rating: 4.9,
 
-    subjects: [
-      "Mathematics",
-      "Physics",
-      "Chemistry",
-      "English",
-      "Second Language"
+    description:
+      "MPC is the best stream for students interested in Engineering, Computer Science, Artificial Intelligence, Data Science, Defence and Research.",
+
+    streams: [
+      "Engineering",
+      "Computer Science",
+      "Artificial Intelligence",
+      "Data Science",
+      "Architecture"
     ],
 
     entranceExams: [
@@ -25,69 +28,178 @@ const intermediate = [
       "AP EAPCET",
       "TS EAPCET",
       "BITSAT",
-      "VITEEE"
+      "VITEEE",
+      "SRMJEEE"
+    ],
+
+    skills: [
+      "Mathematics",
+      "Logical Thinking",
+      "Problem Solving",
+      "Programming Basics",
+      "Physics",
+      "Analytical Skills"
+    ],
+
+    topColleges: [
+      "IIT",
+      "NIT",
+      "BITS Pilani",
+      "IIIT Hyderabad",
+      "VIT"
+    ],
+
+    certifications: [
+      "Python",
+      "Java",
+      "C++",
+      "Data Structures",
+      "Web Development"
+    ],
+
+    companies: [
+      "Google",
+      "Microsoft",
+      "Amazon",
+      "Infosys",
+      "TCS"
+    ],
+
+    careerOpportunities: [
+      "Software Engineer",
+      "AI Engineer",
+      "Data Scientist",
+      "Civil Engineer",
+      "Mechanical Engineer"
+    ],
+
+    roadmap: [
+      "Complete Intermediate",
+      "Prepare for JEE/EAPCET",
+      "Join Engineering",
+      "Learn Programming",
+      "Internship",
+      "Get Campus Placement"
     ],
 
     higherStudies: [
       "B.Tech",
       "B.Sc",
       "B.Arch",
-      "Integrated M.Sc"
-    ]
+      "Integrated M.Tech"
+    ],
+
+    futureScope: "Excellent"
   },
 
   {
     id: "bipc",
-
     name: "BiPC (Biology, Physics, Chemistry)",
-
+    icon: "🩺",
+    category: "Medical",
     duration: "2 Years",
-
     eligibility: "10th Pass",
 
-    description:
-      "Best stream for Medical, Pharmacy, Agriculture and Life Science careers.",
+    averageSalary: "₹6 LPA - ₹50 LPA",
+    growth: "Excellent",
+    rating: 4.9,
 
-    subjects: [
-      "Biology",
-      "Physics",
-      "Chemistry",
-      "English",
-      "Second Language"
+    description:
+      "BiPC is ideal for students aiming for Medicine, Dentistry, Pharmacy, Nursing, Biotechnology and Life Sciences.",
+
+    streams: [
+      "MBBS",
+      "BDS",
+      "BAMS",
+      "Pharmacy",
+      "Biotechnology"
     ],
 
     entranceExams: [
       "NEET",
-      "AP EAPCET",
-      "TS EAPCET"
+      "EAPCET",
+      "AIIMS",
+      "JIPMER"
+    ],
+
+    skills: [
+      "Biology",
+      "Observation",
+      "Communication",
+      "Patient Care",
+      "Critical Thinking"
+    ],
+
+    topColleges: [
+      "AIIMS",
+      "JIPMER",
+      "CMC Vellore",
+      "NIMS",
+      "Osmania Medical College"
+    ],
+
+    certifications: [
+      "First Aid",
+      "Medical Coding",
+      "Clinical Research"
+    ],
+
+    companies: [
+      "Apollo",
+      "Aster",
+      "Fortis",
+      "Medanta",
+      "Yashoda"
+    ],
+
+    careerOpportunities: [
+      "Doctor",
+      "Dentist",
+      "Pharmacist",
+      "Nurse",
+      "Biotechnologist"
+    ],
+
+    roadmap: [
+      "Complete Intermediate",
+      "Prepare NEET",
+      "Join Medical College",
+      "Internship",
+      "PG (Optional)",
+      "Doctor"
     ],
 
     higherStudies: [
       "MBBS",
       "BDS",
-      "B.Pharmacy",
-      "B.Sc Nursing",
-      "B.Sc Agriculture"
-    ]
+      "B.Pharm",
+      "B.Sc Nursing"
+    ],
+
+    futureScope: "Excellent"
   },
 
   {
     id: "mec",
-
-    name: "MEC (Mathematics, Economics, Commerce)",
-
+    name: "MEC (Maths, Economics, Commerce)",
+    icon: "💹",
+    category: "Commerce",
     duration: "2 Years",
-
     eligibility: "10th Pass",
 
-    description:
-      "Ideal stream for Commerce, Banking, Finance, Business and Management.",
+    averageSalary: "₹5 LPA - ₹25 LPA",
+    growth: "High",
+    rating: 4.7,
 
-    subjects: [
-      "Mathematics",
-      "Economics",
-      "Commerce",
-      "English"
+    description:
+      "MEC prepares students for Finance, Business, Banking, Chartered Accountancy and Economics.",
+
+    streams: [
+      "B.Com",
+      "BBA",
+      "CA",
+      "CMA",
+      "Economics"
     ],
 
     entranceExams: [
@@ -95,31 +207,78 @@ const intermediate = [
       "CA Foundation"
     ],
 
+    skills: [
+      "Accounting",
+      "Business",
+      "Finance",
+      "Economics",
+      "Communication"
+    ],
+
+    topColleges: [
+      "SRCC",
+      "Loyola College",
+      "Christ University",
+      "NMIMS"
+    ],
+
+    certifications: [
+      "Tally",
+      "Excel",
+      "Financial Modeling"
+    ],
+
+    companies: [
+      "Deloitte",
+      "EY",
+      "KPMG",
+      "PwC"
+    ],
+
+    careerOpportunities: [
+      "Chartered Accountant",
+      "Financial Analyst",
+      "Bank Officer",
+      "Business Analyst"
+    ],
+
+    roadmap: [
+      "Intermediate",
+      "Degree",
+      "Professional Certification",
+      "Internship",
+      "Placement"
+    ],
+
     higherStudies: [
       "B.Com",
       "BBA",
-      "CA",
-      "CS"
-    ]
+      "MBA"
+    ],
+
+    futureScope: "Very High"
   },
 
   {
     id: "cec",
-
     name: "CEC (Civics, Economics, Commerce)",
-
+    icon: "⚖️",
+    category: "Commerce",
     duration: "2 Years",
-
     eligibility: "10th Pass",
 
-    description:
-      "Suitable for Law, Business Administration, Banking and Government careers.",
+    averageSalary: "₹4 LPA - ₹20 LPA",
+    growth: "High",
+    rating: 4.6,
 
-    subjects: [
-      "Civics",
-      "Economics",
-      "Commerce",
-      "English"
+    description:
+      "CEC is suitable for Law, Commerce, Public Administration, Banking and Civil Services.",
+
+    streams: [
+      "Law",
+      "B.Com",
+      "BBA",
+      "Public Administration"
     ],
 
     entranceExams: [
@@ -127,68 +286,127 @@ const intermediate = [
       "CUET"
     ],
 
+    skills: [
+      "Communication",
+      "Leadership",
+      "Economics",
+      "Commerce",
+      "Public Administration"
+    ],
+
+    topColleges: [
+      "NLSIU",
+      "NLU Delhi",
+      "Symbiosis Law School"
+    ],
+
+    certifications: [
+      "MS Office",
+      "Legal Research"
+    ],
+
+    companies: [
+      "Banks",
+      "Law Firms",
+      "Government Departments"
+    ],
+
+    careerOpportunities: [
+      "Lawyer",
+      "Bank Officer",
+      "Civil Servant",
+      "Business Executive"
+    ],
+
+    roadmap: [
+      "Intermediate",
+      "Degree",
+      "Law/MBA",
+      "Placement"
+    ],
+
     higherStudies: [
-      "B.Com",
-      "BBA",
-      "LLB"
-    ]
+      "LLB",
+      "MBA",
+      "M.Com"
+    ],
+
+    futureScope: "High"
   },
 
   {
     id: "hec",
-
     name: "HEC (History, Economics, Civics)",
-
+    icon: "🏛️",
+    category: "Humanities",
     duration: "2 Years",
-
     eligibility: "10th Pass",
 
-    description:
-      "Best stream for Civil Services, Teaching, Arts and Social Science careers.",
+    averageSalary: "₹4 LPA - ₹18 LPA",
+    growth: "Good",
+    rating: 4.5,
 
-    subjects: [
-      "History",
-      "Economics",
-      "Civics",
-      "English"
+    description:
+      "HEC is ideal for Civil Services, Teaching, Journalism and Social Sciences.",
+
+    streams: [
+      "BA",
+      "Journalism",
+      "Political Science",
+      "History"
     ],
 
     entranceExams: [
-      "CUET"
+      "CUET",
+      "UPSC"
     ],
 
-    higherStudies: [
-      "BA",
-      "BSW",
-      "LLB"
-    ]
-  },
-
-  {
-    id: "vocational",
-
-    name: "Vocational Intermediate",
-
-    duration: "2 Years",
-
-    eligibility: "10th Pass",
-
-    description:
-      "Skill-based education with early employment opportunities.",
-
-    subjects: [
-      "Trade Subjects",
-      "English",
-      "General Subjects"
+    skills: [
+      "Writing",
+      "Research",
+      "Communication",
+      "History",
+      "Public Speaking"
     ],
 
-    entranceExams: [],
+    topColleges: [
+      "Delhi University",
+      "JNU",
+      "Osmania University"
+    ],
 
-    higherStudies: [
+    certifications: [
+      "Content Writing",
+      "Digital Marketing"
+    ],
+
+    companies: [
+      "Media",
+      "Government",
+      "NGOs"
+    ],
+
+    careerOpportunities: [
+      "IAS",
+      "Teacher",
+      "Journalist",
+      "Content Writer"
+    ],
+
+    roadmap: [
+      "Intermediate",
       "Degree",
-      "Diploma",
-      "Employment"
-    ]
+      "Competitive Exams",
+      "Career"
+    ],
+
+    higherStudies: [
+      "MA",
+      "MBA",
+      "LLB"
+    ],
+
+    futureScope: "Good"
   }
 ];
 

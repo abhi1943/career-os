@@ -6,6 +6,7 @@ import degree from "./careers/degree";
 import engineering from "./careers/engineering";
 import medical from "./careers/medical";
 import government from "./careers/government";
+import professionalCareers from "./careers/professionalCareers";
 
 const database = {
   after10th,
@@ -16,6 +17,8 @@ const database = {
   engineering,
   medical,
   government,
+
+  professionalCareers
 };
 
 export default database;
