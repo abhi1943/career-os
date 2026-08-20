@@ -1,4 +1,5 @@
 import database from "../data";
+
 import roadmaps from "../data/roadmaps";
 import indiaSalaries from "../data/salaries/india";
 import abroadSalaries from "../data/salaries/abroad";
@@ -14,58 +15,299 @@ import youtube from "../data/resources/youtube";
 import technicalSkills from "../data/skills/technicalSkills";
 import softSkills from "../data/skills/softSkills";
 import tools from "../data/skills/tools";
-import professions from "../data/professions";
 
-export function getCareerCompleteData(careerId) {
-  let career = null;
+/**
+ * Find a career anywhere inside the CareerOS database.
+ */
+function findCareerById(careerId) {
+  if (!careerId) return null;
 
-  // Search Education Careers
-  Object.values(database).forEach((list) => {
-    const found = list.find((item) => item.id === careerId);
+  let foundCareer = null;
 
-    if (found) {
-      career = found;
+  Object.values(database).forEach((careerList) => {
+    if (!Array.isArray(careerList)) return;
+
+    const career = careerList.find(
+      (item) => item?.id === careerId
+    );
+
+    if (career) {
+      foundCareer = career;
     }
   });
 
-  // Search Professional Careers
-  if (!career) {
-    career = professions.find((item) => item.id === careerId);
-  }
-
-  if (!career) {
-  console.log("Career NOT Found:", careerId);
-  return null;
+  return foundCareer;
 }
 
-console.log("Career Found:", career);
+/**
+ * Convert different career data formats
+ * into one consistent format for CareerOS.
+ */
+function normalizeCareer(career) {
+  if (!career) return null;
 
   return {
     ...career,
 
-    roadmap: roadmaps[careerId] || career.roadmap || [],
+    /* ---------------------------------------------
+       BASIC INFORMATION
+    --------------------------------------------- */
 
-    salary: {
-      india: indiaSalaries[careerId] || {},
-      abroad: abroadSalaries[careerId] || {},
+    id: career.id || "",
+    name: career.name || "Career",
+    icon: career.icon || "💼",
+    category: career.category || "Career",
+
+    duration: career.duration || "Learning + Career",
+
+    eligibility:
+      career.eligibility ||
+      "Eligibility information unavailable",
+
+    description:
+      career.description ||
+      "Career information is currently unavailable.",
+
+    overview:
+      career.overview ||
+      career.description ||
+      "",
+
+    /* ---------------------------------------------
+       SALARY
+    --------------------------------------------- */
+
+    averageSalary:
+      career.averageSalary ||
+      career.salary ||
+      "Salary information unavailable",
+
+    salary:
+      career.salary ||
+      career.averageSalary ||
+      "Salary information unavailable",
+
+    /* ---------------------------------------------
+       GROWTH
+    --------------------------------------------- */
+
+    growth:
+      career.growth ||
+      career.futureScope ||
+      "High",
+
+    futureScope:
+      career.futureScope ||
+      "This career has opportunities for growth as technology and industry requirements evolve.",
+
+    /* ---------------------------------------------
+       CAREER INFORMATION
+    --------------------------------------------- */
+
+    rating:
+      typeof career.rating === "number"
+        ? career.rating
+        : 4.5,
+
+    streams: Array.isArray(career.streams)
+      ? career.streams
+      : [],
+
+    entranceExams: Array.isArray(career.entranceExams)
+      ? career.entranceExams
+      : [],
+
+    higherStudies: Array.isArray(career.higherStudies)
+      ? career.higherStudies
+      : [],
+
+    careerOpportunities: Array.isArray(
+      career.careerOpportunities
+    )
+      ? career.careerOpportunities
+      : career.jobRoles || [],
+
+    jobRoles: Array.isArray(career.jobRoles)
+      ? career.jobRoles
+      : career.careerOpportunities || [],
+
+    /* ---------------------------------------------
+       SKILLS
+    --------------------------------------------- */
+
+    skills: Array.isArray(career.skills)
+      ? career.skills
+      : [],
+
+    technologies: Array.isArray(career.technologies)
+      ? career.technologies
+      : [],
+
+    /* ---------------------------------------------
+       ROADMAP
+    --------------------------------------------- */
+
+    roadmap: Array.isArray(roadmaps?.[career.id])
+      ? roadmaps[career.id]
+      : Array.isArray(career.roadmap)
+        ? career.roadmap
+        : [],
+
+    /* ---------------------------------------------
+       PROJECTS
+    --------------------------------------------- */
+
+    careerProjects: Array.isArray(career.projects)
+      ? career.projects
+      : [],
+
+    /* ---------------------------------------------
+       CERTIFICATIONS
+    --------------------------------------------- */
+
+    certifications: Array.isArray(
+      career.certifications
+    )
+      ? career.certifications
+      : [],
+
+    /* ---------------------------------------------
+       COMPANIES
+    --------------------------------------------- */
+
+    companies: Array.isArray(career.companies)
+      ? career.companies
+      : [],
+
+    topCompanies: Array.isArray(career.topCompanies)
+      ? career.topCompanies
+      : Array.isArray(career.companies)
+        ? career.companies
+        : [],
+
+    /* ---------------------------------------------
+       COLLEGES
+    --------------------------------------------- */
+
+    topColleges: Array.isArray(career.topColleges)
+      ? career.topColleges
+      : [],
+
+    /* ---------------------------------------------
+       PROS / CONS
+    --------------------------------------------- */
+
+    pros: Array.isArray(career.pros)
+      ? career.pros
+      : [],
+
+    cons: Array.isArray(career.cons)
+      ? career.cons
+      : [],
+
+    /* ---------------------------------------------
+       JOB INFORMATION
+    --------------------------------------------- */
+
+    jobOpenings:
+      career.jobOpenings ||
+      "Demand varies by company, location and experience.",
+
+    workMode:
+      career.workMode ||
+      "Office / Hybrid / Remote",
+  };
+}
+
+/**
+ * Return complete CareerOS career data.
+ */
+export function getCareerCompleteData(careerId) {
+  if (!careerId) {
+    console.warn("CareerOS: Career ID is missing");
+    return null;
+  }
+
+  const career = findCareerById(careerId);
+
+  if (!career) {
+    console.warn(
+      "CareerOS: Career not found:",
+      careerId
+    );
+
+    return null;
+  }
+
+  const normalizedCareer = normalizeCareer(career);
+
+  return {
+    ...normalizedCareer,
+
+    /* ---------------------------------------------
+       SALARY DATA
+    --------------------------------------------- */
+
+    salaryData: {
+      india:
+        indiaSalaries?.[careerId] || {},
+
+      abroad:
+        abroadSalaries?.[careerId] || {},
     },
+
+    /* ---------------------------------------------
+       INTERVIEW
+    --------------------------------------------- */
 
     interview: {
-      technical: technicalQuestions[careerId] || [],
-      hr: hrQuestions || [],
+      technical:
+        technicalQuestions?.[careerId] || [],
+
+      hr:
+        Array.isArray(hrQuestions)
+          ? hrQuestions
+          : [],
     },
+
+    /* ---------------------------------------------
+       RESOURCES
+    --------------------------------------------- */
 
     resources: {
-      courses,
-      books,
-      projects,
-      youtube,
+      courses: Array.isArray(courses)
+        ? courses
+        : [],
+
+      books: Array.isArray(books)
+        ? books
+        : [],
+
+      projects: Array.isArray(projects)
+        ? projects
+        : [],
+
+      youtube: Array.isArray(youtube)
+        ? youtube
+        : [],
     },
 
+    /* ---------------------------------------------
+       SKILL LIBRARY
+    --------------------------------------------- */
+
     skillLibrary: {
-  technical: technicalSkills,
-  soft: softSkills,
-  tools,
-},
+      technical: Array.isArray(technicalSkills)
+        ? technicalSkills
+        : [],
+
+      soft: Array.isArray(softSkills)
+        ? softSkills
+        : [],
+
+      tools: Array.isArray(tools)
+        ? tools
+        : [],
+    },
   };
 }

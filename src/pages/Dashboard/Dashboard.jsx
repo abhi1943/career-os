@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { CareerContext } from "../../context/CareerContext";
 import { useAuth } from "../../context/AuthContext";
-
+import CareerJobs from "@/components/careerDetails/CareerJobs";
 import WelcomeBanner from "./components/WelcomeBanner";
 import QuickStats from "./components/QuickStats";
 import ProfileCard from "./components/ProfileCard";
@@ -13,7 +13,7 @@ import RecentSearches from "./components/RecentSearches";
 import SavedCareers from "./components/SavedCareers";
 import RecentCareers from "./components/RecentCareers";
 import CareerGoal from "./components/CareerGoal";
-
+import SavedJobs from "./components/SavedJobs";
 import { getDashboardData } from "../../services/dashboardService";
 import { analyzeResume } from "../../utils/resumeAnalyzer";
 
@@ -159,6 +159,14 @@ function Dashboard() {
 
         </div>
 
+        {/* Saved Jobs */}
+
+        <div className="mt-10">
+
+          <SavedJobs />
+
+        </div>
+
         {/* Second Row */}
 
         <div className="grid lg:grid-cols-3 gap-8 mt-10">
@@ -194,6 +202,14 @@ function Dashboard() {
           </div>
 
         </div>
+
+        {/* Live Job Openings */}
+
+        <CareerJobs
+          careerId={student?.dreamCareer}
+          careerName={student?.dreamCareer}
+          student={student}
+        />
 
       </div>
 

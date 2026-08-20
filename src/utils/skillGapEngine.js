@@ -1,43 +1,83 @@
-export function analyzeSkillGap(student, career) {
-  if (!student || !career) return null;
+import {
+  getMatchedSkills,
+  getMissingSkills,
+} from "./skillEngine";
 
-  const userSkills = (student.skills || []).map((skill) =>
-    skill.toLowerCase()
-  );
+/* ==================================================
+   SKILL GAP ENGINE
+================================================== */
 
-  const requiredSkills = career.skills || [];
+export function analyzeSkillGap(
+  student,
+  career
+) {
+  if (!student || !career) {
+    return null;
+  }
 
-  const matched = [];
-  const missing = [];
+  const userSkills = Array.isArray(
+    student.skills
+  )
+    ? student.skills
+    : [];
 
-  requiredSkills.forEach((skill) => {
-    if (userSkills.includes(skill.toLowerCase())) {
-      matched.push(skill);
-    } else {
-      missing.push(skill);
-    }
-  });
+  const requiredSkills = Array.isArray(
+    career.skills
+  )
+    ? career.skills
+    : [];
+
+  /* ==================================================
+     MATCHED SKILLS
+  ================================================== */
+
+  const matched =
+    getMatchedSkills(
+      userSkills,
+      requiredSkills
+    );
+
+  /* ==================================================
+     MISSING SKILLS
+  ================================================== */
+
+  const missing =
+    getMissingSkills(
+      userSkills,
+      requiredSkills
+    );
+
+  /* ==================================================
+     PERCENTAGE
+  ================================================== */
 
   const percentage =
     requiredSkills.length === 0
       ? 0
       : Math.round(
-          (matched.length / requiredSkills.length) * 100
+          (matched.length /
+            requiredSkills.length) *
+            100
         );
 
-  let level = "";
+  /* ==================================================
+     READINESS LEVEL
+  ================================================== */
 
-  if (percentage >= 90)
+  let level =
+    "Needs Learning";
+
+  if (percentage >= 90) {
     level = "Industry Ready";
-
-  else if (percentage >= 75)
+  } else if (percentage >= 75) {
     level = "Almost Ready";
-
-  else if (percentage >= 50)
+  } else if (percentage >= 50) {
     level = "Good Foundation";
+  }
 
-  else
-    level = "Needs Learning";
+  /* ==================================================
+     RETURN
+  ================================================== */
 
   return {
     matched,

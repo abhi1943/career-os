@@ -1,0 +1,49 @@
+[
+  {
+    "id": "5499656047",
+    "jobId": "5499656047",
+    "job": {
+      "adref": "eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTQ5OTY1NjA0NyIsInMiOiJlczdKZHNxYThSR3lJZFZDLUR1LVlnIn0.L9Ct-Dr57hJd7yNmFGbaiv0Ayi2BVrbV_fTbsi1AvE4",
+      "contract_time": "full_time",
+      "redirect_url": "https://www.adzuna.in/details/5499656047?utm_medium=api&utm_source=be3ee70e",
+      "company": {
+        "display_name": "Writesonic",
+        "__CLASS__": "Adzuna::API::Response::Company"
+      },
+      "id": "5499656047",
+      "created": "2025-11-17T02:37:43Z",
+      "salary_is_predicted": "0",
+      "location": {
+        "area": [
+          "India"
+        ],
+        "__CLASS__": "Adzuna::API::Response::Location",
+        "display_name": "India"
+      },
+      "category": {
+        "label": "IT Jobs",
+        "__CLASS__": "Adzuna::API::Response::Category",
+        "tag": "it-jobs"
+      },
+      "title": "Frontend Engineer",
+      "description": "About Writesonic AI search just hit a billion weekly users. Most brands are invisible there. We're changing that. Writesonic helps 11,000 brands track and dominate visibility across ChatGPT, Claude, Perplexity, and Google AI. We don't just show problems. We fix them with optimization workflows that drive real results. Real-time tracking, actionable insights, and content that ranks everywhere. The Role We're hiring a Frontend Engineer who obsesses over pixels and performance. You'll turn designs…",
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "detected_experience": "Any Experience",
+      "detected_work_mode": "Not Specified",
+      "detected_job_type": "Full-time",
+      "detected_salary": "Any Salary",
+      "skills": [],
+      "searchText": "frontend engineer about writesonic ai search just hit a billion weekly users. most brands are invisible there. we're changing that. writesonic helps 11,000 brands track and dominate visibility across chatgpt, claude, perplexity, and google ai. we don't just show problems. we fix them with optimization workflows that drive real results. real-time tracking, actionable insights, and content that ranks everywhere. the role we're hiring a frontend engineer who obsesses over pixels and performance. you'll turn designs… writesonic india it jobs any experience not specified full-time",
+      "firstSeenAt": "2026-08-18T06:03:35.187Z",
+      "lastUpdatedAt": "2026-08-18T06:03:35.187Z",
+      "storedAt": "2026-08-18T06:03:35.187Z",
+      "expiresAt": "2026-08-19T06:03:35.187Z",
+      "savedAt": "2026-08-18T06:06:10.612Z",
+      "updatedAt": "2026-08-18T06:06:10.612Z"
+    },
+    "status": "Applied",
+    "appliedAt": "2026-08-18T06:06:36.398Z",
+    "createdAt": "2026-08-18T06:06:36.403Z",
+    "updatedAt": "2026-08-18T06:50:26.749Z"
+  }
+]

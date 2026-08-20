@@ -1,33 +1,59 @@
-import { createContext, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
 
-export const FavoritesContext = createContext();
+import {
+    createContext,
+    useState,
+} from "react";
 
-export function FavoritesProvider({ children }) {
-  const [favorites, setFavorites] = useState([]);
+export const FavoritesContext =
+    createContext();
 
-  function toggleFavorite(item) {
-    const exists = favorites.find((fav) => fav.id === item.id);
-
-    if (exists) {
-      setFavorites(favorites.filter((fav) => fav.id !== item.id));
-    } else {
-      setFavorites([...favorites, item]);
-    }
-  }
-
-  function isFavorite(id) {
-    return favorites.some((fav) => fav.id === id);
-  }
-
-  return (
-    <FavoritesContext.Provider
-      value={{
+export function FavoritesProvider({
+    children,
+}) {
+    const [
         favorites,
-        toggleFavorite,
-        isFavorite,
-      }}
-    >
-      {children}
-    </FavoritesContext.Provider>
-  );
+        setFavorites,
+    ] = useState([]);
+
+    function toggleFavorite(item) {
+        const exists =
+            favorites.find(
+                (fav) =>
+                    fav.id === item.id
+            );
+
+        if (exists) {
+            setFavorites(
+                favorites.filter(
+                    (fav) =>
+                        fav.id !== item.id
+                )
+            );
+        } else {
+            setFavorites([
+                ...favorites,
+                item,
+            ]);
+        }
+    }
+
+    function isFavorite(id) {
+        return favorites.some(
+            (fav) =>
+                fav.id === id
+        );
+    }
+
+    return (
+        <FavoritesContext.Provider
+            value={{
+                favorites,
+                toggleFavorite,
+                isFavorite,
+            }}
+        >
+            {children}
+        </FavoritesContext.Provider>
+    );
 }

@@ -1,24 +1,45 @@
-import { createContext, useEffect, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
 
-export const GoalContext = createContext();
+import {
+    createContext,
+    useEffect,
+    useState,
+} from "react";
 
-export function GoalProvider({ children }) {
-  const [goal, setGoal] = useState(() => {
-    return JSON.parse(localStorage.getItem("careerGoal")) || null;
-  });
+export const GoalContext =
+    createContext();
 
-  useEffect(() => {
-    localStorage.setItem("careerGoal", JSON.stringify(goal));
-  }, [goal]);
-
-  return (
-    <GoalContext.Provider
-      value={{
+export function GoalProvider({
+    children,
+}) {
+    const [
         goal,
         setGoal,
-      }}
-    >
-      {children}
-    </GoalContext.Provider>
-  );
+    ] = useState(() => {
+        return (
+            JSON.parse(
+                localStorage.getItem(
+                    "careerGoal"
+                )
+            ) || null
+        );
+    });
+
+    useEffect(() => {
+        localStorage.setItem(
+            "careerGoal",
+            JSON.stringify(goal)
+        );
+    }, [goal]);
+
+    return (
+        <GoalContext.Provider
+            value={{
+                goal,
+                setGoal,
+            }}
+        >
+            {children}
+        </GoalContext.Provider>
+    );
 }

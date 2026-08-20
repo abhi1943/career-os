@@ -1,67 +1,127 @@
+import { useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 import { getColleges } from "../../utils/collegeEngine";
-import CollegeCard from "../../components/cards/CollegeCard";
 import { getExams } from "../../utils/examEngine";
-import ExamCard from "../../components/cards/ExamCard";
+import { saveRecentCareer } from "../../utils/recentCareers";
+
 import { GoalContext } from "../../context/GoalContext";
-import { useContext } from "react";
 import { FavoritesContext } from "../../context/FavoritesContext";
 import { CompareContext } from "../../context/CompareContext";
-import { useEffect } from "react";
-import { saveRecentCareer } from "../../utils/recentCareers";
+import { CareerContext } from "../../context/CareerContext";
+
 import useCareerData from "../../hooks/useCareerData";
+
+/* Career Details Components */
+
 import CareerHero from "../../components/careerDetails/CareerHero";
 import CareerSkills from "../../components/careerDetails/CareerSkills";
 import CareerSalary from "../../components/careerDetails/CareerSalary";
 import CareerCourses from "../../components/careerDetails/CareerCourses";
 import CareerProjects from "../../components/careerDetails/CareerProjects";
 import CareerInterview from "../../components/careerDetails/CareerInterview";
-import CareerRoadmap from "../../components/careerDetails/CareerRoadmap";
 import CareerBooks from "../../components/careerDetails/CareerBooks";
 import CareerYoutube from "../../components/careerDetails/CareerYoutube";
 import CareerTabs from "../../components/careerDetails/tabs/CareerTabs";
+
 import CareerCompanies from "../../components/careerDetails/CareerCompanies";
 import CareerFuture from "../../components/careerDetails/CareerFuture";
 import CareerProsCons from "../../components/careerDetails/CareerProsCons";
 import CareerCertifications from "../../components/careerDetails/CareerCertifications";
 import CareerPath from "../../components/careerDetails/CareerPath";
+
 import CareerMatchScore from "../../components/careerDetails/CareerMatchScore";
-import { CareerContext } from "../../context/CareerContext";
-import AIRecommendations from "../../components/careerDetails/AIRecommendations";
-import CareerAnalytics from "../../components/dashboard/CareerAnalytics";
 import CareerSkillGap from "../../components/careerDetails/CareerSkillGap";
 import CareerLearningPath from "../../components/careerDetails/CareerLearningPath";
-import CareerRoadmapAI from "../../components/roadmap/CareerRoadmapAI";
-import CareerLearningHub from "../../components/careers/CareerLearningHub";
+
+import AIRecommendations from "../../components/careerDetails/AIRecommendations";
 import CareerHiringCompanies from "../../components/careerDetails/CareerHiringCompanies";
 import CareerJobs from "../../components/careerDetails/CareerJobs";
+
+import CareerAnalytics from "../../components/dashboard/CareerAnalytics";
+
+import CareerRoadmapAI from "../../components/roadmap/CareerRoadmapAI";
+import CareerLearningHub from "../../components/careers/CareerLearningHub";
+
+import CollegeCard from "../../components/cards/CollegeCard";
+import ExamCard from "../../components/cards/ExamCard";
+
+
 function CareerDetails() {
   const { careerId } = useParams();
 
+
+  /* --------------------------------------------------
+     CAREER DATA
+  -------------------------------------------------- */
+
   const career = useCareerData(careerId);
-  console.log("Career ID:", careerId);
-  console.log("Career Data:", career);
+
+  /* --------------------------------------------------
+     CONTEXTS
+  -------------------------------------------------- */
+
+  const { student } = useContext(CareerContext);
+
+  const { toggleFavorite, isFavorite } =
+    useContext(FavoritesContext);
+
+  const {
+    addToCompare,
+    compareList,
+  } = useContext(CompareContext);
+
+  const { setGoal } = useContext(GoalContext);
+  const [learningProgress, setLearningProgress] =
+    useState(0);
+
+  /* --------------------------------------------------
+     SAVE RECENT CAREER
+  -------------------------------------------------- */
+
   useEffect(() => {
     if (career) {
       saveRecentCareer(career);
     }
   }, [career]);
-  const { toggleFavorite, isFavorite } =
-    useContext(FavoritesContext);
 
-  const { addToCompare, compareList, } =
-    useContext(CompareContext);
-  const { setGoal } = useContext(GoalContext);
-  const { student } = useContext(CareerContext);
+  /* --------------------------------------------------
+     DEBUG
+  -------------------------------------------------- */
+
+  console.log("Career ID:", careerId);
+  console.log("Career Data:", career);
   console.log("Student Data:", student);
+
+  /* --------------------------------------------------
+     CAREER NOT FOUND
+  -------------------------------------------------- */
 
   if (!career) {
     return (
-      <h1 className="text-center text-4xl mt-20 font-bold">
-        Career Not Found
-      </h1>
+      <div className="min-h-[60vh] flex items-center justify-center px-6">
+        <div className="text-center">
+
+          <div className="text-6xl mb-6">
+            🔍
+          </div>
+
+          <h1 className="text-4xl font-bold text-slate-800">
+            Career Not Found
+          </h1>
+
+          <p className="text-gray-500 mt-3">
+            We couldn't find the career you are looking for.
+          </p>
+
+        </div>
+      </div>
     );
   }
+
+  /* --------------------------------------------------
+     FAVORITE / COMPARE
+  -------------------------------------------------- */
 
   const favorite = isFavorite(career.id);
 
@@ -69,13 +129,62 @@ function CareerDetails() {
     (item) => item.id === career.id
   );
 
+  /* --------------------------------------------------
+     COLLEGES / EXAMS
+  -------------------------------------------------- */
+
   const colleges = getColleges(career.id);
+
   const exams = getExams(career.id);
 
-  return (
-    <div className="max-w-7xl mx-auto py-16 px-6">
+  /* --------------------------------------------------
+     SAFE RESOURCE DATA
+  -------------------------------------------------- */
 
-      {/* Hero Section */}
+  const resources = career.resources || {};
+
+  const courses = resources.courses || [];
+
+  const projects = resources.projects || [];
+
+  const books = resources.books || [];
+
+  const youtube = resources.youtube || [];
+
+  /* --------------------------------------------------
+     SAFE CAREER DATA
+  -------------------------------------------------- */
+
+  const streams = career.streams || [];
+
+  const entranceExams = career.entranceExams || [];
+
+  const higherStudies = career.higherStudies || [];
+
+  const careerOpportunities =
+    career.careerOpportunities || [];
+
+  const topColleges =
+    career.topColleges || [];
+
+  const skillLibrary =
+    career.skillLibrary || career.skills || [];
+
+  const topCompanies =
+    career.topCompanies ||
+    career.companies ||
+    [];
+
+  /* --------------------------------------------------
+     PAGE
+  -------------------------------------------------- */
+
+  return (
+    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+
+      {/* ==================================================
+          HERO
+      ================================================== */}
 
       <CareerHero
         career={career}
@@ -86,209 +195,476 @@ function CareerDetails() {
         setGoal={setGoal}
       />
 
-      <CareerMatchScore
-        student={student}
-        career={career}
-      />
-      <CareerSkillGap
-        student={student}
-        career={career}
-      />
-      <CareerLearningPath
-        student={student}
-        career={career}
-      />
-      <CareerAnalytics
-        student={student}
-        career={career}
-      />
 
-      <AIRecommendations
-        student={student}
-      />
+      {/* ==================================================
+          AI CAREER INTELLIGENCE
+      ================================================== */}
 
-      <CareerTabs>
+      <section className="mt-10 space-y-8">
 
-        {(active) => (
+        {/* -----------------------------------------------
+            AI CAREER MATCH
+        ----------------------------------------------- */}
 
-          <>
+        <CareerMatchScore
+          student={student}
+          career={career}
+        />
 
-            {active === "Overview" && (
-              <>
-                {/* Streams */}
-                {career.streams?.length > 0 && (
-                  <div className="mt-10">
-                    <h2 className="text-3xl font-bold mb-6">Streams</h2>
 
-                    <div className="grid md:grid-cols-3 gap-5">
-                      {career.streams.map((stream) => (
-                        <div
-                          key={stream}
-                          className="bg-white shadow rounded-2xl p-5"
-                        >
-                          {stream}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+        {/* -----------------------------------------------
+            AI SKILL GAP ANALYSIS
+        ----------------------------------------------- */}
 
-                {/* Entrance Exams */}
-                {career.entranceExams?.length > 0 && (
-                  <div className="mt-12">
-                    <h2 className="text-3xl font-bold mb-6">
-                      Entrance Exams
-                    </h2>
+        <CareerSkillGap
+          student={student}
+          career={career}
+        />
 
-                    <div className="flex flex-wrap gap-4">
-                      {career.entranceExams.map((exam) => (
-                        <span
-                          key={exam}
-                          className="bg-green-100 text-green-700 px-5 py-2 rounded-full"
-                        >
-                          {exam}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
-                {/* Higher Studies */}
-                {career.higherStudies?.length > 0 && (
-                  <div className="mt-12">
-                    <h2 className="text-3xl font-bold mb-6">
-                      Higher Studies
-                    </h2>
+        {/* -----------------------------------------------
+            PERSONALIZED AI LEARNING PATH
+        ----------------------------------------------- */}
 
-                    <div className="grid md:grid-cols-2 gap-5">
-                      {career.higherStudies.map((study) => (
-                        <div
-                          key={study}
-                          className="bg-white shadow rounded-2xl p-5"
-                        >
-                          🎓 {study}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <CareerJobs careerId={career.id} />
-                {/* Career Opportunities */}
-                {career.careerOpportunities?.length > 0 && (
-                  <div className="mt-12">
-                    <h2 className="text-3xl font-bold mb-6">
-                      Career Opportunities
-                    </h2>
+        <CareerLearningPath
+          student={student}
+          career={career}
+          onProgressChange={setLearningProgress}
+        />
 
-                    <div className="grid md:grid-cols-2 gap-5">
-                      {career.careerOpportunities.map((job) => (
-                        <div
-                          key={job}
-                          className="bg-white shadow rounded-2xl p-5"
-                        >
-                          🚀 {job}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <CareerFuture career={career} />
 
-                <CareerProsCons career={career} />
+        {/* -----------------------------------------------
+            CAREER ANALYTICS
+        ----------------------------------------------- */}
 
-                <CareerCertifications career={career} />
+        <CareerAnalytics
+          student={student}
+          career={career}
+          learningProgress={learningProgress}
 
-                <CareerPath career={career} />
-                <CareerCompanies topCompanies={career.topCompanies} />
-                <CareerHiringCompanies careerId={career.id} />
-              </>
-            )}
+        />
 
-            {active === "Roadmap" && (
-              <>
-                {/* <CareerRoadmap roadmap={career.roadmap} /> */}
 
-                <CareerRoadmapAI careerId={career.id} />
+        {/* -----------------------------------------------
+            AI RECOMMENDED CAREERS
+        ----------------------------------------------- */}
 
-                <CareerLearningHub careerId={career.id} />
-              </>
-            )}
+        <AIRecommendations
+          student={student}
+        />
 
-            {active === "Skills" && (
-              <CareerSkills
-                career={career}
-                skillLibrary={career.skillLibrary}
-              />
-            )}
+      </section>
 
-            {active === "Resources" && (
-              <>
-                <CareerCourses
-                  courses={career.resources.courses}
+
+      {/* ==================================================
+          CAREER TABS
+      ================================================== */}
+
+      <div className="mt-12">
+
+        <CareerTabs>
+
+          {(active) => (
+
+            <>
+
+              {/* ==================================================
+                  OVERVIEW
+              ================================================== */}
+
+              {active === "Overview" && (
+                <div className="space-y-12">
+
+
+                  {/* -----------------------------------------------
+                      STREAMS
+                  ----------------------------------------------- */}
+
+                  {streams.length > 0 && (
+                    <section>
+
+                      <h2 className="text-3xl font-bold text-slate-800 mb-6">
+                        Streams
+                      </h2>
+
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                        {streams.map((stream, index) => (
+                          <div
+                            key={`${stream}-${index}`}
+                            className="
+                              bg-white
+                              shadow-sm
+                              hover:shadow-md
+                              border
+                              rounded-2xl
+                              p-5
+                              transition
+                            "
+                          >
+                            <div className="text-2xl mb-3">
+                              🎯
+                            </div>
+
+                            <p className="font-semibold text-slate-700">
+                              {stream}
+                            </p>
+
+                          </div>
+                        ))}
+
+                      </div>
+
+                    </section>
+                  )}
+
+
+                  {/* -----------------------------------------------
+                      ENTRANCE EXAMS
+                  ----------------------------------------------- */}
+
+                  {entranceExams.length > 0 && (
+                    <section>
+
+                      <h2 className="text-3xl font-bold text-slate-800 mb-6">
+                        Entrance Exams
+                      </h2>
+
+                      <div className="flex flex-wrap gap-3">
+
+                        {entranceExams.map((exam, index) => (
+                          <span
+                            key={`${exam}-${index}`}
+                            className="
+                              bg-green-100
+                              text-green-700
+                              px-5
+                              py-2
+                              rounded-full
+                              font-medium
+                            "
+                          >
+                            {exam}
+                          </span>
+                        ))}
+
+                      </div>
+
+                    </section>
+                  )}
+
+
+                  {/* -----------------------------------------------
+                      HIGHER STUDIES
+                  ----------------------------------------------- */}
+
+                  {higherStudies.length > 0 && (
+                    <section>
+
+                      <h2 className="text-3xl font-bold text-slate-800 mb-6">
+                        Higher Studies
+                      </h2>
+
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                        {higherStudies.map((study, index) => (
+                          <div
+                            key={`${study}-${index}`}
+                            className="
+                              bg-white
+                              shadow-sm
+                              border
+                              rounded-2xl
+                              p-5
+                              hover:shadow-md
+                              transition
+                            "
+                          >
+
+                            <div className="text-2xl mb-3">
+                              🎓
+                            </div>
+
+                            <p className="font-semibold text-slate-700">
+                              {study}
+                            </p>
+
+                          </div>
+                        ))}
+
+                      </div>
+
+                    </section>
+                  )}
+
+
+                  {/* ==================================================
+                      LATEST JOB OPENINGS
+                  ================================================== */}
+
+                  <CareerJobs
+                    careerId={career.id}
+                    careerName={career.name}
+                    student={student}
+                  />
+
+
+                  {/* -----------------------------------------------
+                      CAREER OPPORTUNITIES
+                  ----------------------------------------------- */}
+
+                  {careerOpportunities.length > 0 && (
+                    <section>
+
+                      <h2 className="text-3xl font-bold text-slate-800 mb-6">
+                        Career Opportunities
+                      </h2>
+
+                      <div className="grid sm:grid-cols-2 gap-5">
+
+                        {careerOpportunities.map(
+                          (job, index) => (
+                            <div
+                              key={`${job}-${index}`}
+                              className="
+                                bg-white
+                                shadow-sm
+                                border
+                                rounded-2xl
+                                p-5
+                                hover:shadow-md
+                                transition
+                              "
+                            >
+
+                              <div className="flex items-center gap-3">
+
+                                <span className="text-2xl">
+                                  🚀
+                                </span>
+
+                                <span className="font-semibold text-slate-700">
+                                  {job}
+                                </span>
+
+                              </div>
+
+                            </div>
+                          )
+                        )}
+
+                      </div>
+
+                    </section>
+                  )}
+
+
+                  {/* ==================================================
+                      FUTURE SCOPE
+                  ================================================== */}
+
+                  <CareerFuture
+                    career={career}
+                  />
+
+
+                  {/* ==================================================
+                      PROS & CONS
+                  ================================================== */}
+
+                  <CareerProsCons
+                    career={career}
+                  />
+
+
+                  {/* ==================================================
+                      RECOMMENDED CERTIFICATIONS
+                  ================================================== */}
+
+                  <CareerCertifications
+                    career={career}
+                  />
+
+
+                  {/* ==================================================
+                      CAREER PATH
+                  ================================================== */}
+
+                  <CareerPath
+                    career={career}
+                  />
+
+
+                  {/* ==================================================
+                      COMPANIES
+                  ================================================== */}
+
+                  <CareerCompanies
+                    topCompanies={topCompanies}
+                  />
+
+
+                  {/* ==================================================
+                      COMPANIES HIRING
+                  ================================================== */}
+
+                  <CareerHiringCompanies
+                    careerId={career.id}
+                  />
+
+                </div>
+              )}
+
+
+              {/* ==================================================
+                  ROADMAP
+              ================================================== */}
+
+              {active === "Roadmap" && (
+                <div className="space-y-10">
+
+                  <CareerRoadmapAI
+                    careerId={career.id}
+                    career={career}
+                  />
+
+                  <CareerLearningHub
+                    careerId={career.id}
+                  />
+
+                </div>
+              )}
+
+
+              {/* ==================================================
+                  SKILLS
+              ================================================== */}
+
+              {active === "Skills" && (
+                <CareerSkills
+                  career={career}
+                  skillLibrary={skillLibrary}
                 />
+              )}
 
-                <CareerProjects
-                  projects={career.resources.projects}
+
+              {/* ==================================================
+                  RESOURCES
+              ================================================== */}
+
+              {active === "Resources" && (
+                <div className="space-y-10">
+
+                  {courses.length > 0 && (
+                    <CareerCourses
+                      courses={courses}
+                    />
+                  )}
+
+                  {projects.length > 0 && (
+                    <CareerProjects
+                      projects={projects}
+                    />
+                  )}
+
+                  {books.length > 0 && (
+                    <CareerBooks
+                      books={books}
+                    />
+                  )}
+
+                  {youtube.length > 0 && (
+                    <CareerYoutube
+                      channels={youtube}
+                    />
+                  )}
+
+                </div>
+              )}
+
+
+              {/* ==================================================
+                  SALARY
+              ================================================== */}
+
+              {active === "Salary" && (
+                <CareerSalary
+                  salary={career.salaryData}
                 />
+              )}
 
-                <CareerBooks
-                  books={career.resources.books}
+
+              {/* ==================================================
+                  INTERVIEW
+              ================================================== */}
+
+              {active === "Interview" && (
+                <CareerInterview
+                  interview={career.interview}
                 />
+              )}
 
-                <CareerYoutube
-                  channels={career.resources.youtube}
-                />
-              </>
-            )}
+            </>
 
-            {active === "Salary" && (
-              <CareerSalary salary={career.salary} />
-            )}
+          )}
 
-            {active === "Interview" && (
-              <CareerInterview
-                interview={career.interview}
-              />
-            )}
+        </CareerTabs>
 
-          </>
+      </div>
 
-        )}
 
-      </CareerTabs>
+      {/* ==================================================
+          TOP COLLEGES
+      ================================================== */}
 
-      {/* Top Colleges */}
+      {topColleges.length > 0 && (
+        <section className="mt-16">
 
-      {career.topColleges?.length > 0 && (
-        <div className="mt-14">
-
-          <h2 className="text-3xl font-bold mb-6">
+          <h2 className="text-3xl font-bold text-slate-800 mb-6">
             Top Colleges
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
-            {career.topColleges.map((college) => (
+            {topColleges.map((college, index) => (
               <div
-                key={college}
-                className="bg-white shadow rounded-2xl p-5"
+                key={`${college}-${index}`}
+                className="
+                  bg-white
+                  shadow-sm
+                  border
+                  rounded-2xl
+                  p-5
+                  hover:shadow-md
+                  transition
+                "
               >
-                🏫 {college}
+
+                <div className="text-2xl mb-3">
+                  🏫
+                </div>
+
+                <p className="font-semibold text-slate-700">
+                  {college}
+                </p>
+
               </div>
             ))}
 
           </div>
 
-        </div>
+        </section>
       )}
 
-      {/* Recommended Colleges */}
+
+      {/* ==================================================
+          RECOMMENDED COLLEGES
+      ================================================== */}
 
       {colleges?.length > 0 && (
-        <div className="mt-20">
+        <section className="mt-20">
 
-          <h2 className="text-3xl font-bold mb-8">
+          <h2 className="text-3xl font-bold text-slate-800 mb-8">
             Recommended Colleges
           </h2>
 
@@ -303,15 +679,18 @@ function CareerDetails() {
 
           </div>
 
-        </div>
+        </section>
       )}
 
-      {/* Recommended Exams */}
+
+      {/* ==================================================
+          RECOMMENDED EXAMS
+      ================================================== */}
 
       {exams?.length > 0 && (
-        <div className="mt-20">
+        <section className="mt-20">
 
-          <h2 className="text-3xl font-bold mb-8">
+          <h2 className="text-3xl font-bold text-slate-800 mb-8">
             Entrance Exams
           </h2>
 
@@ -326,7 +705,7 @@ function CareerDetails() {
 
           </div>
 
-        </div>
+        </section>
       )}
 
     </div>

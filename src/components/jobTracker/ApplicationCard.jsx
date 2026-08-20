@@ -1,89 +1,218 @@
+import {
+    Trash2,
+} from "lucide-react";
+
 function ApplicationCard({
-
     application,
-
-    onEdit,
-
     onDelete,
-
 }) {
+    const job =
+        application?.job || {};
+
+    function getCompany() {
+        if (typeof job.company === "string") {
+            return job.company;
+        }
+
+        return (
+            job.company?.display_name ||
+            job.company?.name ||
+            "-"
+        );
+    }
+
+    function getLocation() {
+        if (typeof job.location === "string") {
+            return job.location;
+        }
+
+        return (
+            job.location?.display_name ||
+            "-"
+        );
+    }
+
+    function getSalary() {
+        if (typeof job.salary === "string") {
+            return job.salary;
+        }
+
+        if (typeof job.salary === "number") {
+            return String(job.salary);
+        }
+
+        if (job.salary_min || job.salary_max) {
+            const min =
+                job.salary_min || "";
+
+            const max =
+                job.salary_max || "";
+
+            if (min && max) {
+                return `${min} - ${max}`;
+            }
+
+            return min || max;
+        }
+
+        return "-";
+    }
+
+    function formatDate(date) {
+        if (!date) {
+            return "-";
+        }
+
+        const parsedDate =
+            new Date(date);
+
+        if (
+            Number.isNaN(
+                parsedDate.getTime()
+            )
+        ) {
+            return "-";
+        }
+
+        return parsedDate.toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+            }
+        );
+    }
+
+    function statusColor(status) {
+        switch (status) {
+            case "Applied":
+                return "bg-blue-100 text-blue-700";
+
+            case "Interview":
+                return "bg-yellow-100 text-yellow-700";
+
+            case "Offer":
+                return "bg-green-100 text-green-700";
+
+            case "Rejected":
+                return "bg-red-100 text-red-700";
+
+            case "Withdrawn":
+                return "bg-gray-100 text-gray-700";
+
+            default:
+                return "bg-gray-100 text-gray-700";
+        }
+    }
+
+    const company =
+        getCompany();
+
+    const location =
+        getLocation();
+
+    const salary =
+        getSalary();
+
+    const status =
+        application?.status ||
+        "Applied";
 
     return (
+        <div className="bg-white rounded-3xl shadow-lg p-6">
 
-        <div className="bg-white rounded-2xl shadow-lg p-5">
+            {/* COMPANY */}
+            <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                    {company}
+                </h2>
 
-            <h2 className="text-xl font-bold">
+                <p className="text-gray-600 mt-1">
+                    {job.title || "-"}
+                </p>
+            </div>
 
-                {application.company}
+            {/* DETAILS */}
+            <div className="mt-5 space-y-2 text-sm text-gray-600">
 
-            </h2>
+                <p>
+                    <span className="font-semibold text-gray-700">
+                        Location:
+                    </span>{" "}
+                    {location}
+                </p>
 
-            <p className="text-gray-600 mt-1">
+                <p>
+                    <span className="font-semibold text-gray-700">
+                        Salary:
+                    </span>{" "}
+                    {salary}
+                </p>
 
-                {application.role}
+                <p>
+                    <span className="font-semibold text-gray-700">
+                        Applied:
+                    </span>{" "}
+                    {formatDate(
+                        application?.appliedAt
+                    )}
+                </p>
 
-            </p>
+            </div>
 
-            <p className="mt-3">
+            {/* STATUS */}
+            <div className="mt-4">
 
-                📍 {application.location || "-"}
+                <span
+                    className={`
+                        inline-flex
+                        px-3
+                        py-1.5
+                        rounded-full
+                        text-sm
+                        font-semibold
+                        ${statusColor(status)}
+                    `}
+                >
+                    {status}
+                </span>
 
-            </p>
+            </div>
 
-            <p>
-
-                💰 {application.salary || "-"}
-
-            </p>
-
-            <p>
-
-                📅 {application.appliedDate || "-"}
-
-            </p>
-
-            <p className="mt-2">
-
-                <strong>Status:</strong>
-
-                {" "}
-
-                {application.status}
-
-            </p>
-
-            <div className="flex gap-3 mt-5">
+            {/* ACTIONS */}
+            <div className="flex gap-3 mt-6">
 
                 <button
-
-                    onClick={() => onEdit(application)}
-
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-
+                    type="button"
+                    onClick={() =>
+                        onDelete(
+                            application.jobId
+                        )
+                    }
+                    className="
+                        bg-red-50
+                        hover:bg-red-100
+                        text-red-600
+                        px-4
+                        py-2
+                        rounded-lg
+                        flex
+                        items-center
+                        gap-2
+                        font-semibold
+                        transition
+                    "
                 >
+                    <Trash2 size={16} />
 
-                    Edit
-
-                </button>
-
-                <button
-
-                    onClick={() => onDelete(application.id)}
-
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg"
-
-                >
-
-                    Delete
-
+                    Remove
                 </button>
 
             </div>
 
         </div>
-
     );
-
 }
 
 export default ApplicationCard;

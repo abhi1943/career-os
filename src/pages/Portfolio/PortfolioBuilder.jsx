@@ -1,8 +1,19 @@
-import { useEffect, useState } from "react";
+
+import {
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
+
 import PortfolioPreview from "./PortfolioPreview";
 
-import { generatePortfolio } from "../../utils/portfolioGenerator";
-import { useAuth } from "../../context/AuthContext";
+import {
+    generatePortfolio,
+} from "../../utils/portfolioGenerator";
+
+import {
+    useAuth,
+} from "../../context/AuthContext";
 
 import {
     savePortfolio,
@@ -10,58 +21,115 @@ import {
 } from "../../services/firestoreService";
 
 function PortfolioBuilder({ resume }) {
-
     const { user } = useAuth();
 
-    const [portfolio, setPortfolio] = useState(null);
+    const [savedPortfolio, setSavedPortfolio] =
+        useState(null);
 
-    // Generate portfolio whenever resume changes
-    useEffect(() => {
+    // ======================================================
+    // GENERATE PORTFOLIO FROM RESUME
+    // ======================================================
 
-        if (!resume) return;
-
-        const generated = generatePortfolio(resume);
-
-        setPortfolio(generated);
-
-    }, [resume]);
-
-    // Load from Firestore on login
-    useEffect(() => {
-
-        if (!user) return;
-
-        async function fetchPortfolio() {
-
-            const data = await loadPortfolio(user.uid);
-
-            if (data) {
-                setPortfolio(data);
-            }
-
+    const generatedPortfolio = useMemo(() => {
+        if (!resume) {
+            return null;
         }
 
-        fetchPortfolio();
+        return generatePortfolio(resume);
+    }, [resume]);
 
+    // ======================================================
+    // EFFECTIVE PORTFOLIO
+    // ======================================================
+
+    const portfolio =
+        savedPortfolio || generatedPortfolio;
+
+    // ======================================================
+    // LOAD FROM FIRESTORE ON LOGIN
+    // ======================================================
+
+    useEffect(() => {
+        if (!user) {
+            return;
+        }
+
+        let cancelled = false;
+
+        const fetchPortfolio = async () => {
+            try {
+                const data =
+                    await loadPortfolio(
+                        user.uid
+                    );
+
+                if (
+                    cancelled ||
+                    !data
+                ) {
+                    return;
+                }
+
+                setSavedPortfolio(data);
+            } catch (error) {
+                console.error(
+                    "CareerOS load portfolio error:",
+                    error
+                );
+            }
+        };
+
+        void fetchPortfolio();
+
+        return () => {
+            cancelled = true;
+        };
     }, [user]);
 
-    // Auto Save (2-second debounce)
-    useEffect(() => {
+    // ======================================================
+    // AUTO SAVE
+    // ======================================================
 
-        if (!user || !portfolio) return;
+    useEffect(() => {
+        if (
+            !user ||
+            !portfolio
+        ) {
+            return undefined;
+        }
 
         const timer = setTimeout(() => {
-
-            savePortfolio(user.uid, portfolio);
-
+            void savePortfolio(
+                user.uid,
+                portfolio
+            );
         }, 2000);
 
-        return () => clearTimeout(timer);
-
+        return () => {
+            clearTimeout(timer);
+        };
     }, [portfolio, user]);
 
-    return (
+    // ======================================================
+    // MANUAL GENERATE
+    // ======================================================
 
+    const handleGeneratePortfolio = () => {
+        if (!resume) {
+            return;
+        }
+
+        const generated =
+            generatePortfolio(resume);
+
+        setSavedPortfolio(generated);
+    };
+
+    // ======================================================
+    // RENDER
+    // ======================================================
+
+    return (
         <div className="bg-white rounded-3xl shadow-lg p-8">
 
             <h2 className="text-2xl font-bold mb-5">
@@ -69,14 +137,12 @@ function PortfolioBuilder({ resume }) {
             </h2>
 
             <button
-                className="bg-indigo-600 text-white px-6 py-3 rounded-xl"
-                onClick={() => {
-
-                    const generated = generatePortfolio(resume);
-
-                    setPortfolio(generated);
-
-                }}
+                type="button"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl transition"
+                onClick={
+                    handleGeneratePortfolio
+                }
+                disabled={!resume}
             >
                 Generate Portfolio Website
             </button>
@@ -90,9 +156,7 @@ function PortfolioBuilder({ resume }) {
             </div>
 
         </div>
-
     );
-
 }
 
 export default PortfolioBuilder;

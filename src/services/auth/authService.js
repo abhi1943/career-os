@@ -1,92 +1,222 @@
-export function register(user) {
+// ======================================================
+// CareerOS Authentication Service
+// ======================================================
+//
+// Firebase is now the single source of truth for
+// authentication.
+//
+// This service provides a small application-level wrapper
+// around Firebase Authentication.
+//
+// ======================================================
 
-    const users = JSON.parse(
-        localStorage.getItem("careeros_users") || "[]"
-    );
+import {
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    signInWithEmailAndPassword,
+    signOut,
+} from "firebase/auth";
 
-    const exists = users.find(
-        u => u.email === user.email
-    );
+import {
+    auth,
+} from "../firebase/firebase";
 
-    if (exists) {
+// ======================================================
+// REGISTER
+// ======================================================
+
+export async function register(
+    email,
+    password
+) {
+    try {
+        const userCredential =
+            await createUserWithEmailAndPassword(
+                auth,
+                email.trim(),
+                password
+            );
 
         return {
-
-            success: false,
-
-            message: "Email already exists"
-
+            success: true,
+            user: userCredential.user,
         };
+    } catch (error) {
+        console.error(
+            "CareerOS registration error:",
+            error
+        );
 
+        return {
+            success: false,
+            code: error?.code,
+            message:
+                getAuthErrorMessage(
+                    error?.code
+                ),
+        };
     }
-
-    users.push(user);
-
-    localStorage.setItem(
-        "careeros_users",
-        JSON.stringify(users)
-    );
-
-    return {
-
-        success: true
-
-    };
-
 }
 
-export function login(email, password) {
+// ======================================================
+// LOGIN
+// ======================================================
 
-    const users = JSON.parse(
-        localStorage.getItem("careeros_users") || "[]"
-    );
+export async function login(
+    email,
+    password
+) {
+    try {
+        const userCredential =
+            await signInWithEmailAndPassword(
+                auth,
+                email.trim(),
+                password
+            );
 
-    const user = users.find(
+        return {
+            success: true,
+            user: userCredential.user,
+        };
+    } catch (error) {
+        console.error(
+            "CareerOS login error:",
+            error
+        );
 
-        u =>
-            u.email === email &&
-            u.password === password
-
-    );
-
-    if (!user) {
-
-        return null;
-
+        return {
+            success: false,
+            code: error?.code,
+            message:
+                getAuthErrorMessage(
+                    error?.code
+                ),
+        };
     }
-
-    localStorage.setItem(
-
-        "careeros_current_user",
-
-        JSON.stringify(user)
-
-    );
-
-    return user;
-
 }
 
-export function logout() {
+// ======================================================
+// LOGOUT
+// ======================================================
 
-    localStorage.removeItem(
+export async function logout() {
+    try {
+        await signOut(auth);
 
-        "careeros_current_user"
+        return {
+            success: true,
+        };
+    } catch (error) {
+        console.error(
+            "CareerOS logout error:",
+            error
+        );
 
-    );
-
+        return {
+            success: false,
+            code: error?.code,
+            message:
+                getAuthErrorMessage(
+                    error?.code
+                ),
+        };
+    }
 }
 
-export function getCurrentUser() {
+// ======================================================
+// PASSWORD RESET
+// ======================================================
 
-    return JSON.parse(
+export async function resetPassword(
+    email
+) {
+    try {
+        await sendPasswordResetEmail(
+            auth,
+            email.trim()
+        );
 
-        localStorage.getItem(
+        return {
+            success: true,
+        };
+    } catch (error) {
+        console.error(
+            "CareerOS password reset error:",
+            error
+        );
 
-            "careeros_current_user"
+        return {
+            success: false,
+            code: error?.code,
+            message:
+                getAuthErrorMessage(
+                    error?.code
+                ),
+        };
+    }
+}
 
-        )
+// ======================================================
+// FIREBASE ERROR MESSAGES
+// ======================================================
 
-    );
+function getAuthErrorMessage(
+    code
+) {
+    switch (code) {
+        case "auth/email-already-in-use":
+            return (
+                "An account already exists with this email address."
+            );
 
+        case "auth/invalid-email":
+            return (
+                "Please enter a valid email address."
+            );
+
+        case "auth/weak-password":
+            return (
+                "Password should be at least 6 characters."
+            );
+
+        case "auth/invalid-credential":
+            return (
+                "Incorrect email or password. Please try again."
+            );
+
+        case "auth/wrong-password":
+            return (
+                "Incorrect password. Please try again."
+            );
+
+        case "auth/user-not-found":
+            return (
+                "No account was found with this email address."
+            );
+
+        case "auth/user-disabled":
+            return (
+                "This account has been disabled."
+            );
+
+        case "auth/too-many-requests":
+            return (
+                "Too many requests. Please try again later."
+            );
+
+        case "auth/network-request-failed":
+            return (
+                "Network error. Please check your internet connection."
+            );
+
+        case "auth/operation-not-allowed":
+            return (
+                "This authentication method is currently disabled."
+            );
+
+        default:
+            return (
+                "Something went wrong. Please try again."
+            );
+    }
 }

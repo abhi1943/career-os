@@ -1,5 +1,17 @@
 function CareerProsCons({ career }) {
-  if (!career.pros) return null;
+  if (!career) return null;
+
+  const pros = Array.isArray(career.pros)
+    ? career.pros
+    : [];
+
+  const cons = Array.isArray(career.cons)
+    ? career.cons
+    : [];
+
+  if (pros.length === 0 && cons.length === 0) {
+    return null;
+  }
 
   return (
     <div className="mt-20">
@@ -10,45 +22,55 @@ function CareerProsCons({ career }) {
 
       <div className="grid lg:grid-cols-2 gap-8">
 
-        <div className="bg-green-50 rounded-3xl shadow-lg p-8">
+        {/* Advantages */}
 
-          <h3 className="text-2xl font-bold text-green-700 mb-6">
-            Advantages
-          </h3>
+        {pros.length > 0 && (
+          <div className="bg-green-50 rounded-3xl shadow-lg p-8">
 
-          <ul className="space-y-4">
+            <h3 className="text-2xl font-bold text-green-700 mb-6">
+              Advantages
+            </h3>
 
-            {career.pros.map((item) => (
+            <ul className="space-y-4">
 
-              <li key={item}>
-                ✅ {item}
-              </li>
+              {pros.map((item, index) => (
+                <li
+                  key={`${item}-${index}`}
+                  className="text-gray-700"
+                >
+                  ✅ {item}
+                </li>
+              ))}
 
-            ))}
+            </ul>
 
-          </ul>
+          </div>
+        )}
 
-        </div>
+        {/* Challenges */}
 
-        <div className="bg-red-50 rounded-3xl shadow-lg p-8">
+        {cons.length > 0 && (
+          <div className="bg-red-50 rounded-3xl shadow-lg p-8">
 
-          <h3 className="text-2xl font-bold text-red-700 mb-6">
-            Challenges
-          </h3>
+            <h3 className="text-2xl font-bold text-red-700 mb-6">
+              Challenges
+            </h3>
 
-          <ul className="space-y-4">
+            <ul className="space-y-4">
 
-            {career.cons.map((item) => (
+              {cons.map((item, index) => (
+                <li
+                  key={`${item}-${index}`}
+                  className="text-gray-700"
+                >
+                  ❌ {item}
+                </li>
+              ))}
 
-              <li key={item}>
-                ❌ {item}
-              </li>
+            </ul>
 
-            ))}
-
-          </ul>
-
-        </div>
+          </div>
+        )}
 
       </div>
 

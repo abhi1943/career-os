@@ -1,62 +1,100 @@
-function ApplicationStats({ applications }) {
+function ApplicationStats({
+    applications,
+}) {
+    const total = applications.length;
 
-    const applied =
-        applications.filter(
-            a => a.status === "Applied"
-        ).length;
+    const applied = applications.filter(
+        (application) =>
+            application.status === "Applied"
+    ).length;
 
-    const interview =
-        applications.filter(
-            a => a.status === "Interview"
-        ).length;
+    const interview = applications.filter(
+        (application) =>
+            application.status === "Interview"
+    ).length;
 
-    const offer =
-        applications.filter(
-            a => a.status === "Offer"
-        ).length;
+    const offer = applications.filter(
+        (application) =>
+            application.status === "Offer"
+    ).length;
 
-    const rejected =
-        applications.filter(
-            a => a.status === "Rejected"
-        ).length;
+    const rejected = applications.filter(
+        (application) =>
+            application.status === "Rejected"
+    ).length;
 
-    const card = (title, value, color) => (
+    const withdrawn = applications.filter(
+        (application) =>
+            application.status === "Withdrawn"
+    ).length;
 
-        <div className="bg-white rounded-3xl shadow-lg p-6">
-
-            <p className="text-gray-500">
-
-                {title}
-
-            </p>
-
-            <h2 className={`text-4xl font-bold mt-3 ${color}`}>
-
-                {value}
-
-            </h2>
-
-        </div>
-
-    );
+    const statistics = [
+        {
+            title: "Total",
+            value: total,
+            color: "text-gray-900",
+        },
+        {
+            title: "Applied",
+            value: applied,
+            color: "text-blue-600",
+        },
+        {
+            title: "Interview",
+            value: interview,
+            color: "text-yellow-600",
+        },
+        {
+            title: "Offers",
+            value: offer,
+            color: "text-green-600",
+        },
+        {
+            title: "Rejected",
+            value: rejected,
+            color: "text-red-600",
+        },
+        {
+            title: "Withdrawn",
+            value: withdrawn,
+            color: "text-gray-600",
+        },
+    ];
 
     return (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
 
-        <div className="grid md:grid-cols-4 gap-6">
+            {statistics.map((stat) => (
+                <div
+                    key={stat.title}
+                    className="
+                        bg-white
+                        rounded-3xl
+                        shadow-lg
+                        p-6
+                        transition
+                        hover:shadow-xl
+                    "
+                >
+                    <p className="text-sm font-medium text-gray-500">
+                        {stat.title}
+                    </p>
 
-            {card("Applied", applied, "text-blue-600")}
-
-            {card("Interview", interview, "text-yellow-600")}
-
-            {card("Offers", offer, "text-green-600")}
-
-            {card("Rejected", rejected, "text-red-600")}
+                    <h2
+                        className={`
+                            text-4xl
+                            font-bold
+                            mt-3
+                            ${stat.color}
+                        `}
+                    >
+                        {stat.value}
+                    </h2>
+                </div>
+            ))}
 
         </div>
-
     );
-
 }
 
 export default ApplicationStats;
-

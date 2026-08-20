@@ -1,35 +1,23 @@
 export function optimizeProject(project, role) {
-
     if (!project.title) return project;
 
-    let extra = "";
+    const extraByRole = {
+        "Frontend Developer":
+            "Developed responsive UI using reusable React components, optimized performance, integrated REST APIs, and improved user experience.",
 
-    switch (role) {
+        "Backend Developer":
+            "Designed scalable REST APIs, optimized database queries, implemented authentication, and followed secure backend practices.",
 
-        case "Frontend Developer":
-            extra =
-                "Developed responsive UI using reusable React components, optimized performance, integrated REST APIs, and improved user experience.";
-            break;
+        "Full Stack Developer":
+            "Built end-to-end web applications with frontend, backend, authentication, APIs, and database integration.",
 
-        case "Backend Developer":
-            extra =
-                "Designed scalable REST APIs, optimized database queries, implemented authentication, and followed secure backend practices.";
-            break;
+        "AI Engineer":
+            "Implemented machine learning workflows, data preprocessing, model evaluation, and prediction pipelines.",
+    };
 
-        case "Full Stack Developer":
-            extra =
-                "Built end-to-end web applications with frontend, backend, authentication, APIs, and database integration.";
-            break;
-
-        case "AI Engineer":
-            extra =
-                "Implemented machine learning workflows, data preprocessing, model evaluation, and prediction pipelines.";
-            break;
-
-        default:
-            extra =
-                "Applied industry-standard software engineering practices and clean architecture.";
-    }
+    const extra =
+        extraByRole[role] ||
+        "Applied industry-standard software engineering practices and clean architecture.";
 
     return {
         ...project,

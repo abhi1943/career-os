@@ -1,65 +1,72 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
 
-import { auth } from "../firebase/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import {
+    onAuthStateChanged,
+    signOut,
+} from "firebase/auth";
 
-export const AuthContext = createContext();
+import { auth } from "../firebase/firebase";
+
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+    const [user, setUser] =
+        useState(null);
 
-  const [user, setUser] = useState(null);
+    const [authLoading, setAuthLoading] =
+        useState(true);
 
-  const [authLoading, setAuthLoading] = useState(true);
+    useEffect(() => {
+        const unsubscribe =
+            onAuthStateChanged(
+                auth,
+                (currentUser) => {
+                    setUser(currentUser);
+                    setAuthLoading(false);
+                }
+            );
 
-  useEffect(() => {
+        return unsubscribe;
+    }, []);
 
-    const unsubscribe = onAuthStateChanged(
+    const logout = async () => {
+        await signOut(auth);
+    };
 
-      auth,
-
-      (currentUser) => {
-
-        setUser(currentUser);
-
-        setAuthLoading(false);
-
-      }
-
-    );
-
-    return unsubscribe;
-
-  }, []);
-
-  return (
-
-    <AuthContext.Provider
-
-      value={{
-
+    const value = {
+        // Firebase authenticated user
         user,
 
+        // Authentication state
+        isAuthenticated: Boolean(user),
+
+        // Loading state while Firebase
+        // checks the current session
         authLoading,
 
-      }}
+        // Convenient user information
+        userId: user?.uid || null,
 
-    >
+        userEmail: user?.email || null,
 
-      {children}
+        // Centralized logout
+        logout,
+    };
 
-    </AuthContext.Provider>
-
-  );
-
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
-
-  return useContext(AuthContext);
-
+    return useContext(AuthContext);
 }

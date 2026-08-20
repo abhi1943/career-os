@@ -1,5 +1,4 @@
 import database from "../data";
-import professions from "../data/professions";
 import { calculateCareerMatch } from "./aiCareerMatch";
 
 export function recommendCareers(student) {
@@ -7,33 +6,51 @@ export function recommendCareers(student) {
 
   const allCareers = [];
 
-  // Education careers
-  Object.values(database).forEach((list) => {
-    list.forEach((career) => {
-      allCareers.push(career);
+  Object.values(database).forEach((careerList) => {
+    if (!Array.isArray(careerList)) return;
+
+    careerList.forEach((career) => {
+      if (
+        career &&
+        career.id &&
+        !allCareers.some(
+          (item) => item.id === career.id
+        )
+      ) {
+        allCareers.push(career);
+      }
     });
   });
 
-  // Professional careers
-  professions.forEach((career) => {
-    // Prevent duplicates
-    if (!allCareers.find((c) => c.id === career.id)) {
-      allCareers.push(career);
-    }
-  });
-
-  const recommendations = allCareers
+  return allCareers
     .map((career) => {
-      const result = calculateCareerMatch(student, career);
+      const result =
+        calculateCareerMatch(
+          student,
+          career
+        );
 
       return {
         ...career,
+
         score: result.score,
-        matchedSkills: result.matchedSkills,
+
+        matchedSkills:
+          result.matchedSkills,
+
+        missingSkills:
+          result.missingSkills,
+
+        placementChance:
+          result.placementChance,
+
+        learningProgress:
+          result.learningProgress,
       };
     })
-    .sort((a, b) => b.score - a.score)
+    .sort(
+      (a, b) =>
+        b.score - a.score
+    )
     .slice(0, 6);
-
-  return recommendations;
 }

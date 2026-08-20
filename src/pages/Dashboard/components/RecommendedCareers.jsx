@@ -2,7 +2,7 @@ import { useContext } from "react";
 import {
   GraduationCap,
   ArrowRight,
-  TrendingUp,
+  // TrendingUp,
 } from "lucide-react";
 
 import { CareerContext } from "../../../context/CareerContext";

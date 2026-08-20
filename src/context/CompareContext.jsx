@@ -1,40 +1,61 @@
-import { createContext, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
 
-export const CompareContext = createContext();
+import {
+    createContext,
+    useState,
+} from "react";
 
-export function CompareProvider({ children }) {
-  const [compareList, setCompareList] = useState([]);
+export const CompareContext =
+    createContext();
 
-  function toggleCompare(career) {
-    const exists = compareList.find(
-      item => item.id === career.id
-    );
+export function CompareProvider({
+    children,
+}) {
+    const [
+        compareList,
+        setCompareList,
+    ] = useState([]);
 
-    if (exists) {
-      setCompareList(compareList.filter(
-        item => item.id !== career.id
-      ));
-      return;
+    function toggleCompare(career) {
+        const exists =
+            compareList.find(
+                (item) =>
+                    item.id === career.id
+            );
+
+        if (exists) {
+            setCompareList(
+                compareList.filter(
+                    (item) =>
+                        item.id !== career.id
+                )
+            );
+            return;
+        }
+
+        if (compareList.length >= 2) {
+            return;
+        }
+
+        setCompareList([
+            ...compareList,
+            career,
+        ]);
     }
 
-    if (compareList.length >= 2) return;
+    function clearCompare() {
+        setCompareList([]);
+    }
 
-    setCompareList([...compareList, career]);
-  }
-
-  function clearCompare() {
-    setCompareList([]);
-  }
-
-  return (
-    <CompareContext.Provider
-      value={{
-        compareList,
-        toggleCompare,
-        clearCompare
-      }}
-    >
-      {children}
-    </CompareContext.Provider>
-  );
+    return (
+        <CompareContext.Provider
+            value={{
+                compareList,
+                toggleCompare,
+                clearCompare,
+            }}
+        >
+            {children}
+        </CompareContext.Provider>
+    );
 }

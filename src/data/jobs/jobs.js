@@ -1,3 +1,4 @@
+// Static fallback jobs
 const jobs = {
   "frontend-developer": [
     {

@@ -3,6 +3,10 @@ import { learningResources } from "../../utils/learningResources";
 function CareerLearningHub({ careerId }) {
   const resources = learningResources[careerId];
 
+  /* ==================================================
+     CAREER NOT FOUND
+  ================================================== */
+
   if (!resources) {
     return (
       <section className="bg-white rounded-3xl shadow-lg p-8 mt-10">
@@ -17,113 +21,218 @@ function CareerLearningHub({ careerId }) {
     );
   }
 
+  /* ==================================================
+     SAFE RESOURCE ARRAYS
+  ================================================== */
+
+  const youtube = Array.isArray(resources.youtube)
+    ? resources.youtube
+    : [];
+
+  const websites = Array.isArray(resources.websites)
+    ? resources.websites
+    : [];
+
+  const projects = Array.isArray(resources.projects)
+    ? resources.projects
+    : [];
+
+  /* ==================================================
+     EMPTY RESOURCE CHECK
+  ================================================== */
+
+  const hasResources =
+    youtube.length > 0 ||
+    websites.length > 0 ||
+    projects.length > 0;
+
+  if (!hasResources) {
+    return (
+      <section className="bg-white rounded-3xl shadow-lg p-8 mt-10">
+        <h2 className="text-3xl font-bold mb-4">
+          📚 Career Learning Hub
+        </h2>
+
+        <p className="text-gray-500">
+          Learning resources are being prepared for this career.
+        </p>
+      </section>
+    );
+  }
+
+  /* ==================================================
+     RENDER
+  ================================================== */
+
   return (
     <section className="bg-white rounded-3xl shadow-lg p-8 mt-10">
 
-      <h2 className="text-3xl font-bold mb-8">
-        📚 Career Learning Hub
-      </h2>
-
-      {/* YouTube */}
+      {/* ==================================================
+          HEADER
+      ================================================== */}
 
       <div className="mb-10">
 
-        <h3 className="text-2xl font-semibold mb-5">
-          🎥 Recommended YouTube Courses
-        </h3>
+        <h2 className="text-3xl font-bold text-slate-800">
+          📚 Career Learning Hub
+        </h2>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-          {resources.youtube.map((video) => (
-
-            <a
-              key={video.title}
-              href={video.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border rounded-2xl p-5 hover:shadow-lg hover:border-red-500 transition"
-            >
-
-              <h4 className="font-bold">
-                {video.title}
-              </h4>
-
-              <p className="text-red-600 mt-2">
-                Watch Course →
-              </p>
-
-            </a>
-
-          ))}
-
-        </div>
+        <p className="text-gray-500 mt-2">
+          Recommended resources to build the skills required
+          for this career.
+        </p>
 
       </div>
 
-      {/* Websites */}
+      {/* ==================================================
+          YOUTUBE
+      ================================================== */}
 
-      <div className="mb-10">
+      {youtube.length > 0 && (
+        <div className="mb-12">
 
-        <h3 className="text-2xl font-semibold mb-5">
-          🌐 Best Learning Websites
-        </h3>
+          <h3 className="text-2xl font-semibold mb-5">
+            🎥 Recommended YouTube Courses
+          </h3>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-          {resources.websites.map((site) => (
+            {youtube.map((video, index) => (
 
-            <a
-              key={site.name}
-              href={site.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border rounded-2xl p-5 hover:shadow-lg hover:border-blue-500 transition"
-            >
+              <a
+                key={`${video.title}-${index}`}
+                href={video.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  border
+                  border-gray-200
+                  rounded-2xl
+                  p-5
+                  bg-white
+                  hover:shadow-lg
+                  hover:border-red-400
+                  transition
+                "
+              >
 
-              <h4 className="font-bold">
-                {site.name}
-              </h4>
+                <div className="text-3xl mb-4">
+                  ▶️
+                </div>
 
-              <p className="text-blue-600 mt-2">
-                Visit Website →
-              </p>
+                <h4 className="font-bold text-slate-800">
+                  {video.title}
+                </h4>
 
-            </a>
+                <p className="text-red-600 mt-3 font-semibold">
+                  Watch Course →
+                </p>
 
-          ))}
+              </a>
 
-        </div>
+            ))}
 
-      </div>
-
-      {/* Projects */}
-
-      <div>
-
-        <h3 className="text-2xl font-semibold mb-5">
-          💻 Practice Projects
-        </h3>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-
-          {resources.projects.map((project) => (
-
-            <div
-              key={project}
-              className="bg-slate-100 rounded-2xl p-5"
-            >
-
-              <h4 className="font-bold">
-                {project}
-              </h4>
-
-            </div>
-
-          ))}
+          </div>
 
         </div>
+      )}
 
-      </div>
+      {/* ==================================================
+          WEBSITES
+      ================================================== */}
+
+      {websites.length > 0 && (
+        <div className="mb-12">
+
+          <h3 className="text-2xl font-semibold mb-5">
+            🌐 Best Learning Websites
+          </h3>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            {websites.map((site, index) => (
+
+              <a
+                key={`${site.name}-${index}`}
+                href={site.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  border
+                  border-gray-200
+                  rounded-2xl
+                  p-5
+                  bg-white
+                  hover:shadow-lg
+                  hover:border-blue-400
+                  transition
+                "
+              >
+
+                <div className="text-3xl mb-4">
+                  🌐
+                </div>
+
+                <h4 className="font-bold text-slate-800">
+                  {site.name}
+                </h4>
+
+                <p className="text-blue-600 mt-3 font-semibold">
+                  Visit Website →
+                </p>
+
+              </a>
+
+            ))}
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ==================================================
+          PROJECTS
+      ================================================== */}
+
+      {projects.length > 0 && (
+        <div>
+
+          <h3 className="text-2xl font-semibold mb-5">
+            💻 Practice Projects
+          </h3>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            {projects.map((project, index) => (
+
+              <div
+                key={`${project}-${index}`}
+                className="
+                  bg-slate-100
+                  rounded-2xl
+                  p-5
+                  hover:bg-blue-50
+                  hover:shadow-md
+                  transition
+                "
+              >
+
+                <div className="text-3xl mb-3">
+                  🚀
+                </div>
+
+                <h4 className="font-bold text-slate-800">
+                  {project}
+                </h4>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+      )}
 
     </section>
   );

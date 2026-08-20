@@ -10,16 +10,17 @@ function SearchBar({
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const [recentSearches, setRecentSearches] = useState([]);
+  const [recentSearches, setRecentSearches] = useState(() => {
+  try {
+    return (
+      JSON.parse(localStorage.getItem("recentSearches")) || []
+    );
+  } catch {
+    return [];
+  }
+});
 
-  const wrapperRef = useRef(null);
-
-  useEffect(() => {
-    const searches =
-      JSON.parse(localStorage.getItem("recentSearches")) || [];
-
-    setRecentSearches(searches);
-  }, []);
+const wrapperRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
