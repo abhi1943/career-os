@@ -1,8 +1,7 @@
+
 import { useEffect, useState } from "react";
 
-function JobRefreshStatus({
-    onJobsRefreshed,
-}) {
+function JobRefreshStatus({ onJobsRefreshed }) {
     const [status, setStatus] = useState(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -12,7 +11,9 @@ function JobRefreshStatus({
     // API BASE URL
     // ======================================================
 
-    const API_BASE_URL = "https://career-os-api-1h85.onrender.com";
+    const API_BASE_URL =
+        import.meta.env.VITE_API_URL ||
+        "https://career-os-api-1h85.onrender.com";
 
     // ======================================================
     // FETCH REFRESH STATUS
@@ -62,19 +63,19 @@ function JobRefreshStatus({
     // ======================================================
 
     useEffect(() => {
-    const initialTimeout = setTimeout(() => {
-        fetchStatus();
-    }, 0);
+        const initialTimeout = setTimeout(() => {
+            fetchStatus();
+        }, 0);
 
-    const interval = setInterval(() => {
-        fetchStatus();
-    }, 30000);
+        const interval = setInterval(() => {
+            fetchStatus();
+        }, 30000);
 
-    return () => {
-        clearTimeout(initialTimeout);
-        clearInterval(interval);
-    };
-}, []);
+        return () => {
+            clearTimeout(initialTimeout);
+            clearInterval(interval);
+        };
+    }, []);
 
     // ======================================================
     // MANUAL REFRESH
@@ -142,33 +143,24 @@ function JobRefreshStatus({
 
         const parsedDate = new Date(date);
 
-        if (
-            Number.isNaN(
-                parsedDate.getTime()
-            )
-        ) {
+        if (Number.isNaN(parsedDate.getTime())) {
             return "Not available";
         }
 
-        return parsedDate.toLocaleString(
-            "en-IN",
-            {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-            }
-        );
+        return parsedDate.toLocaleString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+        });
     };
 
     // ======================================================
     // FORMAT NEXT REFRESH
     // ======================================================
 
-    const formatNextRefresh = (
-        milliseconds
-    ) => {
+    const formatNextRefresh = (milliseconds) => {
         if (
             milliseconds === null ||
             milliseconds === undefined
@@ -176,11 +168,9 @@ function JobRefreshStatus({
             return "Not available";
         }
 
-        const totalMinutes =
-            Math.ceil(
-                milliseconds /
-                    (60 * 1000)
-            );
+        const totalMinutes = Math.ceil(
+            milliseconds / (60 * 1000)
+        );
 
         if (totalMinutes <= 0) {
             return "Refreshing soon";
@@ -190,8 +180,7 @@ function JobRefreshStatus({
             totalMinutes / 60
         );
 
-        const minutes =
-            totalMinutes % 60;
+        const minutes = totalMinutes % 60;
 
         if (hours > 0) {
             return `~${hours}h ${
@@ -213,7 +202,6 @@ function JobRefreshStatus({
             <div className="max-w-7xl mx-auto px-6">
                 <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-6">
                     <div className="flex items-center gap-3">
-
                         <div className="text-2xl">
                             🔄
                         </div>
@@ -227,7 +215,6 @@ function JobRefreshStatus({
                                 Checking refresh status...
                             </p>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -242,11 +229,8 @@ function JobRefreshStatus({
         return (
             <div className="max-w-7xl mx-auto px-6">
                 <div className="bg-white border border-red-200 rounded-2xl shadow-sm p-6 mb-6">
-
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
                         <div className="flex items-start gap-3">
-
                             <div className="text-2xl">
                                 ⚠️
                             </div>
@@ -260,7 +244,6 @@ function JobRefreshStatus({
                                     {error}
                                 </p>
                             </div>
-
                         </div>
 
                         <button
@@ -270,9 +253,7 @@ function JobRefreshStatus({
                         >
                             Try Again
                         </button>
-
                     </div>
-
                 </div>
             </div>
         );
@@ -282,20 +263,16 @@ function JobRefreshStatus({
     // BACKEND DATA
     // ======================================================
 
-    const refresh =
-        status?.refresh || {};
-
-    const store =
-        status?.store || {};
+    const refresh = status?.refresh || {};
+    const store = status?.store || {};
 
     // ======================================================
     // STATUS VALUES
     // ======================================================
 
-    const storedJobs =
-        Number(
-            store?.totalJobs || 0
-        );
+    const storedJobs = Number(
+        store?.totalJobs || 0
+    );
 
     const lastRefresh =
         refresh?.lastRefreshCompletedAt ||
@@ -303,20 +280,15 @@ function JobRefreshStatus({
         null;
 
     const nextRefreshIn =
-        refresh?.nextRefreshInMs ??
-        null;
+        refresh?.nextRefreshInMs ?? null;
 
-    const staleRemoved =
-        Number(
-            refresh?.lastRefreshRemovedCount ||
-                0
-        );
+    const staleRemoved = Number(
+        refresh?.lastRefreshRemovedCount || 0
+    );
 
-    const isRefreshing =
-        Boolean(
-            refresh?.isRefreshing
-        );
-
+    const isRefreshing = Boolean(
+        refresh?.isRefreshing
+    );
 
     // ======================================================
     // RENDER
@@ -324,12 +296,7 @@ function JobRefreshStatus({
 
     return (
         <div className="max-w-7xl mx-auto px-6">
-
             <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-6">
-
-                {/* ==================================================
-                    HEADER
-                ================================================== */}
 
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
 
@@ -364,10 +331,6 @@ function JobRefreshStatus({
 
                     </div>
 
-                    {/* ==================================================
-                        REFRESH BUTTON
-                    ================================================== */}
-
                     <button
                         type="button"
                         onClick={handleRefresh}
@@ -390,23 +353,13 @@ function JobRefreshStatus({
 
                 </div>
 
-                {/* ==================================================
-                    ERROR
-                ================================================== */}
-
                 {error && (
                     <div className="mt-4 bg-red-50 border border-red-100 text-red-600 rounded-xl px-4 py-3 text-sm">
                         ⚠️ {error}
                     </div>
                 )}
 
-                {/* ==================================================
-                    STATUS CARDS
-                ================================================== */}
-
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-
-                    {/* ACTIVE JOBS */}
 
                     <div className="bg-blue-50 rounded-xl p-4">
 
@@ -426,8 +379,6 @@ function JobRefreshStatus({
 
                     </div>
 
-                    {/* LAST REFRESH */}
-
                     <div className="bg-green-50 rounded-xl p-4">
 
                         <p className="text-xs font-semibold text-green-600 uppercase tracking-wide">
@@ -445,8 +396,6 @@ function JobRefreshStatus({
                         </p>
 
                     </div>
-
-                    {/* NEXT REFRESH */}
 
                     <div className="bg-purple-50 rounded-xl p-4">
 
@@ -466,8 +415,6 @@ function JobRefreshStatus({
 
                     </div>
 
-                    {/* CLEANED JOBS */}
-
                     <div className="bg-orange-50 rounded-xl p-4">
 
                         <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide">
@@ -485,10 +432,6 @@ function JobRefreshStatus({
                     </div>
 
                 </div>
-
-                {/* ==================================================
-                    REFRESHING STATUS
-                ================================================== */}
 
                 {isRefreshing && (
                     <div className="mt-5 flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
@@ -513,10 +456,6 @@ function JobRefreshStatus({
                     </div>
                 )}
 
-                {/* ==================================================
-                    FOOTER
-                ================================================== */}
-
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-5 pt-5 border-t border-gray-100">
 
                     <p className="text-xs text-gray-500">
@@ -530,9 +469,9 @@ function JobRefreshStatus({
                 </div>
 
             </div>
-
         </div>
     );
 }
 
 export default JobRefreshStatus;
+  
