@@ -57,7 +57,7 @@ import Applications from "../pages/Applications/Applications";
 import Search from "../pages/Search/Search";
 import Compare from "../pages/Compare/Compare";
 import Chatbot from "../pages/Chatbot/Chatbot";
-import Chatboard from "@/pages/chatboard/chatboard";
+import Chatboard from "../pages/chatboard/chatboard";
 
 import ResumeBuilder from "../pages/Resume/ResumeBuilder";
 import PortfolioBuilder from "../pages/Portfolio/PortfolioBuilder";
