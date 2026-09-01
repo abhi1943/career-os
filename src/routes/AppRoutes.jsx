@@ -48,7 +48,7 @@ import JobDetails from "../pages/Companies/JobDetails";
 // ======================================================
 
 import Jobs from "../pages/Jobs/Jobs";
-import SavedJobs from "../pages/jobs/SavedJobs";
+import SavedJobs from "../pages/Jobs/SavedJobs";
 import JobAlertsPage from "../pages/Jobs/JobAlertsPage";
 import Applications from "../pages/Applications/Applications";
 // ======================================================
