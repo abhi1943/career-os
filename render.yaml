@@ -1,0 +1,120 @@
+services:
+
+  # ======================================================
+  # CAREEROS BACKEND
+  # ======================================================
+
+  - type: web
+    name: career-os-api
+    runtime: node
+    plan: free
+    region: virginia
+
+    rootDir: server
+
+    buildCommand: npm install
+    startCommand: node server.js
+
+    envVars:
+
+      # Render provides PORT automatically.
+      - key: NODE_ENV
+        value: production
+
+      # --------------------------------------------------
+      # FRONTEND
+      # --------------------------------------------------
+
+      - key: FRONTEND_URL
+        value: https://career-os-peach.vercel.app
+
+      # --------------------------------------------------
+      # ADZUNA
+      # --------------------------------------------------
+
+      - key: ADZUNA_APP_ID
+        sync: false
+
+      - key: ADZUNA_APP_KEY
+        sync: false
+
+      # --------------------------------------------------
+      # MYSQL
+      # --------------------------------------------------
+
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: career-os-mysql
+          property: host
+
+      - key: DB_PORT
+        value: "3306"
+
+      - key: DB_USER
+        fromService:
+          type: pserv
+          name: career-os-mysql
+          envVarKey: MYSQL_USER
+
+      - key: DB_PASSWORD
+        fromService:
+          type: pserv
+          name: career-os-mysql
+          envVarKey: MYSQL_PASSWORD
+
+      - key: DB_NAME
+        fromService:
+          type: pserv
+          name: career-os-mysql
+          envVarKey: MYSQL_DATABASE
+
+      # --------------------------------------------------
+      # FIREBASE
+      # --------------------------------------------------
+
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+
+
+  # ======================================================
+  # CAREEROS MYSQL
+  # ======================================================
+
+  - type: pserv
+    name: career-os-mysql
+    runtime: image
+    plan: 0.5c-512mb
+    region: virginia
+
+    image:
+      url: mysql:8.0
+
+    envVars:
+
+      # Database name
+      - key: MYSQL_DATABASE
+        value: career_os
+
+      # MySQL application user
+      - key: MYSQL_USER
+        value: careeros
+
+      # Application user's password
+      - key: MYSQL_PASSWORD
+        generateValue: true
+
+      # MySQL root password
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+
+    disk:
+      name: career-os-mysql-disk
+      mountPath: /var/lib/mysql
+      sizeGB: 10
