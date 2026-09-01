@@ -23,70 +23,59 @@ function CareerRecommendation() {
         );
     }
 
-    let careers = getCareerOptions(student);
+    /* ==================================================
+       GET ELIGIBLE CAREERS
+    ================================================== */
 
-    // If user selected a career goal, show it first
-    if (student.dreamCareer) {
-        careers = careers.sort((a, b) => {
-            if (a.name === student.dreamCareer) return -1;
-            if (b.name === student.dreamCareer) return 1;
-            return 0;
-        });
-    }
+    const careers = getCareerOptions(student);
 
-    const filteredCareers =
-        student.education === "btech"
-            ? careers.filter((career) => {
-                  const branch = student.specialization;
+    /* ==================================================
+       CALCULATE AI MATCH
+    ================================================== */
 
-                  if (branch === "CSE") {
-                      return [
-                          "software-engineer",
-                          "frontend-developer",
-                          "backend-developer",
-                          "full-stack-developer",
-                          "cloud-engineer",
-                          "qa-engineer",
-                      ].includes(career.id);
-                  }
-
-                  if (branch === "AI & ML") {
-                      return [
-                          "ai-engineer",
-                          "data-scientist",
-                          "software-engineer",
-                      ].includes(career.id);
-                  }
-
-                  if (branch === "Data Science") {
-                      return [
-                          "data-scientist",
-                          "ai-engineer",
-                      ].includes(career.id);
-                  }
-
-                  if (branch === "Cyber Security") {
-                      return [
-                          "cyber-security-engineer",
-                          "cloud-engineer",
-                      ].includes(career.id);
-                  }
-
-                  return true;
-              })
-            : careers;
-
-    const recommendations = filteredCareers
+    const recommendations = careers
         .map((career) => ({
             career,
             ...calculateCareerMatch(student, career),
         }))
-        .sort((a, b) => b.score - a.score);
+        .sort((a, b) => {
+
+            /*
+             * IMPORTANT:
+             * The user's selected dream career ALWAYS
+             * stays at the top.
+             */
+
+            const aIsSelected =
+                student.dreamCareer &&
+                a.career.name === student.dreamCareer;
+
+            const bIsSelected =
+                student.dreamCareer &&
+                b.career.name === student.dreamCareer;
+
+            if (aIsSelected && !bIsSelected) {
+                return -1;
+            }
+
+            if (!aIsSelected && bIsSelected) {
+                return 1;
+            }
+
+            /*
+             * All other careers are ranked by AI score.
+             */
+
+            return b.score - a.score;
+        });
 
     return (
         <section className="bg-white rounded-3xl shadow-lg p-8">
 
-            {/* Header */}
+            {/* ==================================================
+                HEADER
+            ================================================== */}
+
             <h2 className="text-3xl font-bold mb-2">
                 🤖 AI Career Recommendation
             </h2>
@@ -95,7 +84,10 @@ function CareerRecommendation() {
                 These careers are ranked based on your profile.
             </p>
 
-            {/* Career Recommendations */}
+            {/* ==================================================
+                CAREER RECOMMENDATIONS
+            ================================================== */}
+
             <div className="space-y-5">
 
                 {recommendations.map(
@@ -111,21 +103,42 @@ function CareerRecommendation() {
                         futureDemand,
                     }) => {
 
-                        const roadmap = generateRoadmap(career.name);
+                        const roadmap =
+                            generateRoadmap(career.name);
+
+                        const isSelected =
+                            student.dreamCareer === career.name;
 
                         return (
                             <div
                                 key={career.id}
-                                className="border rounded-2xl p-6 hover:shadow-md transition"
+                                className={`border rounded-2xl p-6 transition ${
+                                    isSelected
+                                        ? "border-blue-500 bg-blue-50/30 shadow-md"
+                                        : "hover:shadow-md"
+                                }`}
                             >
 
-                                {/* ============================= */}
-                                {/* Career Header */}
-                                {/* ============================= */}
+                                {/* ==================================================
+                                    SELECTED CAREER BADGE
+                                ================================================== */}
+
+                                {isSelected && (
+                                    <div className="mb-4">
+
+                                        <span className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold">
+                                            🎯 Selected Career Goal
+                                        </span>
+
+                                    </div>
+                                )}
+
+                                {/* ==================================================
+                                    CAREER HEADER
+                                ================================================== */}
 
                                 <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-5">
 
-                                    {/* Career Information */}
                                     <div className="flex-1 min-w-0">
 
                                         <h3 className="text-xl font-bold">
@@ -151,7 +164,9 @@ function CareerRecommendation() {
                                                 <span className="font-semibold">
                                                     Salary:
                                                 </span>{" "}
-                                                {career.salary}
+                                                {career.averageSalary ||
+                                                    career.salary ||
+                                                    "Not specified"}
                                             </div>
 
                                             <div>
@@ -174,7 +189,10 @@ function CareerRecommendation() {
 
                                     </div>
 
-                                    {/* Match Score */}
+                                    {/* ==================================================
+                                        MATCH SCORE
+                                    ================================================== */}
+
                                     <div className="text-left md:text-right shrink-0">
 
                                         <div className="text-3xl font-bold text-green-600">
@@ -189,96 +207,90 @@ function CareerRecommendation() {
 
                                 </div>
 
+                                {/* ==================================================
+                                    MATCHED SKILLS
+                                ================================================== */}
 
-                                {/* ============================= */}
-                                {/* Matched Skills */}
-                                {/* ============================= */}
+                                {matchedSkills.length > 0 && (
+                                    <div className="mt-5">
 
-                                <div className="mt-5">
+                                        <h4 className="font-semibold mb-2">
+                                            ✅ Matched Skills
+                                        </h4>
 
-                                    {matchedSkills.length > 0 && (
-                                        <>
-                                            <h4 className="font-semibold mb-2">
-                                                ✅ Matched Skills
-                                            </h4>
+                                        <div className="flex flex-wrap gap-2">
 
-                                            <div className="flex flex-wrap gap-2">
-
-                                                {matchedSkills.map((skill) => (
-                                                    <span
-                                                        key={skill}
-                                                        className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
-                                                    >
-                                                        ✔ {skill}
-                                                    </span>
-                                                ))}
-
-                                            </div>
-                                        </>
-                                    )}
-
-
-                                    {/* ============================= */}
-                                    {/* AI Recommendation Reasons */}
-                                    {/* ============================= */}
-
-                                    {reasons && reasons.length > 0 && (
-                                        <div className="mt-5">
-
-                                            <h4 className="font-semibold mb-2">
-                                                🤖 Why AI Recommended This
-                                            </h4>
-
-                                            <ul className="space-y-2">
-
-                                                {reasons.map((reason) => (
-                                                    <li
-                                                        key={reason}
-                                                        className="text-green-700 text-sm"
-                                                    >
-                                                        ✔ {reason}
-                                                    </li>
-                                                ))}
-
-                                            </ul>
+                                            {matchedSkills.map((skill) => (
+                                                <span
+                                                    key={skill}
+                                                    className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                                                >
+                                                    ✔ {skill}
+                                                </span>
+                                            ))}
 
                                         </div>
-                                    )}
 
+                                    </div>
+                                )}
 
-                                    {/* ============================= */}
-                                    {/* Missing Skills */}
-                                    {/* ============================= */}
+                                {/* ==================================================
+                                    AI REASONS
+                                ================================================== */}
 
-                                    {missingSkills.length > 0 && (
-                                        <div className="mt-5">
+                                {reasons && reasons.length > 0 && (
+                                    <div className="mt-5">
 
-                                            <h4 className="font-semibold mb-2 text-red-600">
-                                                📚 Learn Next
-                                            </h4>
+                                        <h4 className="font-semibold mb-2">
+                                            🤖 Why AI Recommended This
+                                        </h4>
 
-                                            <div className="flex flex-wrap gap-2">
+                                        <ul className="space-y-2">
 
-                                                {missingSkills.map((skill) => (
-                                                    <span
-                                                        key={skill}
-                                                        className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
-                                                    >
-                                                        {skill}
-                                                    </span>
-                                                ))}
+                                            {reasons.map((reason, index) => (
+                                                <li
+                                                    key={`${reason}-${index}`}
+                                                    className="text-green-700 text-sm"
+                                                >
+                                                    ✔ {reason}
+                                                </li>
+                                            ))}
 
-                                            </div>
+                                        </ul>
+
+                                    </div>
+                                )}
+
+                                {/* ==================================================
+                                    MISSING SKILLS
+                                ================================================== */}
+
+                                {missingSkills.length > 0 && (
+                                    <div className="mt-5">
+
+                                        <h4 className="font-semibold mb-2 text-red-600">
+                                            📚 Learn Next
+                                        </h4>
+
+                                        <div className="flex flex-wrap gap-2">
+
+                                            {missingSkills.map((skill) => (
+                                                <span
+                                                    key={skill}
+                                                    className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
+                                                >
+                                                    {skill}
+                                                </span>
+                                            ))}
 
                                         </div>
-                                    )}
 
-                                </div>
+                                    </div>
+                                )}
 
-
-                                {/* ============================= */}
-                                {/* Career Success Meter */}
-                                {/* ============================= */}
+                                {/* ==================================================
+                                    CAREER SUCCESS METER
+                                ================================================== */}
 
                                 <div className="mt-6 border-t pt-6">
 
@@ -288,7 +300,8 @@ function CareerRecommendation() {
 
                                     <div className="grid md:grid-cols-2 gap-4">
 
-                                        {/* Overall Match */}
+                                        {/* Overall */}
+
                                         <div className="bg-blue-50 rounded-xl p-4">
 
                                             <div className="text-gray-500">
@@ -301,8 +314,8 @@ function CareerRecommendation() {
 
                                         </div>
 
+                                        {/* Placement */}
 
-                                        {/* Placement Chance */}
                                         <div className="bg-green-50 rounded-xl p-4">
 
                                             <div className="text-gray-500">
@@ -315,8 +328,8 @@ function CareerRecommendation() {
 
                                         </div>
 
+                                        {/* Salary */}
 
-                                        {/* Salary Potential */}
                                         <div className="bg-purple-50 rounded-xl p-4">
 
                                             <div className="text-gray-500">
@@ -329,8 +342,8 @@ function CareerRecommendation() {
 
                                         </div>
 
-
                                         {/* Future Demand */}
+
                                         <div className="bg-orange-50 rounded-xl p-4">
 
                                             <div className="text-gray-500">
@@ -343,8 +356,8 @@ function CareerRecommendation() {
 
                                         </div>
 
-
                                         {/* Learning Progress */}
+
                                         <div className="md:col-span-2 bg-gray-50 rounded-xl p-4">
 
                                             <div className="flex justify-between mb-2">
@@ -376,10 +389,9 @@ function CareerRecommendation() {
 
                                 </div>
 
-
-                                {/* ============================= */}
-                                {/* AI Learning Roadmap */}
-                                {/* ============================= */}
+                                {/* ==================================================
+                                    AI LEARNING ROADMAP
+                                ================================================== */}
 
                                 {roadmap.length > 0 && (
                                     <div className="mt-8 border-t pt-6 w-full">
@@ -397,12 +409,10 @@ function CareerRecommendation() {
                                                     className="flex items-start gap-4"
                                                 >
 
-                                                    {/* Step Number */}
                                                     <div className="bg-blue-600 text-white rounded-full w-8 h-8 shrink-0 flex items-center justify-center text-sm font-semibold">
                                                         {index + 1}
                                                     </div>
 
-                                                    {/* Step Content */}
                                                     <div className="flex-1 min-w-0">
 
                                                         <p className="text-sm font-semibold text-blue-600">
@@ -419,10 +429,7 @@ function CareerRecommendation() {
                                                                 <div className="flex flex-wrap gap-2 mt-3">
 
                                                                     {step.skills.map(
-                                                                        (
-                                                                            skill,
-                                                                            skillIndex
-                                                                        ) => (
+                                                                        (skill, skillIndex) => (
 
                                                                             <span
                                                                                 key={`${step.month}-${skill}-${skillIndex}`}
@@ -449,16 +456,17 @@ function CareerRecommendation() {
                                     </div>
                                 )}
 
-
-                                {/* ============================= */}
-                                {/* Career Details Button */}
-                                {/* ============================= */}
+                                {/* ==================================================
+                                    CAREER DETAILS
+                                ================================================== */}
 
                                 <div className="mt-6 flex justify-end">
 
                                     <button
                                         onClick={() =>
-                                            navigate(`/career/${career.id}`)
+                                            navigate(
+                                                `/career/${career.id}`
+                                            )
                                         }
                                         className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition"
                                     >

@@ -13,10 +13,11 @@ function RecommendedCareers() {
 
   const recommendations = getRecommendations(student);
 
-  return (
-    <div className="bg-white rounded-3xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300">
 
-      <div className="flex items-center gap-3 mb-6">
+    return (
+  <div className="h-full min-h-0 bg-white rounded-3xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden">
+
+    <div className="flex items-center gap-3 mb-6 flex-shrink-0">
         <GraduationCap className="text-purple-600" />
 
         <h2 className="text-2xl font-bold">
@@ -42,7 +43,7 @@ function RecommendedCareers() {
 
       ) : (
 
-        <div className="space-y-5">
+        <div className="space-y-5 overflow-y-auto pr-2 flex-1 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
 
           {recommendations.map((career) => (
 

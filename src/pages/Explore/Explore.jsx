@@ -12,7 +12,7 @@ const exploreSections = [
             "Career Details",
             "Career Roadmaps",
             "Required Skills",
-            "Career Assessment",
+            "Career Finder",
         ],
         route: "/careers",
         button: "Explore Careers",
@@ -248,7 +248,7 @@ function Explore() {
                         onClick={() => navigate("/career-assessment")}
                         className="mt-6 bg-white text-blue-700 px-7 py-3 rounded-xl font-bold hover:bg-blue-50 transition"
                     >
-                        Take Career Assessment →
+                        Take Career Finder →
                     </button>
 
                 </div>

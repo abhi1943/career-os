@@ -12,24 +12,24 @@ const intermediate = [
     rating: 4.9,
 
     description:
-      "MPC is the best stream for students interested in Engineering, Computer Science, Artificial Intelligence, Data Science, Defence and Research.",
+      "MPC is an excellent stream for students interested in Engineering, Computer Science, Artificial Intelligence, Data Science, Defence and Research.",
 
     streams: [
       "Engineering",
       "Computer Science",
       "Artificial Intelligence",
       "Data Science",
-      "Architecture"
+      "Architecture",
     ],
 
     entranceExams: [
       "JEE Main",
       "JEE Advanced",
       "AP EAPCET",
-      "TS EAPCET",
+      "TG EAPCET",
       "BITSAT",
       "VITEEE",
-      "SRMJEEE"
+      "SRMJEEE",
     ],
 
     skills: [
@@ -38,7 +38,7 @@ const intermediate = [
       "Problem Solving",
       "Programming Basics",
       "Physics",
-      "Analytical Skills"
+      "Analytical Skills",
     ],
 
     topColleges: [
@@ -46,7 +46,7 @@ const intermediate = [
       "NIT",
       "BITS Pilani",
       "IIIT Hyderabad",
-      "VIT"
+      "VIT",
     ],
 
     certifications: [
@@ -54,7 +54,7 @@ const intermediate = [
       "Java",
       "C++",
       "Data Structures",
-      "Web Development"
+      "Web Development",
     ],
 
     companies: [
@@ -62,7 +62,7 @@ const intermediate = [
       "Microsoft",
       "Amazon",
       "Infosys",
-      "TCS"
+      "TCS",
     ],
 
     careerOpportunities: [
@@ -70,26 +70,26 @@ const intermediate = [
       "AI Engineer",
       "Data Scientist",
       "Civil Engineer",
-      "Mechanical Engineer"
+      "Mechanical Engineer",
     ],
 
     roadmap: [
       "Complete Intermediate",
-      "Prepare for JEE/EAPCET",
+      "Prepare for JEE / EAPCET",
       "Join Engineering",
       "Learn Programming",
-      "Internship",
-      "Get Campus Placement"
+      "Complete Internship",
+      "Get Campus Placement",
     ],
 
     higherStudies: [
       "B.Tech",
       "B.Sc",
       "B.Arch",
-      "Integrated M.Tech"
+      "Integrated M.Tech",
     ],
 
-    futureScope: "Excellent"
+    futureScope: "Excellent",
   },
 
   {
@@ -112,14 +112,13 @@ const intermediate = [
       "BDS",
       "BAMS",
       "Pharmacy",
-      "Biotechnology"
+      "Biotechnology",
     ],
 
     entranceExams: [
-      "NEET",
-      "EAPCET",
-      "AIIMS",
-      "JIPMER"
+      "NEET-UG",
+      "AP EAPCET",
+      "TG EAPCET",
     ],
 
     skills: [
@@ -127,7 +126,7 @@ const intermediate = [
       "Observation",
       "Communication",
       "Patient Care",
-      "Critical Thinking"
+      "Critical Thinking",
     ],
 
     topColleges: [
@@ -135,13 +134,13 @@ const intermediate = [
       "JIPMER",
       "CMC Vellore",
       "NIMS",
-      "Osmania Medical College"
+      "Osmania Medical College",
     ],
 
     certifications: [
       "First Aid",
       "Medical Coding",
-      "Clinical Research"
+      "Clinical Research",
     ],
 
     companies: [
@@ -149,7 +148,7 @@ const intermediate = [
       "Aster",
       "Fortis",
       "Medanta",
-      "Yashoda"
+      "Yashoda",
     ],
 
     careerOpportunities: [
@@ -157,26 +156,26 @@ const intermediate = [
       "Dentist",
       "Pharmacist",
       "Nurse",
-      "Biotechnologist"
+      "Biotechnologist",
     ],
 
     roadmap: [
       "Complete Intermediate",
-      "Prepare NEET",
-      "Join Medical College",
-      "Internship",
-      "PG (Optional)",
-      "Doctor"
+      "Prepare for NEET-UG",
+      "Join Medical / Allied Health Course",
+      "Complete Internship",
+      "Pursue PG if Required",
+      "Start Professional Career",
     ],
 
     higherStudies: [
       "MBBS",
       "BDS",
       "B.Pharm",
-      "B.Sc Nursing"
+      "B.Sc Nursing",
     ],
 
-    futureScope: "Excellent"
+    futureScope: "Excellent",
   },
 
   {
@@ -199,12 +198,12 @@ const intermediate = [
       "BBA",
       "CA",
       "CMA",
-      "Economics"
+      "Economics",
     ],
 
     entranceExams: [
-      "CUET",
-      "CA Foundation"
+      "CUET-UG",
+      "CA Foundation",
     ],
 
     skills: [
@@ -212,51 +211,51 @@ const intermediate = [
       "Business",
       "Finance",
       "Economics",
-      "Communication"
+      "Communication",
     ],
 
     topColleges: [
       "SRCC",
       "Loyola College",
       "Christ University",
-      "NMIMS"
+      "NMIMS",
     ],
 
     certifications: [
       "Tally",
       "Excel",
-      "Financial Modeling"
+      "Financial Modeling",
     ],
 
     companies: [
       "Deloitte",
       "EY",
       "KPMG",
-      "PwC"
+      "PwC",
     ],
 
     careerOpportunities: [
       "Chartered Accountant",
       "Financial Analyst",
       "Bank Officer",
-      "Business Analyst"
+      "Business Analyst",
     ],
 
     roadmap: [
-      "Intermediate",
-      "Degree",
-      "Professional Certification",
-      "Internship",
-      "Placement"
+      "Complete Intermediate",
+      "Join Degree Program",
+      "Pursue Professional Certification",
+      "Complete Internship",
+      "Get Placement",
     ],
 
     higherStudies: [
       "B.Com",
       "BBA",
-      "MBA"
+      "MBA",
     ],
 
-    futureScope: "Very High"
+    futureScope: "Very High",
   },
 
   {
@@ -278,12 +277,12 @@ const intermediate = [
       "Law",
       "B.Com",
       "BBA",
-      "Public Administration"
+      "Public Administration",
     ],
 
     entranceExams: [
       "CLAT",
-      "CUET"
+      "CUET-UG",
     ],
 
     skills: [
@@ -291,47 +290,48 @@ const intermediate = [
       "Leadership",
       "Economics",
       "Commerce",
-      "Public Administration"
+      "Public Administration",
     ],
 
     topColleges: [
       "NLSIU",
       "NLU Delhi",
-      "Symbiosis Law School"
+      "Symbiosis Law School",
     ],
 
     certifications: [
       "MS Office",
-      "Legal Research"
+      "Legal Research",
     ],
 
     companies: [
       "Banks",
       "Law Firms",
-      "Government Departments"
+      "Government Departments",
     ],
 
     careerOpportunities: [
       "Lawyer",
       "Bank Officer",
       "Civil Servant",
-      "Business Executive"
+      "Business Executive",
     ],
 
     roadmap: [
-      "Intermediate",
-      "Degree",
-      "Law/MBA",
-      "Placement"
+      "Complete Intermediate",
+      "Join Degree Program",
+      "Pursue Law / MBA",
+      "Complete Internship",
+      "Get Placement / Prepare for Competitive Exams",
     ],
 
     higherStudies: [
       "LLB",
       "MBA",
-      "M.Com"
+      "M.Com",
     ],
 
-    futureScope: "High"
+    futureScope: "High",
   },
 
   {
@@ -347,18 +347,17 @@ const intermediate = [
     rating: 4.5,
 
     description:
-      "HEC is ideal for Civil Services, Teaching, Journalism and Social Sciences.",
+      "HEC is ideal for Civil Services, Teaching, Journalism, Public Administration and Social Sciences.",
 
     streams: [
       "BA",
       "Journalism",
       "Political Science",
-      "History"
+      "History",
     ],
 
     entranceExams: [
-      "CUET",
-      "UPSC"
+      "CUET-UG",
     ],
 
     skills: [
@@ -366,48 +365,49 @@ const intermediate = [
       "Research",
       "Communication",
       "History",
-      "Public Speaking"
+      "Public Speaking",
     ],
 
     topColleges: [
       "Delhi University",
       "JNU",
-      "Osmania University"
+      "Osmania University",
     ],
 
     certifications: [
       "Content Writing",
-      "Digital Marketing"
+      "Digital Marketing",
     ],
 
     companies: [
       "Media",
       "Government",
-      "NGOs"
+      "NGOs",
     ],
 
     careerOpportunities: [
       "IAS",
       "Teacher",
       "Journalist",
-      "Content Writer"
+      "Content Writer",
     ],
 
     roadmap: [
-      "Intermediate",
-      "Degree",
-      "Competitive Exams",
-      "Career"
+      "Complete Intermediate",
+      "Join Degree Program",
+      "Prepare for Competitive Exams",
+      "Complete Internship",
+      "Start Career",
     ],
 
     higherStudies: [
       "MA",
       "MBA",
-      "LLB"
+      "LLB",
     ],
 
-    futureScope: "Good"
-  }
+    futureScope: "Good",
+  },
 ];
 
 export default intermediate;

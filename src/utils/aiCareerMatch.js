@@ -1,122 +1,282 @@
 import {
-  // normalizeSkill,
-  skillsMatch,
-  getMatchedSkills,
-  getMissingSkills,
+skillsMatch,
+getMatchedSkills,
+getMissingSkills,
 } from "./skillEngine";
 
 /* ==================================================
-   TEXT NORMALIZATION
+TEXT NORMALIZATION
 ================================================== */
 
 function normalizeText(value) {
-  if (typeof value !== "string") {
-    return "";
-  }
+if (typeof value !== "string") {
+return "";
+}
 
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, " ");
+return value
+.toLowerCase()
+.trim()
+.replace(/\s+/g, " ");
 }
 
 /* ==================================================
-   CAREER NAME MATCHING
+SPECIALIZATION → CAREER MATCH MAP
 ================================================== */
 
-function careerNameMatches(dreamCareer, careerName) {
-  const dream = normalizeText(dreamCareer);
-  const name = normalizeText(careerName);
+const specializationCareerMap = {
+CSE: {
+"software-engineer": 15,
+"full-stack-developer": 14,
+"backend-developer": 14,
+"frontend-developer": 13,
+"qa-engineer": 10,
+"mobile-app-developer": 9,
+"cloud-engineer": 9,
+"devops-engineer": 9,
+},
 
-  if (!dream || !name) {
-    return false;
-  }
+"AI & ML": {
+  "ai-engineer": 15,
+  "machine-learning-engineer": 15,
+  "data-scientist": 14,
+  "software-engineer": 8,
+  "backend-developer": 6,
+},
 
-  /* --------------------------------------------------
-     Exact / Partial Match
-  -------------------------------------------------- */
+"Data Science": {
+"data-scientist": 15,
+"data-analyst": 14,
+"business-analyst": 11,
+"ai-engineer": 10,
+},
 
-  if (
-    name.includes(dream) ||
-    dream.includes(name)
-  ) {
-    return true;
-  }
+"Cyber Security": {
+"cyber-security-engineer": 15,
+"security-analyst": 14,
+"soc-analyst": 14,
+"ethical-hacker": 13,
+"penetration-tester": 12,
+"cloud-engineer": 8,
+"devops-engineer": 8,
+},
 
-  /* --------------------------------------------------
-     Related Career Groups
-  -------------------------------------------------- */
+IT: {
+"software-engineer": 15,
+"full-stack-developer": 14,
+"backend-developer": 14,
+"frontend-developer": 13,
+"cloud-engineer": 11,
+"devops-engineer": 11,
+"qa-engineer": 9,
+},
 
-  const groups = [
-    [
-      "developer",
-      "engineer",
-      "programmer",
-    ],
+ECE: {
+"embedded-engineer": 15,
+"vlsi-engineer": 15,
+"iot-engineer": 13,
+"electronics-engineer": 13,
+"hardware-engineer": 12,
+"network-engineer": 9,
+},
 
-    [
-      "software",
-      "developer",
-      "programming",
-    ],
+EEE: {
+"electrical-engineer": 15,
+"power-systems-engineer": 14,
+"electrical-design-engineer": 14,
+"control-systems-engineer": 13,
+"maintenance-engineer": 11,
+},
 
-    [
-      "ai",
-      "artificial intelligence",
-      "machine learning",
-    ],
+Mechanical: {
+"mechanical-engineer": 15,
+"automobile-engineer": 14,
+"production-engineer": 14,
+"design-engineer": 13,
+"manufacturing-engineer": 13,
+},
 
-    [
-      "data",
-      "data science",
-      "data scientist",
-      "analytics",
-    ],
+Civil: {
+"civil-engineer": 15,
+"structural-engineer": 14,
+"construction-engineer": 14,
+"site-engineer": 13,
+"quantity-surveyor": 11,
+},
 
-    [
-      "frontend",
-      "front end",
-      "ui developer",
-    ],
+BCA: {
+"software-engineer": 13,
+"full-stack-developer": 13,
+"frontend-developer": 12,
+"backend-developer": 12,
+"qa-engineer": 9,
+"mobile-app-developer": 8,
+"data-analyst": 12,
+},
 
-    [
-      "backend",
-      "back end",
-      "server",
-    ],
+"B.Sc": {
+"data-scientist": 13,
+"data-analyst": 14,
+"software-engineer": 9,
+"business-analyst": 10,
+"research-analyst": 11,
+},
 
-    [
-      "full stack",
-      "full-stack",
-      "web developer",
-    ],
+"B.Com": {
+accountant: 14,
+"financial-analyst": 15,
+"business-analyst": 13,
+"bank-officer": 11,
+"chartered-accountant": 15,
+"tax-consultant": 12,
+},
 
-    [
-      "cyber security",
-      "cybersecurity",
-      "security",
-    ],
-  ];
+BBA: {
+"business-analyst": 14,
+"marketing-manager": 13,
+"hr-manager": 13,
+"business-executive": 11,
+"operations-manager": 13,
+entrepreneur: 10,
+},
 
-  return groups.some((group) => {
-    const dreamMatches = group.some((word) =>
-      dream.includes(word)
-    );
+BA: {
+"government-officer": 13,
+lawyer: 13,
+journalist: 13,
+teacher: 13,
+"content-writer": 12,
+"social-worker": 10,
+},
+};
 
-    const careerMatches = group.some((word) =>
-      name.includes(word)
-    );
+/* ==================================================
+DREAM CAREER ALIASES
+================================================== */
 
-    return dreamMatches && careerMatches;
-  });
+const dreamCareerAliases = {
+"data scientist": [
+"data scientist",
+"data science",
+],
+
+"data analyst": [
+"data analyst",
+"data analytics",
+"data analysis",
+],
+
+"business analyst": [
+"business analyst",
+"business analysis",
+],
+
+"ai engineer": [
+"ai engineer",
+"artificial intelligence engineer",
+"machine learning engineer",
+],
+
+"machine learning engineer": [
+"machine learning engineer",
+"ml engineer",
+],
+
+"software engineer": [
+"software engineer",
+"software developer",
+"software programmer",
+],
+
+"frontend developer": [
+"frontend developer",
+"front end developer",
+"ui developer",
+],
+
+"backend developer": [
+"backend developer",
+"back end developer",
+"server developer",
+],
+
+"full stack developer": [
+"full stack developer",
+"full-stack developer",
+"fullstack developer",
+"web developer",
+],
+
+"cloud engineer": [
+"cloud engineer",
+"cloud developer",
+],
+
+"devops engineer": [
+"devops engineer",
+"devops developer",
+],
+
+"cyber security engineer": [
+"cyber security engineer",
+"cybersecurity engineer",
+"security engineer",
+],
+
+"ethical hacker": [
+"ethical hacker",
+"penetration tester",
+"pen tester",
+],
+
+"soc analyst": [
+"soc analyst",
+"security operations analyst",
+],
+};
+
+/* ==================================================
+CAREER NAME MATCHING
+================================================== */
+
+function careerNameMatches(
+dreamCareer,
+careerName
+) {
+const dream = normalizeText(dreamCareer);
+const name = normalizeText(careerName);
+
+if (!dream || !name) {
+return false;
+}
+
+if (dream === name) {
+return true;
+}
+
+if (
+name.includes(dream) ||
+dream.includes(name)
+) {
+return true;
+}
+
+const dreamAliases =
+dreamCareerAliases[dream] || [dream];
+
+return dreamAliases.some(
+(alias) =>
+name === alias ||
+name.includes(alias) ||
+alias.includes(name)
+);
 }
 
 /* ==================================================
-   INTEREST MAP
+INTEREST MAP
 ================================================== */
 
 const interestMap = {
-  Technology: [
+  technology: [
     "java",
     "python",
     "react",
@@ -130,299 +290,637 @@ const interestMap = {
     "web",
   ],
 
-  Medical: [
+  data: [
+    "excel",
+    "sql",
+    "python",
+    "pandas",
+    "power bi",
+    "tableau",
+    "statistics",
+    "data analysis",
+  ],
+
+  "artificial-intelligence": [
+    "python",
+    "machine learning",
+    "deep learning",
+    "tensorflow",
+    "pytorch",
+    "statistics",
+    "ai",
+  ],
+
+  business: [
+    "management",
+    "marketing",
+    "finance",
+    "leadership",
+    "business",
+  ],
+
+  finance: [
+    "accounting",
+    "finance",
+    "taxation",
+    "auditing",
+    "financial analysis",
+    "excel",
+  ],
+
+  healthcare: [
     "biology",
     "chemistry",
     "patient care",
     "medicine",
   ],
 
-  Business: [
-    "management",
-    "marketing",
-    "finance",
-    "leadership",
-  ],
-
-  Arts: [
+  design: [
     "design",
     "drawing",
     "creativity",
     "writing",
   ],
 
-  "Government Jobs": [
+  government: [
     "reasoning",
     "general knowledge",
     "aptitude",
+    "current affairs",
+  ],
+
+  engineering: [
+    "engineering",
+    "mechanical",
+    "electrical",
+    "electronics",
+    "design",
+    "technical",
+  ],
+
+  research: [
+    "research",
+    "statistics",
+    "analysis",
+    "python",
+    "data analysis",
   ],
 };
 
 /* ==================================================
-   MAIN CAREER MATCH ENGINE
+EDUCATION MATCHING
 ================================================== */
 
-export function calculateCareerMatch(student, career) {
-  /* --------------------------------------------------
-     SAFE FALLBACK
-  -------------------------------------------------- */
+function educationMatches(
+studentEducation,
+careerEligibility
+) {
+if (
+!studentEducation ||
+!careerEligibility
+) {
+return false;
+}
 
-  if (!student || !career) {
-    return {
-      score: 0,
-      matchedSkills: [],
-      missingSkills: [],
-      reasons: [],
-      placementChance: 0,
-      salaryPotential: 0,
-      learningProgress: 0,
-      futureDemand: 0,
-    };
-  }
+const education =
+normalizeText(studentEducation);
 
-  /* --------------------------------------------------
-     SAFE DATA
-  -------------------------------------------------- */
+const eligibility =
+normalizeText(careerEligibility);
 
-  const careerSkills = Array.isArray(career.skills)
-    ? career.skills
-    : [];
+const educationAliases = {
+btech: [
+"b.tech",
+"btech",
+"b.e",
+"engineering",
+],
 
-  const studentSkills = Array.isArray(student.skills)
-    ? student.skills
-    : [];
 
-  let score = 0;
+degree: [
+  "degree",
+  "bca",
+  "b.sc",
+  "b.com",
+  "bba",
+  "ba",
+],
 
-  const matchedSkills = [];
+intermediate: [
+  "intermediate",
+  "12th",
+  "10+2",
+],
 
-  const reasons = [];
+medical: [
+  "medical",
+  "mbbs",
+  "bds",
+],
 
-  /* ==================================================
-     1. DREAM CAREER MATCH
-  ================================================== */
+polytechnic: [
+  "polytechnic",
+  "diploma",
+],
+
+iti: [
+  "iti",
+],
+
+
+};
+
+const aliases =
+educationAliases[education] ||
+[education];
+
+return aliases.some(
+(alias) =>
+eligibility.includes(alias)
+);
+}
+
+/* ==================================================
+INTEREST MATCH CALCULATION
+================================================== */
+
+function calculateInterestMatch(
+interest,
+careerSkills
+) {
+if (
+!interest ||
+!Array.isArray(careerSkills) ||
+careerSkills.length === 0
+) {
+return {
+score: 0,
+matchedSkills: [],
+};
+}
+
+const interestAliases = {
+  Technology: "technology",
+  "Data & Analytics": "data",
+  "Data Analytics": "data",
+  "Artificial Intelligence": "artificial-intelligence",
+  Business: "business",
+  Finance: "finance",
+  Healthcare: "healthcare",
+  "Design & Creativity": "design",
+  "Government & Public Service": "government",
+  Engineering: "engineering",
+  Research: "research",
+};
+
+const interestKey =
+  interestAliases[interest] || interest;
+
+const expectedSkills =
+  interestMap[interestKey] || [];
+
+if (!expectedSkills.length) {
+return {
+score: 0,
+matchedSkills: [],
+};
+}
+
+const matchedSkills = [];
+
+expectedSkills.forEach(
+(expectedSkill) => {
+const matchedCareerSkill =
+careerSkills.find(
+(careerSkill) =>
+skillsMatch(
+expectedSkill,
+careerSkill
+)
+);
+
 
   if (
-    student.dreamCareer &&
-    career.name &&
-    careerNameMatches(
-      student.dreamCareer,
-      career.name
+    matchedCareerSkill &&
+    !matchedSkills.includes(
+      matchedCareerSkill
     )
   ) {
-    score += 30;
-
-    reasons.push(
-      `Matches your career goal (${student.dreamCareer})`
+    matchedSkills.push(
+      matchedCareerSkill
     );
   }
+}
 
-  /* ==================================================
-     2. EDUCATION MATCH
-  ================================================== */
 
-  if (
-    student.education &&
-    career.eligibility
-  ) {
-    const education = normalizeText(
-      student.education
-    );
+);
 
-    const eligibility = normalizeText(
-      career.eligibility
-    );
+/*
+Interest is worth a maximum of 15 points.
 
-    if (
-      eligibility.includes(education) ||
-      education.includes(eligibility)
-    ) {
-      score += 20;
+```
+These skills are used ONLY to determine
+how well the career matches the student's
+interest.
 
-      reasons.push(
-        "Suitable for your education"
-      );
-    }
-  }
+They are NOT treated as skills the student
+already knows.
+```
 
-  /* ==================================================
-     3. INTEREST MATCH
-  ================================================== */
+*/
 
-  if (student.interest) {
-    const expectedSkills =
-      interestMap[student.interest] || [];
+const percentage =
+expectedSkills.length > 0
+? matchedSkills.length /
+expectedSkills.length
+: 0;
 
-    expectedSkills.forEach((expectedSkill) => {
-      const matchedCareerSkill =
-        careerSkills.find((careerSkill) =>
-          skillsMatch(
-            expectedSkill,
-            careerSkill
-          )
-        );
+const score = Math.min(
+15,
+Math.round(percentage * 15)
+);
 
-      if (matchedCareerSkill) {
-        score += 4;
+return {
+score,
+matchedSkills,
+};
+}
 
-        if (
-          !matchedSkills.includes(
-            matchedCareerSkill
-          )
-        ) {
-          matchedSkills.push(
-            matchedCareerSkill
-          );
-        }
-      }
-    });
-  }
+/* ==================================================
+MAIN CAREER MATCH ENGINE
+================================================== */
 
-  /* ==================================================
-     4. STUDENT SKILL MATCH
-  ================================================== */
+export function calculateCareerMatch(
+student,
+career
+) {
+/* --------------------------------------------------
+SAFE FALLBACK
+-------------------------------------------------- */
 
-  const matchedCareerSkills =
-    getMatchedSkills(
-      studentSkills,
-      careerSkills
-    );
+if (!student || !career) {
+return {
+score: 0,
+matchedSkills: [],
+missingSkills: [],
+reasons: [],
+placementChance: 0,
+salaryPotential: 0,
+learningProgress: 0,
+futureDemand: 0,
+};
+}
 
-  matchedCareerSkills.forEach((skill) => {
-    if (!matchedSkills.includes(skill)) {
-      matchedSkills.push(skill);
+/* --------------------------------------------------
+SAFE DATA
+-------------------------------------------------- */
 
-      score += 8;
+const careerSkills =
+Array.isArray(career.skills)
+? career.skills
+: [];
 
-      reasons.push(
-        `You already know ${skill}`
-      );
-    }
-  });
+const studentSkills =
+Array.isArray(student.skills)
+? student.skills
+: [];
 
-  /* ==================================================
-     5. CAREER GROWTH
-  ================================================== */
+/* --------------------------------------------------
+SCORE COMPONENTS
 
-  if (career.growth === "Excellent") {
-    score += 8;
-  } else if (career.growth === "Very High") {
-    score += 6;
-  } else if (career.growth === "High") {
-    score += 4;
-  }
+```
+ Maximum:
+ Dream Career     = 25
+ Education        = 20
+ Interest         = 15
+ Skills           = 25
+ Specialization   = 15
 
-  /* ==================================================
-     6. SPECIALIZATION
-  ================================================== */
+ TOTAL             = 100
+```
 
-  if (
-    student.specialization &&
-    career.description
-  ) {
-    const specialization = normalizeText(
-      student.specialization
-    );
+-------------------------------------------------- */
 
-    const description = normalizeText(
-      career.description
-    );
+let score = 0;
 
-    if (
-      specialization &&
-      description.includes(specialization)
-    ) {
-      score += 10;
+const reasons = [];
 
-      reasons.push(
-        `Matches your specialization (${student.specialization})`
-      );
-    }
-  }
+/* ==================================================
+1. DREAM CAREER MATCH — 25 POINTS
+================================================== */
 
-  /* ==================================================
-     7. FINAL MATCH SCORE
-  ================================================== */
+if (
+student.dreamCareer &&
+career.name &&
+careerNameMatches(
+student.dreamCareer,
+career.name
+)
+) {
+score += 25;
 
-  score = Math.min(
-    100,
-    Math.round(score)
-  );
 
-  /* ==================================================
-     8. MISSING SKILLS
-  ================================================== */
+reasons.push(
+  `Matches your career goal (${student.dreamCareer})`
+);
 
-  const missingSkills = getMissingSkills(
-    studentSkills,
+
+}
+
+/* ==================================================
+2. EDUCATION MATCH — 20 POINTS
+================================================== */
+
+if (
+educationMatches(
+student.education,
+career.eligibility
+)
+) {
+score += 20;
+
+reasons.push(
+  "Suitable for your education"
+);
+
+
+}
+
+/* ==================================================
+3. INTEREST MATCH — 15 POINTS
+================================================== */
+
+const interestResult =
+  calculateInterestMatch(
+    student.interestKey || student.interest,
     careerSkills
   );
 
-  /* ==================================================
-     9. LEARNING PROGRESS
-  ================================================== */
+score += interestResult.score;
 
-  const learningProgress =
-    careerSkills.length > 0
-      ? Math.round(
-          (matchedSkills.length /
-            careerSkills.length) *
-            100
-        )
-      : 0;
+/*
+IMPORTANT:
+Interest-matched skills are NOT added
+to matchedSkills.
 
-  /* ==================================================
-     10. PLACEMENT CHANCE
-  ================================================== */
+```
+They only contribute to the interest
+score because interest does not mean
+the student has already learned those
+skills.
+```
 
-  const placementChance = Math.min(
-    100,
-    Math.round(
-      score * 0.7 +
-      learningProgress * 0.3
-    )
+*/
+
+if (
+interestResult.score > 0
+) {
+reasons.push(
+`Matches your interest (${student.interest})`
+);
+}
+
+/* ==================================================
+4. STUDENT SKILL MATCH — 25 POINTS
+================================================== */
+
+/*
+These are the ONLY skills that should
+appear as "Matched Skills".
+
+```
+They come directly from the student's
+actual skills and are compared against
+the career's required skills.
+```
+
+*/
+
+const matchedCareerSkills =
+getMatchedSkills(
+studentSkills,
+careerSkills
+);
+
+/*
+Skill score is based on the actual
+percentage of career skills the
+student already has.
+
+```
+Maximum = 25 points.
+```
+
+*/
+
+const skillPercentage =
+careerSkills.length > 0
+? matchedCareerSkills.length /
+careerSkills.length
+: 0;
+
+const skillScore = Math.min(
+25,
+Math.round(
+skillPercentage * 25
+)
+);
+
+score += skillScore;
+
+if (
+matchedCareerSkills.length > 0
+) {
+reasons.push(
+`You already know ${matchedCareerSkills.length} required skill${matchedCareerSkills.length === 1 ? "" : "s"}`
+);
+}
+
+/* ==================================================
+5. SPECIALIZATION MATCH — 15 POINTS
+================================================== */
+
+if (
+student.specialization &&
+career.id
+) {
+const specializationMap =
+specializationCareerMap[
+student.specialization
+];
+
+
+const specializationScore =
+  specializationMap?.[
+    career.id
+  ] || 0;
+
+if (
+  specializationScore > 0
+) {
+  score += Math.min(
+    15,
+    specializationScore
   );
 
-  /* ==================================================
-     11. SALARY POTENTIAL
-  ================================================== */
+  reasons.push(
+    `Strong match for your specialization (${student.specialization})`
+  );
+}
 
-  let salaryPotential = 70;
+}
 
-  if (career.growth === "Excellent") {
-    salaryPotential = 95;
-  } else if (career.growth === "Very High") {
-    salaryPotential = 90;
-  } else if (career.growth === "High") {
-    salaryPotential = 80;
-  }
+/* ==================================================
+6. FINAL MATCH SCORE
+================================================== */
 
-  /* ==================================================
-     12. FUTURE DEMAND
-  ================================================== */
+score = Math.min(
+100,
+Math.round(score)
+);
 
-  let futureDemand = 80;
+/* ==================================================
+7. MISSING SKILLS
+================================================== */
 
-  if (career.growth === "Excellent") {
-    futureDemand = 98;
-  } else if (career.growth === "Very High") {
-    futureDemand = 92;
-  } else if (career.growth === "High") {
-    futureDemand = 86;
-  }
+/*
+Missing skills are calculated from
+the student's ACTUAL skills only.
 
-  /* ==================================================
-     13. RETURN
-  ================================================== */
+```
+Therefore a skill cannot appear in both
+matchedSkills and missingSkills.
+```
 
-  return {
-    score,
-    matchedSkills,
-    missingSkills,
-    reasons,
-    placementChance,
-    salaryPotential,
-    learningProgress,
-    futureDemand,
-  };
+*/
+
+const missingSkills =
+getMissingSkills(
+studentSkills,
+careerSkills
+);
+
+/* ==================================================
+8. LEARNING PROGRESS
+
+```
+ Based ONLY on actual career
+ skills already matched.
+```
+
+================================================== */
+
+const learningProgress =
+careerSkills.length > 0
+? Math.min(
+100,
+Math.round(
+(
+matchedCareerSkills.length /
+careerSkills.length
+) * 100
+)
+)
+: 0;
+
+/* ==================================================
+9. PLACEMENT CHANCE
+================================================== */
+
+const placementChance =
+Math.min(
+100,
+Math.round(
+score * 0.7 +
+learningProgress * 0.3
+)
+);
+
+/* ==================================================
+10. SALARY POTENTIAL
+
+```
+ This represents career potential,
+ NOT student's current salary.
+```
+
+================================================== */
+
+let salaryPotential = 70;
+
+if (
+career.growth === "Excellent"
+) {
+salaryPotential = 95;
+
+} else if (
+career.growth === "Very High"
+) {
+salaryPotential = 90;
+
+} else if (
+career.growth === "High"
+) {
+salaryPotential = 80;
+}
+
+/* ==================================================
+11. FUTURE DEMAND
+================================================== */
+
+let futureDemand = 80;
+
+if (
+career.growth === "Excellent"
+) {
+futureDemand = 98;
+
+} else if (
+career.growth === "Very High"
+) {
+futureDemand = 92;
+
+} else if (
+career.growth === "High"
+) {
+futureDemand = 86;
+}
+
+/* ==================================================
+12. RETURN
+================================================== */
+
+return {
+score,
+
+
+/*
+  IMPORTANT:
+  matchedSkills contains ONLY skills the
+  student actually has.
+*/
+matchedSkills: matchedCareerSkills,
+
+/*
+  missingSkills contains ONLY required
+  career skills the student does not have.
+*/
+missingSkills,
+
+reasons,
+
+placementChance,
+
+salaryPotential,
+
+learningProgress,
+
+futureDemand,
+
+skillPercentage: Math.round(
+  skillPercentage * 100
+),
+
+
+};
 }

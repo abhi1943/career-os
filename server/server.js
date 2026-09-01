@@ -1,27 +1,24 @@
 // ======================================================
 // CareerOS Job Server
 // ======================================================
-//
-// Responsibilities:
-// - Start Express server
-// - Connect Jobs API
-// - Automatically refresh jobs
-// - Remove stale jobs
-// - Track refresh status
-// - Track job freshness
-// - Provide Saved Jobs API
-// - Provide Job Alerts API
-//
-// Automatic refresh:
-// - Runs when server starts
-// - Runs every 6 hours
-// - Removes jobs older than 24 hours
-//
+
+const dotenv = require("dotenv");
+const path = require("path");
+
+// ======================================================
+// ENVIRONMENT
+// ======================================================
+
+dotenv.config({
+    path: path.join(__dirname, ".env"),
+});
+
+// ======================================================
+// DEPENDENCIES
 // ======================================================
 
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 
 // ======================================================
 // ROUTES
@@ -42,29 +39,30 @@ const searchHistoryRoute =
 const applicationsRoute =
     require("./routes/applications");
 
+const notificationRoutes =
+    require("./routes/notifications");
+
+// ======================================================
+// AI MENTOR ROUTE
+// ======================================================
+
+const mentorRoute =
+    require("./routes/mentor");
+
 // ======================================================
 // JOB SERVICES
 // ======================================================
 
 const {
     searchJobs,
+    searchAllJobCategories,
 } = require("./services/adzunaService");
 
 const {
     storeJobs,
-
     removeStaleJobs,
-
-    getStoredJobCount,
-
     getJobStoreStatus,
 } = require("./services/jobService");
-
-// ======================================================
-// ENVIRONMENT
-// ======================================================
-
-dotenv.config();
 
 // ======================================================
 // EXPRESS APP
@@ -74,28 +72,168 @@ const app =
     express();
 
 const PORT =
-    process.env.PORT || 5000;
+    Number(process.env.PORT) || 5000;
+
+// ======================================================
+// SECURITY SETTINGS
+// ======================================================
+
+const JSON_BODY_LIMIT =
+    "1mb";
+
+// ======================================================
+// CORS SETTINGS
+// ======================================================
+
+const configuredOrigins =
+    process.env.FRONTEND_URL ||
+    "http://localhost:5173,http://localhost:4173";
+
+// ======================================================
+// NORMALIZE ORIGIN
+// ======================================================
+
+function normalizeOrigin(origin) {
+    return String(origin || "")
+        .trim()
+        .replace(/\/+$/, "")
+        .toLowerCase();
+}
+
+// ======================================================
+// ALLOWED ORIGINS
+// ======================================================
+
+const allowedOrigins =
+    configuredOrigins
+        .split(",")
+        .map(normalizeOrigin)
+        .filter(Boolean);
+
+// ======================================================
+// CORS CONFIGURATION
+// ======================================================
+//
+// IMPORTANT:
+//
+// Do NOT add:
+//     app.options("*", ...)
+//
+// Express 5 does not accept "*" there.
+//
+// This single CORS middleware handles:
+//
+// GET
+// POST
+// PUT
+// PATCH
+// DELETE
+// OPTIONS
+//
+// and supports:
+//
+// Content-Type
+// Authorization
+// X-User-Id
+//
+// ======================================================
+
+const corsOptions = {
+    origin: (
+        requestOrigin,
+        callback
+    ) => {
+        // Requests without an Origin header
+        // are allowed (PowerShell, Postman, server-to-server, etc.)
+        if (!requestOrigin) {
+            return callback(
+                null,
+                true
+            );
+        }
+
+        const normalizedRequestOrigin =
+            normalizeOrigin(
+                requestOrigin
+            );
+
+        if (
+            allowedOrigins.includes(
+                normalizedRequestOrigin
+            )
+        ) {
+            return callback(
+                null,
+                true
+            );
+        }
+
+        console.warn(
+            `⚠️ CORS blocked origin: ${requestOrigin}`
+        );
+
+        return callback(
+            new Error(
+                "Not allowed by CareerOS CORS policy."
+            )
+        );
+    },
+
+    credentials:
+        true,
+
+    methods: [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+    ],
+
+    allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-User-Id",
+    ],
+
+    optionsSuccessStatus:
+        204,
+};
+
+// ======================================================
+// CORS MIDDLEWARE
+// ======================================================
+
+app.use(
+    cors(
+        corsOptions
+    )
+);
+
+// ======================================================
+// JSON BODY PARSER
+// ======================================================
+
+app.use(
+    express.json({
+        limit:
+            JSON_BODY_LIMIT,
+    })
+);
 
 // ======================================================
 // AUTOMATIC REFRESH SETTINGS
 // ======================================================
 
-// Refresh every 6 hours.
 const JOB_REFRESH_INTERVAL =
     6 * 60 * 60 * 1000;
 
-// Jobs older than 24 hours are considered expired.
 const STALE_JOB_MAX_AGE =
     24 * 60 * 60 * 1000;
 
 // ======================================================
 // DEFAULT JOB SEARCHES
-// ======================================================
-//
-// These searches keep the CareerOS job database
-// automatically populated with different types
-// of technology and data jobs.
-//
 // ======================================================
 
 const DEFAULT_JOB_SEARCHES = [
@@ -108,6 +246,54 @@ const DEFAULT_JOB_SEARCHES = [
     "python developer",
     "data analyst",
 ];
+
+// ======================================================
+// CAREEROS PRELOAD SETTINGS
+// ======================================================
+
+const CAREEROS_PRELOAD_LOCATION =
+    "India";
+
+const CAREEROS_PRELOAD_PAGE =
+    1;
+
+const CAREEROS_PRELOAD_EXPERIENCE =
+    "Any Experience";
+
+const CAREEROS_PRELOAD_JOB_TYPE =
+    "Any Type";
+
+const CAREEROS_PRELOAD_WORK_MODE =
+    "Any";
+
+const CAREEROS_PRELOAD_SALARY =
+    "Any Salary";
+
+// ======================================================
+// PRELOAD STATE
+// ======================================================
+
+const preloadState = {
+    isPreloading: false,
+
+    lastPreloadStartedAt: null,
+
+    lastPreloadCompletedAt: null,
+
+    lastPreloadFailedAt: null,
+
+    lastPreloadFetchedCount: 0,
+
+    lastPreloadStoredCount: 0,
+
+    lastPreloadUpdatedCount: 0,
+
+    lastPreloadSkippedCount: 0,
+
+    lastPreloadError: null,
+
+    lastPreloadTrigger: null,
+};
 
 // ======================================================
 // REFRESH STATE
@@ -139,7 +325,9 @@ const refreshState = {
 // DELAY HELPER
 // ======================================================
 
-function delay(milliseconds) {
+function delay(
+    milliseconds
+) {
     return new Promise(
         (resolve) => {
             setTimeout(
@@ -151,28 +339,176 @@ function delay(milliseconds) {
 }
 
 // ======================================================
+// CAREEROS CATEGORY PRELOAD
+// ======================================================
+
+async function preloadCareerOSJobs(
+    trigger = "unknown"
+) {
+    if (
+        preloadState.isPreloading
+    ) {
+        return {
+            started: false,
+            alreadyRunning: true,
+        };
+    }
+
+    preloadState.isPreloading =
+        true;
+
+    preloadState.lastPreloadStartedAt =
+        new Date().toISOString();
+
+    preloadState.lastPreloadCompletedAt =
+        null;
+
+    preloadState.lastPreloadFailedAt =
+        null;
+
+    preloadState.lastPreloadFetchedCount =
+        0;
+
+    preloadState.lastPreloadStoredCount =
+        0;
+
+    preloadState.lastPreloadUpdatedCount =
+        0;
+
+    preloadState.lastPreloadSkippedCount =
+        0;
+
+    preloadState.lastPreloadError =
+        null;
+
+    preloadState.lastPreloadTrigger =
+        trigger;
+
+    try {
+        // Remove expired jobs before loading fresh jobs.
+        removeStaleJobs(
+            STALE_JOB_MAX_AGE
+        );
+
+        const data =
+            await searchAllJobCategories({
+                location:
+                    CAREEROS_PRELOAD_LOCATION,
+
+                page:
+                    CAREEROS_PRELOAD_PAGE,
+
+                experience:
+                    CAREEROS_PRELOAD_EXPERIENCE,
+
+                jobType:
+                    CAREEROS_PRELOAD_JOB_TYPE,
+
+                workMode:
+                    CAREEROS_PRELOAD_WORK_MODE,
+
+                salary:
+                    CAREEROS_PRELOAD_SALARY,
+            });
+
+        const jobs =
+            Array.isArray(
+                data?.results
+            )
+                ? data.results
+                : [];
+
+        preloadState.lastPreloadFetchedCount =
+            jobs.length;
+
+        if (
+            jobs.length > 0
+        ) {
+            const storeResult =
+                storeJobs(
+                    jobs
+                );
+
+            preloadState.lastPreloadStoredCount =
+                Number(
+                    storeResult?.stored ||
+                    0
+                );
+
+            preloadState.lastPreloadUpdatedCount =
+                Number(
+                    storeResult?.updated ||
+                    0
+                );
+
+            preloadState.lastPreloadSkippedCount =
+                Number(
+                    storeResult?.skipped ||
+                    0
+                );
+        }
+
+        preloadState.lastPreloadCompletedAt =
+            new Date().toISOString();
+
+        return {
+            started: true,
+
+            completed: true,
+
+            jobsFetched:
+                preloadState
+                    .lastPreloadFetchedCount,
+
+            jobsStored:
+                preloadState
+                    .lastPreloadStoredCount,
+
+            jobsUpdated:
+                preloadState
+                    .lastPreloadUpdatedCount,
+        };
+    } catch (error) {
+        preloadState.lastPreloadFailedAt =
+            new Date().toISOString();
+
+        preloadState.lastPreloadError =
+            error?.message ||
+            "Unknown preload error";
+
+        console.error(
+            "❌ CareerOS category preload failed:",
+            error
+                ?.response
+                ?.data ||
+                error?.message
+        );
+
+        return {
+            started: true,
+
+            completed: false,
+
+            error:
+                error?.message ||
+                "Unknown error",
+        };
+    } finally {
+        preloadState.isPreloading =
+            false;
+    }
+}
+
+// ======================================================
 // AUTOMATIC JOB REFRESH
 // ======================================================
 
 async function refreshJobs() {
-
-    // --------------------------------------------------
-    // PREVENT DUPLICATE REFRESH
-    // --------------------------------------------------
-
     if (
         refreshState.isRefreshing
     ) {
-        console.log(
-            "⏳ Job refresh already running. Skipping this refresh."
-        );
-
         return;
     }
-
-    // --------------------------------------------------
-    // START REFRESH
-    // --------------------------------------------------
 
     refreshState.isRefreshing =
         true;
@@ -204,59 +540,22 @@ async function refreshJobs() {
     refreshState.lastRefreshError =
         null;
 
-    console.log("");
-
-    console.log(
-        "======================================================"
-    );
-
-    console.log(
-        "🔄 CareerOS automatic job refresh started"
-    );
-
-    console.log(
-        "======================================================"
-    );
-
     try {
-
-        // ==================================================
-        // REMOVE EXPIRED JOBS
-        // ==================================================
-
-        console.log(
-            "🧹 Removing expired jobs..."
-        );
-
-        const removedCount =
+        // Remove expired jobs before refresh.
+        const removedBeforeRefresh =
             removeStaleJobs(
                 STALE_JOB_MAX_AGE
             );
 
         refreshState.lastRefreshRemovedCount =
             Number(
-                removedCount || 0
+                removedBeforeRefresh || 0
             );
 
-        console.log(
-            `🧹 Removed ${refreshState.lastRefreshRemovedCount} expired job(s).`
-        );
-
-        // ==================================================
-        // FETCH JOBS
-        // ==================================================
-
         let totalFetched = 0;
-
         let totalStored = 0;
-
         let totalUpdated = 0;
-
         let totalSkipped = 0;
-
-        // --------------------------------------------------
-        // RUN DEFAULT SEARCHES
-        // --------------------------------------------------
 
         for (
             let index = 0;
@@ -264,18 +563,12 @@ async function refreshJobs() {
             DEFAULT_JOB_SEARCHES.length;
             index++
         ) {
-
             const query =
                 DEFAULT_JOB_SEARCHES[
                     index
                 ];
 
             try {
-
-                console.log(
-                    `🔎 Searching jobs: ${query}`
-                );
-
                 const data =
                     await searchJobs({
                         query,
@@ -305,10 +598,6 @@ async function refreshJobs() {
                         ? data.results
                         : [];
 
-                // --------------------------------------------------
-                // STORE JOBS
-                // --------------------------------------------------
-
                 const storeResult =
                     storeJobs(
                         jobs
@@ -335,27 +624,6 @@ async function refreshJobs() {
                         0
                     );
 
-                console.log(
-                    `   ✅ ${jobs.length} job(s) received`
-                );
-
-                console.log(
-                    `   📦 Stored: ${
-                        storeResult?.stored ||
-                        0
-                    } | Updated: ${
-                        storeResult?.updated ||
-                        0
-                    } | Skipped: ${
-                        storeResult?.skipped ||
-                        0
-                    }`
-                );
-
-                // --------------------------------------------------
-                // DELAY BEFORE NEXT SEARCH
-                // --------------------------------------------------
-
                 if (
                     index <
                     DEFAULT_JOB_SEARCHES.length -
@@ -365,19 +633,11 @@ async function refreshJobs() {
                         1000
                     );
                 }
-
             } catch (
                 searchError
             ) {
-
-                // --------------------------------------------------
-                // ONE SEARCH FAILURE SHOULD NOT STOP
-                // THE ENTIRE REFRESH
-                // --------------------------------------------------
-
                 console.error(
-                    `❌ Failed search "${query}":`,
-
+                    `❌ Failed job search "${query}":`,
                     searchError
                         ?.response
                         ?.data ||
@@ -385,11 +645,6 @@ async function refreshJobs() {
                 );
             }
         }
-
-        // ==================================================
-        // REMOVE ANY JOBS THAT BECAME EXPIRED
-        // DURING THE REFRESH
-        // ==================================================
 
         const removedAfterRefresh =
             removeStaleJobs(
@@ -400,10 +655,6 @@ async function refreshJobs() {
             Number(
                 removedAfterRefresh || 0
             );
-
-        // ==================================================
-        // SAVE REFRESH STATISTICS
-        // ==================================================
 
         refreshState.lastRefreshFetchedCount =
             totalFetched;
@@ -419,68 +670,7 @@ async function refreshJobs() {
 
         refreshState.lastRefreshCompletedAt =
             new Date().toISOString();
-
-        // ==================================================
-        // GET CURRENT FRESH STORE STATUS
-        // ==================================================
-
-        const storeStatus =
-            getJobStoreStatus();
-
-        // ==================================================
-        // REFRESH COMPLETED
-        // ==================================================
-
-        console.log("");
-
-        console.log(
-            "======================================================"
-        );
-
-        console.log(
-            "✅ CareerOS automatic job refresh completed"
-        );
-
-        console.log(
-            `📥 Jobs fetched: ${totalFetched}`
-        );
-
-        console.log(
-            `📦 New jobs stored: ${totalStored}`
-        );
-
-        console.log(
-            `🔄 Existing jobs updated: ${totalUpdated}`
-        );
-
-        console.log(
-            `⚠️ Jobs skipped: ${totalSkipped}`
-        );
-
-        console.log(
-            `🧹 Expired jobs removed: ${refreshState.lastRefreshRemovedCount}`
-        );
-
-        console.log(
-            `🟢 Fresh jobs available: ${storeStatus.freshJobs}`
-        );
-
-        console.log(
-            `📦 Jobs currently stored: ${getStoredJobCount()}`
-        );
-
-        console.log(
-            "======================================================"
-        );
-
-        console.log("");
-
     } catch (error) {
-
-        // ==================================================
-        // REFRESH FAILURE
-        // ==================================================
-
         refreshState.lastRefreshFailedAt =
             new Date().toISOString();
 
@@ -490,110 +680,224 @@ async function refreshJobs() {
 
         console.error(
             "❌ CareerOS automatic job refresh failed:",
-
             error
                 ?.response
                 ?.data ||
                 error?.message
         );
-
     } finally {
-
-        // ==================================================
-        // RELEASE REFRESH LOCK
-        // ==================================================
-
         refreshState.isRefreshing =
             false;
     }
 }
 
 // ======================================================
-// MIDDLEWARE
-// ======================================================
-
-// // Frontend URL
-// const FRONTEND_URL =
-//     process.env.FRONTEND_URL ||
-//     "http://localhost:5174";
-
-// Allow requests from the CareerOS frontend.
-// ======================================================
-// CORS
-// ======================================================
-
-const allowedOrigin =
-    process.env.FRONTEND_URL ||
-    "http://localhost:5173";
-
-app.use(
-    cors({
-        origin: allowedOrigin,
-        credentials: true,
-    })
-);
-
-// ======================================================
-// JSON BODY PARSER
-// ======================================================
-
-app.use(
-    express.json()
-);
-// ======================================================
-// HOME ROUTE
+// HEALTH CHECK
 // ======================================================
 
 app.get(
     "/",
     (req, res) => {
-        res.json({
+        res.status(200).json({
             success: true,
 
             message:
                 "CareerOS Job Server is running 🚀",
+
+            serverTime:
+                new Date().toISOString(),
+
+            environment:
+                process.env.NODE_ENV ||
+                "development",
         });
+    }
+);
+
+// ======================================================
+// CAREEROS PRELOAD API
+// ======================================================
+
+app.post(
+    "/api/jobs/preload",
+    (req, res) => {
+        try {
+            const storeStatus =
+                getJobStoreStatus();
+
+            if (
+                preloadState.isPreloading
+            ) {
+                return res.json({
+                    success: true,
+
+                    started: false,
+
+                    alreadyRunning:
+                        true,
+
+                    message:
+                        "CareerOS job preload is already running.",
+
+                    preload: {
+                        isPreloading:
+                            true,
+
+                        startedAt:
+                            preloadState
+                                .lastPreloadStartedAt,
+                    },
+
+                    store:
+                        storeStatus,
+                });
+            }
+
+            preloadCareerOSJobs(
+                "user-login"
+            ).catch(
+                (error) => {
+                    console.error(
+                        "❌ Background CareerOS preload error:",
+                        error?.message ||
+                            error
+                    );
+                }
+            );
+
+            return res.json({
+                success: true,
+
+                started: true,
+
+                background: true,
+
+                message:
+                    "CareerOS job preload started in the background.",
+
+                store:
+                    storeStatus,
+            });
+        } catch (error) {
+            console.error(
+                "❌ CareerOS preload endpoint error:",
+                error?.message ||
+                    error
+            );
+
+            return res
+                .status(500)
+                .json({
+                    success: false,
+
+                    message:
+                        "Failed to start CareerOS job preload.",
+
+                    error:
+                        error?.message ||
+                        "Unknown error",
+                });
+        }
+    }
+);
+
+// ======================================================
+// PRELOAD STATUS API
+// ======================================================
+
+app.get(
+    "/api/jobs/preload-status",
+    (req, res) => {
+        try {
+            const storeStatus =
+                getJobStoreStatus();
+
+            return res.json({
+                success: true,
+
+                preload: {
+                    isPreloading:
+                        preloadState
+                            .isPreloading,
+
+                    lastPreloadStartedAt:
+                        preloadState
+                            .lastPreloadStartedAt,
+
+                    lastPreloadCompletedAt:
+                        preloadState
+                            .lastPreloadCompletedAt,
+
+                    lastPreloadFailedAt:
+                        preloadState
+                            .lastPreloadFailedAt,
+
+                    lastPreloadFetchedCount:
+                        preloadState
+                            .lastPreloadFetchedCount,
+
+                    lastPreloadStoredCount:
+                        preloadState
+                            .lastPreloadStoredCount,
+
+                    lastPreloadUpdatedCount:
+                        preloadState
+                            .lastPreloadUpdatedCount,
+
+                    lastPreloadSkippedCount:
+                        preloadState
+                            .lastPreloadSkippedCount,
+
+                    lastPreloadError:
+                        preloadState
+                            .lastPreloadError,
+
+                    lastPreloadTrigger:
+                        preloadState
+                            .lastPreloadTrigger,
+                },
+
+                store:
+                    storeStatus,
+
+                serverTime:
+                    new Date().toISOString(),
+            });
+        } catch (error) {
+            console.error(
+                "Preload Status Error:",
+                error.message
+            );
+
+            return res
+                .status(500)
+                .json({
+                    success: false,
+
+                    message:
+                        "Failed to get preload status",
+
+                    error:
+                        error.message,
+                });
+        }
     }
 );
 
 // ======================================================
 // REFRESH STATUS
 // ======================================================
-//
-// GET /api/jobs/refresh-status
-//
-// Shows:
-// - Is refresh currently running?
-// - Last refresh started
-// - Last refresh completed
-// - Last refresh failed
-// - Jobs fetched
-// - Jobs stored
-// - Jobs updated
-// - Jobs skipped
-// - Jobs expired
-// - Current freshness status
-// - Next refresh countdown
-//
-// ======================================================
 
 app.get(
     "/api/jobs/refresh-status",
     (req, res) => {
-
         try {
-
-            // --------------------------------------------------
-            // CALCULATE NEXT REFRESH
-            // --------------------------------------------------
-
             let nextRefreshIn =
                 null;
 
             if (
                 refreshState.lastRefreshStartedAt
             ) {
-
                 const lastStarted =
                     new Date(
                         refreshState
@@ -615,24 +919,13 @@ app.get(
                     );
             }
 
-            // --------------------------------------------------
-            // CURRENT STORE STATUS
-            // --------------------------------------------------
-
             const storeStatus =
                 getJobStoreStatus();
 
-            // --------------------------------------------------
-            // RESPONSE
-            // --------------------------------------------------
-
             res.json({
-
-                success:
-                    true,
+                success: true,
 
                 refresh: {
-
                     isRefreshing:
                         refreshState
                             .isRefreshing,
@@ -701,15 +994,55 @@ app.get(
                               ),
                 },
 
+                preload: {
+                    isPreloading:
+                        preloadState
+                            .isPreloading,
+
+                    lastPreloadStartedAt:
+                        preloadState
+                            .lastPreloadStartedAt,
+
+                    lastPreloadCompletedAt:
+                        preloadState
+                            .lastPreloadCompletedAt,
+
+                    lastPreloadFailedAt:
+                        preloadState
+                            .lastPreloadFailedAt,
+
+                    lastPreloadFetchedCount:
+                        preloadState
+                            .lastPreloadFetchedCount,
+
+                    lastPreloadStoredCount:
+                        preloadState
+                            .lastPreloadStoredCount,
+
+                    lastPreloadUpdatedCount:
+                        preloadState
+                            .lastPreloadUpdatedCount,
+
+                    lastPreloadSkippedCount:
+                        preloadState
+                            .lastPreloadSkippedCount,
+
+                    lastPreloadError:
+                        preloadState
+                            .lastPreloadError,
+
+                    lastPreloadTrigger:
+                        preloadState
+                            .lastPreloadTrigger,
+                },
+
                 store:
                     storeStatus,
 
                 serverTime:
                     new Date().toISOString(),
             });
-
         } catch (error) {
-
             console.error(
                 "Refresh Status Error:",
                 error.message
@@ -718,9 +1051,7 @@ app.get(
             res.status(
                 500
             ).json({
-
-                success:
-                    false,
+                success: false,
 
                 message:
                     "Failed to get refresh status",
@@ -733,15 +1064,74 @@ app.get(
 );
 
 // ======================================================
-// JOBS API
+// MANUAL JOB REFRESH API
 // ======================================================
-//
-// Existing routes:
-//
-// GET /api/jobs
-// GET /api/jobs/:id
-// GET /api/jobs/:id/related
-//
+
+app.post(
+    "/api/jobs/refresh",
+    (req, res) => {
+        try {
+            if (
+                refreshState.isRefreshing
+            ) {
+                return res.json({
+                    success: true,
+
+                    started: false,
+
+                    alreadyRunning:
+                        true,
+
+                    message:
+                        "CareerOS job refresh is already running.",
+                });
+            }
+
+            refreshJobs().catch(
+                (error) => {
+                    console.error(
+                        "❌ Manual job refresh failed:",
+                        error?.message ||
+                            error
+                    );
+                }
+            );
+
+            return res.json({
+                success: true,
+
+                started: true,
+
+                background: true,
+
+                message:
+                    "CareerOS job refresh started in the background.",
+            });
+        } catch (error) {
+            console.error(
+                "❌ Manual refresh endpoint error:",
+                error?.message ||
+                    error
+            );
+
+            return res
+                .status(500)
+                .json({
+                    success: false,
+
+                    message:
+                        "Failed to start job refresh.",
+
+                    error:
+                        error?.message ||
+                        "Unknown error",
+                });
+        }
+    }
+);
+
+// ======================================================
+// JOBS API
 // ======================================================
 
 app.use(
@@ -752,13 +1142,6 @@ app.use(
 // ======================================================
 // SAVED JOBS API
 // ======================================================
-//
-// GET    /api/saved-jobs
-// POST   /api/saved-jobs
-// GET    /api/saved-jobs/:id
-// DELETE /api/saved-jobs/:id
-//
-// ======================================================
 
 app.use(
     "/api/saved-jobs",
@@ -768,19 +1151,6 @@ app.use(
 // ======================================================
 // JOB ALERTS API
 // ======================================================
-//
-// GET    /api/job-alerts
-// POST   /api/job-alerts
-// GET    /api/job-alerts/stats
-// POST   /api/job-alerts/match
-// POST   /api/job-alerts/:id/test
-// GET    /api/job-alerts/:id
-// PUT    /api/job-alerts/:id
-// PATCH  /api/job-alerts/:id/enable
-// PATCH  /api/job-alerts/:id/disable
-// DELETE /api/job-alerts/:id
-//
-// ======================================================
 
 app.use(
     "/api/job-alerts",
@@ -788,15 +1158,16 @@ app.use(
 );
 
 // ======================================================
-// SEARCH HISTORY API
+// NOTIFICATIONS API
 // ======================================================
-//
-// GET    /api/search-history
-// GET    /api/search-history/count
-// GET    /api/search-history/:id
-// DELETE /api/search-history/:id
-// DELETE /api/search-history
-//
+
+app.use(
+    "/api/notifications",
+    notificationRoutes
+);
+
+// ======================================================
+// SEARCH HISTORY API
 // ======================================================
 
 app.use(
@@ -807,34 +1178,31 @@ app.use(
 // ======================================================
 // APPLICATIONS API
 // ======================================================
-//
-// GET    /api/applications
-// GET    /api/applications/count
-// GET    /api/applications/statuses
-// GET    /api/applications/:jobId
-// POST   /api/applications
-// PATCH  /api/applications/:jobId
-// DELETE /api/applications/:jobId
-//
-// ======================================================
 
 app.use(
     "/api/applications",
     applicationsRoute
 );
+
+// ======================================================
+// AI MENTOR API
+// ======================================================
+
+app.use(
+    "/api/ai/mentor",
+    mentorRoute
+);
+
 // ======================================================
 // 404 HANDLER
 // ======================================================
 
 app.use(
     (req, res) => {
-
         res.status(
             404
         ).json({
-
-            success:
-                false,
+            success: false,
 
             message:
                 "CareerOS API route not found.",
@@ -856,7 +1224,6 @@ app.use(
         res,
         next
     ) => {
-
         console.error(
             "CareerOS Server Error:",
             error
@@ -870,18 +1237,56 @@ app.use(
             );
         }
 
-        res.status(
-            error?.status ||
-            500
-        ).json({
+        // --------------------------------------------------
+        // CORS ERROR
+        // --------------------------------------------------
 
-            success:
-                false,
+        if (
+            error?.message ===
+            "Not allowed by CareerOS CORS policy."
+        ) {
+            return res
+                .status(403)
+                .json({
+                    success: false,
 
-            message:
-                error?.message ||
-                "Internal server error.",
-        });
+                    message:
+                        "Request origin is not allowed by CareerOS CORS policy.",
+                });
+        }
+
+        // --------------------------------------------------
+        // BODY TOO LARGE
+        // --------------------------------------------------
+
+        if (
+            error?.type ===
+                "entity.too.large" ||
+            error?.status ===
+                413
+        ) {
+            return res
+                .status(413)
+                .json({
+                    success: false,
+
+                    message:
+                        "Request body is too large. Maximum allowed size is 1 MB.",
+                });
+        }
+
+        return res
+            .status(
+                error?.status ||
+                500
+            )
+            .json({
+                success: false,
+
+                message:
+                    error?.message ||
+                    "Internal server error.",
+            });
     }
 );
 
@@ -889,88 +1294,94 @@ app.use(
 // START SERVER
 // ======================================================
 
-app.listen(
-    PORT,
-    async () => {
+const server =
+    app.listen(
+        PORT,
+        () => {
+            
 
-        console.log("");
+            // Initial background refresh.
+            refreshJobs().catch(
+                (error) => {
+                    console.error(
+                        "❌ Background initial job refresh failed:",
+                        error?.message ||
+                            error
+                    );
+                }
+            );
 
-        console.log(
-            "======================================================"
+            // Scheduled refresh.
+            setInterval(
+                () => {
+                    refreshJobs().catch(
+                        (error) => {
+                            console.error(
+                                "❌ Scheduled job refresh failed:",
+                                error?.message ||
+                                    error
+                            );
+                        }
+                    );
+                },
+                JOB_REFRESH_INTERVAL
+            );
+        }
+    );
+
+// ======================================================
+// GRACEFUL SHUTDOWN
+// ======================================================
+
+function shutdown(
+    signal
+) {
+    console.log(
+        `🛑 ${signal} received. Shutting down CareerOS server...`
+    );
+
+    server.close(
+        () => {
+            
+
+            process.exit(
+                0
+            );
+        }
+    );
+
+    setTimeout(
+        () => {
+            console.error(
+                "⚠️ Forced shutdown after timeout."
+            );
+
+            process.exit(
+                1
+            );
+        },
+        10000
+    ).unref();
+}
+
+// ======================================================
+// PROCESS SIGNALS
+// ======================================================
+
+process.on(
+    "SIGINT",
+    () => {
+        shutdown(
+            "SIGINT"
         );
-
-        console.log(
-            "🚀 CareerOS Job Server"
-        );
-
-        console.log(
-            "======================================================"
-        );
-
-        console.log(
-            `🌐 Server: http://localhost:${PORT}`
-        );
-
-        console.log(
-            `📡 Jobs API: http://localhost:${PORT}/api/jobs`
-        );
-
-        console.log(
-            `📊 Store Status: http://localhost:${PORT}/api/jobs/refresh-status`
-        );
-
-        console.log(
-            `🔄 Refresh Status: http://localhost:${PORT}/api/jobs/refresh-status`
-        );
-
-        console.log(
-            `💾 Saved Jobs: http://localhost:${PORT}/api/saved-jobs`
-        );
-
-        console.log(
-            `🔔 Job Alerts: http://localhost:${PORT}/api/job-alerts`
-        );
-        console.log(
-    `📝 Applications: http://localhost:${PORT}/api/applications`
+    }
 );
 
-        console.log(
-            `⏰ Automatic Refresh: Every 6 hours`
-        );
-
-        console.log(
-            `🧹 Job Expiration: After 24 hours without refresh`
-        );
-
-        console.log(
-            "======================================================"
-        );
-
-        console.log("");
-
-        // ==================================================
-        // INITIAL REFRESH
-        // ==================================================
-        //
-        // Populate the job store immediately when the
-        // backend starts.
-        //
-        // ==================================================
-
-        await refreshJobs();
-
-        // ==================================================
-        // AUTOMATIC REFRESH TIMER
-        // ==================================================
-        //
-        // After the initial refresh, automatically refresh
-        // the jobs every 6 hours.
-        //
-        // ==================================================
-
-        setInterval(
-            refreshJobs,
-            JOB_REFRESH_INTERVAL
+process.on(
+    "SIGTERM",
+    () => {
+        shutdown(
+            "SIGTERM"
         );
     }
 );

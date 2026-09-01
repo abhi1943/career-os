@@ -17,13 +17,9 @@ import useCareerData from "../../hooks/useCareerData";
 import CareerHero from "../../components/careerDetails/CareerHero";
 import CareerSkills from "../../components/careerDetails/CareerSkills";
 import CareerSalary from "../../components/careerDetails/CareerSalary";
-import CareerCourses from "../../components/careerDetails/CareerCourses";
-import CareerProjects from "../../components/careerDetails/CareerProjects";
 import CareerInterview from "../../components/careerDetails/CareerInterview";
-import CareerBooks from "../../components/careerDetails/CareerBooks";
-import CareerYoutube from "../../components/careerDetails/CareerYoutube";
 import CareerTabs from "../../components/careerDetails/tabs/CareerTabs";
-
+import CareerResources from "../../components/careerDetails/CareerResources";
 import CareerCompanies from "../../components/careerDetails/CareerCompanies";
 import CareerFuture from "../../components/careerDetails/CareerFuture";
 import CareerProsCons from "../../components/careerDetails/CareerProsCons";
@@ -36,7 +32,7 @@ import CareerLearningPath from "../../components/careerDetails/CareerLearningPat
 
 import AIRecommendations from "../../components/careerDetails/AIRecommendations";
 import CareerHiringCompanies from "../../components/careerDetails/CareerHiringCompanies";
-import CareerJobs from "../../components/careerDetails/CareerJobs";
+// import CareerJobs from "../../components/careerDetails/CareerJobs";
 
 import CareerAnalytics from "../../components/dashboard/CareerAnalytics";
 
@@ -85,13 +81,6 @@ function CareerDetails() {
     }
   }, [career]);
 
-  /* --------------------------------------------------
-     DEBUG
-  -------------------------------------------------- */
-
-  console.log("Career ID:", careerId);
-  console.log("Career Data:", career);
-  console.log("Student Data:", student);
 
   /* --------------------------------------------------
      CAREER NOT FOUND
@@ -133,8 +122,10 @@ function CareerDetails() {
      COLLEGES / EXAMS
   -------------------------------------------------- */
 
-  const colleges = getColleges(career.id);
-
+  const colleges = getColleges(
+    career.education,
+    career.specialization
+  );
   const exams = getExams(career.id);
 
   /* --------------------------------------------------
@@ -143,13 +134,13 @@ function CareerDetails() {
 
   const resources = career.resources || {};
 
-  const courses = resources.courses || [];
+  // const courses = resources.courses || [];
 
-  const projects = resources.projects || [];
+  // const projects = resources.projects || [];
 
-  const books = resources.books || [];
+  // const books = resources.books || [];
 
-  const youtube = resources.youtube || [];
+  // const youtube = resources.youtube || [];
 
   /* --------------------------------------------------
      SAFE CAREER DATA
@@ -274,8 +265,6 @@ function CareerDetails() {
 
               {active === "Overview" && (
                 <div className="space-y-12">
-
-
                   {/* -----------------------------------------------
                       STREAMS
                   ----------------------------------------------- */}
@@ -398,15 +387,7 @@ function CareerDetails() {
                   )}
 
 
-                  {/* ==================================================
-                      LATEST JOB OPENINGS
-                  ================================================== */}
-
-                  <CareerJobs
-                    careerId={career.id}
-                    careerName={career.name}
-                    student={student}
-                  />
+                  
 
 
                   {/* -----------------------------------------------
@@ -553,35 +534,10 @@ function CareerDetails() {
               ================================================== */}
 
               {active === "Resources" && (
-                <div className="space-y-10">
-
-                  {courses.length > 0 && (
-                    <CareerCourses
-                      courses={courses}
-                    />
-                  )}
-
-                  {projects.length > 0 && (
-                    <CareerProjects
-                      projects={projects}
-                    />
-                  )}
-
-                  {books.length > 0 && (
-                    <CareerBooks
-                      books={books}
-                    />
-                  )}
-
-                  {youtube.length > 0 && (
-                    <CareerYoutube
-                      channels={youtube}
-                    />
-                  )}
-
-                </div>
+                <CareerResources
+                  resources={resources}
+                />
               )}
-
 
               {/* ==================================================
                   SALARY

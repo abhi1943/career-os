@@ -1,6 +1,11 @@
 function CareerPath({ career }) {
 
-  if (!career.careerPath) return null;
+  if (
+    !Array.isArray(career?.careerPath) ||
+    career.careerPath.length === 0
+  ) {
+    return null;
+  }
 
   return (
 

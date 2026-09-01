@@ -1,5 +1,7 @@
 export function normalizeSkill(skill) {
-  if (typeof skill !== "string") return "";
+  if (typeof skill !== "string") {
+    return "";
+  }
 
   return skill
     .toLowerCase()
@@ -9,31 +11,74 @@ export function normalizeSkill(skill) {
 }
 
 const aliases = {
-  javascript: ["js"],
-  js: ["javascript"],
+  javascript: [
+    "javascript",
+    "js",
+  ],
 
-  react: ["reactjs", "react.js"],
+  js: [
+    "javascript",
+    "js",
+  ],
 
-  python: ["python3"],
+  react: [
+    "react",
+    "reactjs",
+    "react js",
+  ],
 
-  sql: ["mysql", "postgresql", "database"],
+  python: [
+    "python",
+    "python3",
+  ],
+
+  sql: [
+    "sql",
+    "mysql",
+    "postgresql",
+    "database",
+  ],
 
   "git github": [
     "git",
     "github",
-    "git & github",
+    "git github",
+    "git git hub",
+  ],
+
+  git: [
+    "git github",
+    "github",
+    "git git hub",
+  ],
+
+  github: [
+    "git github",
+    "git",
+    "git git hub",
   ],
 
   "data structures algorithms": [
     "data structures",
     "algorithms",
     "dsa",
-    "data structures & algorithms",
+    "data structures algorithms",
+    "data structures  algorithms",
+  ],
+
+  machine: [
+    "machine learning",
+    "ml",
   ],
 
   "machine learning": [
     "ml",
     "machine learning",
+  ],
+
+  artificial: [
+    "artificial intelligence",
+    "ai",
   ],
 
   "artificial intelligence": [
@@ -46,7 +91,9 @@ export function skillsMatch(studentSkill, careerSkill) {
   const student = normalizeSkill(studentSkill);
   const career = normalizeSkill(careerSkill);
 
-  if (!student || !career) return false;
+  if (!student || !career) {
+    return false;
+  }
 
   // Exact match
   if (student === career) {
@@ -64,15 +111,22 @@ export function skillsMatch(studentSkill, careerSkill) {
   return false;
 }
 
-export function getMatchedSkills(studentSkills = [], careerSkills = []) {
+export function getMatchedSkills(
+  studentSkills = [],
+  careerSkills = []
+) {
   const matched = [];
 
   careerSkills.forEach((careerSkill) => {
-    const exists = studentSkills.some((studentSkill) =>
-      skillsMatch(studentSkill, careerSkill)
+    const exists = studentSkills.some(
+      (studentSkill) =>
+        skillsMatch(studentSkill, careerSkill)
     );
 
-    if (exists && !matched.includes(careerSkill)) {
+    if (
+      exists &&
+      !matched.includes(careerSkill)
+    ) {
       matched.push(careerSkill);
     }
   });
@@ -80,15 +134,22 @@ export function getMatchedSkills(studentSkills = [], careerSkills = []) {
   return matched;
 }
 
-export function getMissingSkills(studentSkills = [], careerSkills = []) {
+export function getMissingSkills(
+  studentSkills = [],
+  careerSkills = []
+) {
   const missing = [];
 
   careerSkills.forEach((careerSkill) => {
-    const exists = studentSkills.some((studentSkill) =>
-      skillsMatch(studentSkill, careerSkill)
+    const exists = studentSkills.some(
+      (studentSkill) =>
+        skillsMatch(studentSkill, careerSkill)
     );
 
-    if (!exists && !missing.includes(careerSkill)) {
+    if (
+      !exists &&
+      !missing.includes(careerSkill)
+    ) {
       missing.push(careerSkill);
     }
   });
@@ -132,7 +193,8 @@ export function getSkillAnalysis(
     careerSkills.length === 0
       ? 0
       : Math.round(
-          (matched.length / careerSkills.length) * 100
+          (matched.length / careerSkills.length) *
+            100
         );
 
   return {

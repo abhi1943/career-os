@@ -1,4 +1,9 @@
+
 const express = require("express");
+
+const {
+    verifyFirebaseToken,
+} = require("../middleware/firebaseAuth");
 
 const {
     getSearchHistory,
@@ -12,16 +17,27 @@ const router =
     express.Router();
 
 // ======================================================
+// FIREBASE AUTHENTICATION
+// ======================================================
+
+router.use(verifyFirebaseToken);
+
+// ======================================================
 // GET SEARCH HISTORY
 // GET /api/search-history
 // ======================================================
 
 router.get(
     "/",
-    (req, res) => {
+    async (req, res) => {
         try {
+            const uid =
+                req.user.uid;
+
             const history =
-                getSearchHistory();
+                await getSearchHistory(
+                    uid
+                );
 
             res.json({
                 success: true,
@@ -57,10 +73,15 @@ router.get(
 
 router.get(
     "/count",
-    (req, res) => {
+    async (req, res) => {
         try {
+            const uid =
+                req.user.uid;
+
             const count =
-                getSearchHistoryCount();
+                await getSearchHistoryCount(
+                    uid
+                );
 
             res.json({
                 success: true,
@@ -93,7 +114,7 @@ router.get(
 
 router.get(
     "/:id",
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 id,
@@ -110,8 +131,12 @@ router.get(
                     });
             }
 
+            const uid =
+                req.user.uid;
+
             const history =
-                getSearchHistoryById(
+                await getSearchHistoryById(
+                    uid,
                     id
                 );
 
@@ -157,7 +182,7 @@ router.get(
 
 router.delete(
     "/:id",
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 id,
@@ -174,8 +199,12 @@ router.delete(
                     });
             }
 
+            const uid =
+                req.user.uid;
+
             const deleted =
-                deleteSearchHistory(
+                await deleteSearchHistory(
+                    uid,
                     id
                 );
 
@@ -222,10 +251,15 @@ router.delete(
 
 router.delete(
     "/",
-    (req, res) => {
+    async (req, res) => {
         try {
+            const uid =
+                req.user.uid;
+
             const removed =
-                clearSearchHistory();
+                await clearSearchHistory(
+                    uid
+                );
 
             res.json({
                 success: true,
@@ -253,5 +287,9 @@ router.delete(
         }
     }
 );
+
+// ======================================================
+// EXPORT ROUTER
+// ======================================================
 
 module.exports = router;

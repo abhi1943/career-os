@@ -1,20 +1,7 @@
 // ======================================================
 // CareerOS Job Service
 // ======================================================
-//
-// Responsibilities:
-// - Store jobs in memory
-// - Normalize jobs
-// - Prevent duplicates
-// - Track first/last seen times
-// - Track job freshness
-// - Track job expiration
-// - Remove expired jobs
-// - Find jobs by ID
-// - Generate related jobs
-// - Provide store status
-//
-// ======================================================
+
 
 // ======================================================
 // JOB STORE

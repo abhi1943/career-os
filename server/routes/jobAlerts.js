@@ -1,52 +1,12 @@
 // ======================================================
 // CareerOS Job Alerts Routes
 // ======================================================
-//
-// STEP 19 — SAVED JOB ALERTS
-// STEP 19.7A — USER-SPECIFIC JOB ALERTS
-// STEP 20.5 — MYSQL ASYNC ROUTES
-//
-// Base URL:
-// /api/job-alerts
-//
-// Responsibilities:
-// - Create saved job alerts
-// - Get all saved job alerts for a user
-// - Get active alerts for a user
-// - Get one alert for a user
-// - Update alerts for a user
-// - Delete alerts for a user
-// - Enable / disable alerts
-// - Activate / deactivate alerts
-// - Test alert against a job
-// - Find alerts matching a job
-// - Record alert matches
-// - Get alert statistics
-//
-// IMPORTANT:
-// The current CareerOS backend does not yet have a full
-// authentication middleware connected to this route.
-//
-// For now, the user ID is supplied through:
-//
-//     x-user-id
-//
-// Example:
-//
-//     x-user-id: user_123
-//
-// This keeps userId out of the request body and allows
-// the route to be connected to real authentication later.
-//
-// IMPORTANT — STEP 20:
-// Job alert service functions now use MySQL and therefore
-// return Promises.
-//
-// All database/service calls below use async/await.
-//
-// ======================================================
 
 const express = require("express");
+
+const {
+    verifyFirebaseToken,
+} = require("../middleware/firebaseAuth");
 
 const {
     createJobAlert,
@@ -75,115 +35,149 @@ const {
 const router = express.Router();
 
 // ======================================================
-// GET USER ID
+// FIREBASE AUTHENTICATION
 // ======================================================
 //
-// Current temporary user identification.
-//
-// Later this can be replaced by real authentication
-// middleware, for example:
-//
-// req.user.id
-//
+// Client-provided user IDs are NOT accepted.
+// All user ownership comes from req.user.uid.
 // ======================================================
 
-function getUserId(req) {
-    return String(
-        req.headers["x-user-id"] || ""
-    ).trim();
-}
+router.use(
+    verifyFirebaseToken
+);
 
 // ======================================================
-// REQUIRE USER ID
+// JOB ALERT ID VALIDATION
 // ======================================================
 //
-// Returns the userId when available.
+// Validates IDs before they reach service/database
+// operations.
 //
-// Sends 401 response when userId is missing.
+// Allowed format:
+// - Letters
+// - Numbers
+// - Underscores
+// - Hyphens
 //
+// Maximum length: 128 characters.
+//
+// This protects all /:id routes consistently.
 // ======================================================
 
-function requireUserId(req, res) {
-    const userId = getUserId(req);
+function validateJobAlertId(
+    req,
+    res,
+    next
+) {
+    const id =
+        req.params.id;
 
-    if (!userId) {
-        res.status(401).json({
+    if (
+        typeof id !== "string"
+    ) {
+        return res.status(400).json({
             success: false,
-            message: "User ID is required.",
-        });
 
-        return null;
+            message:
+                "Invalid job alert ID.",
+        });
     }
 
-    return userId;
+    const normalizedId =
+        id.trim();
+
+    if (
+        !normalizedId
+    ) {
+        return res.status(400).json({
+            success: false,
+
+            message:
+                "Job alert ID is required.",
+        });
+    }
+
+    if (
+        normalizedId.length > 128
+    ) {
+        return res.status(400).json({
+            success: false,
+
+            message:
+                "Job alert ID is too long.",
+        });
+    }
+
+    if (
+        !/^[A-Za-z0-9_-]+$/.test(
+            normalizedId
+        )
+    ) {
+        return res.status(400).json({
+            success: false,
+
+            message:
+                "Invalid job alert ID format.",
+        });
+    }
+
+    req.params.id =
+        normalizedId;
+
+    next();
 }
 
 // ======================================================
 // GET ALL JOB ALERTS
-// ======================================================
-//
 // GET /api/job-alerts
-//
-// Header:
-//
-// x-user-id: user_123
-//
-// Returns only alerts belonging to that user.
-//
 // ======================================================
 
-router.get("/", async (req, res) => {
-    try {
-        const userId =
-            requireUserId(req, res);
+router.get(
+    "/",
+    async (req, res) => {
+        try {
+            const userId =
+                req.user.uid;
 
-        if (!userId) {
-            return;
+            const alerts =
+                await getAllJobAlerts(
+                    userId
+                );
+
+            return res.json({
+                success: true,
+
+                count:
+                    alerts.length,
+
+                alerts,
+            });
+        } catch (error) {
+            console.error(
+                "Get Job Alerts Error:",
+                error.message
+            );
+
+            return res.status(500).json({
+                success: false,
+
+                message:
+                    "Failed to get job alerts.",
+
+                error:
+                    error.message,
+            });
         }
-
-        const alerts =
-            await getAllJobAlerts(userId);
-
-        res.json({
-            success: true,
-            count: alerts.length,
-            alerts,
-        });
-    } catch (error) {
-        console.error(
-            "Get Job Alerts Error:",
-            error.message
-        );
-
-        res.status(500).json({
-            success: false,
-            message:
-                "Failed to get job alerts.",
-            error: error.message,
-        });
     }
-});
+);
 
 // ======================================================
 // GET ACTIVE JOB ALERTS
-// ======================================================
-//
 // GET /api/job-alerts/active
-//
-// Header:
-//
-// x-user-id: user_123
-//
-// Returns only:
-//
-// enabled === true
-// active === true
-//
-// for the requested user.
+// ======================================================
 //
 // IMPORTANT:
 // This route must appear before /:id.
-//
 // ======================================================
 
 router.get(
@@ -191,20 +185,19 @@ router.get(
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alerts =
                 await getActiveJobAlerts(
                     userId
                 );
 
-            res.json({
+            return res.json({
                 success: true,
-                count: alerts.length,
+
+                count:
+                    alerts.length,
+
                 alerts,
             });
         } catch (error) {
@@ -213,11 +206,14 @@ router.get(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to get active job alerts.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -225,17 +221,11 @@ router.get(
 
 // ======================================================
 // GET JOB ALERT STATISTICS
-// ======================================================
-//
 // GET /api/job-alerts/stats
-//
-// Header:
-//
-// x-user-id: user_123
+// ======================================================
 //
 // IMPORTANT:
 // This route must appear before /:id.
-//
 // ======================================================
 
 router.get(
@@ -243,19 +233,16 @@ router.get(
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const stats =
                 await getJobAlertStats(
                     userId
                 );
 
-            res.json({
+            return res.json({
                 success: true,
+
                 stats,
             });
         } catch (error) {
@@ -264,11 +251,14 @@ router.get(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to get job alert statistics.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -276,20 +266,7 @@ router.get(
 
 // ======================================================
 // GET ALERT COUNTS
-// ======================================================
-//
 // GET /api/job-alerts/counts
-//
-// Header:
-//
-// x-user-id: user_123
-//
-// Returns:
-//
-// - total
-// - enabled
-// - disabled
-//
 // ======================================================
 
 router.get(
@@ -297,11 +274,7 @@ router.get(
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const total =
                 await getJobAlertCount(
@@ -318,7 +291,7 @@ router.get(
                     userId
                 );
 
-            res.json({
+            return res.json({
                 success: true,
 
                 counts: {
@@ -333,11 +306,14 @@ router.get(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to get job alert counts.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -345,26 +321,7 @@ router.get(
 
 // ======================================================
 // CREATE JOB ALERT
-// ======================================================
-//
 // POST /api/job-alerts
-//
-// Header:
-//
-// x-user-id: user_123
-//
-// Example body:
-//
-// {
-//     "keyword": "React Developer",
-//     "location": "India",
-//     "experience": "Fresher / 0 years",
-//     "jobType": "Full-time",
-//     "workMode": "Remote",
-//     "salary": "Any Salary",
-//     "frequency": "Daily"
-// }
-//
 // ======================================================
 
 router.post(
@@ -372,11 +329,7 @@ router.post(
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alert =
                 await createJobAlert(
@@ -384,10 +337,12 @@ router.post(
                     userId
                 );
 
-            res.status(201).json({
+            return res.status(201).json({
                 success: true,
+
                 message:
                     "Job alert created successfully.",
+
                 alert,
             });
         } catch (error) {
@@ -396,8 +351,9 @@ router.post(
                 error.message
             );
 
-            res.status(400).json({
+            return res.status(400).json({
                 success: false,
+
                 message:
                     error.message ||
                     "Failed to create job alert.",
@@ -408,31 +364,14 @@ router.post(
 
 // ======================================================
 // MATCH JOB AGAINST USER'S ACTIVE ALERTS
+// POST /api/job-alerts/match
 // ======================================================
 //
-// POST /api/job-alerts/match
+// The service-level findMatchingAlerts()
+// checks all active alerts.
 //
-// Header:
-//
-// x-user-id: user_123
-//
-// Example body:
-//
-// {
-//     "id": "12345",
-//     "title": "React Developer",
-//     "location": "Hyderabad",
-//     "description": "React developer required"
-// }
-//
-// IMPORTANT:
-// The service-level findMatchingAlerts() checks all active
-// alerts because the backend matching system may need
-// global matching.
-//
-// This route filters the result to the requesting user
-// before sending the response.
-//
+// This route filters the result to the
+// authenticated user before returning it.
 // ======================================================
 
 router.post(
@@ -440,11 +379,7 @@ router.post(
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const job =
                 req.body || {};
@@ -455,6 +390,7 @@ router.post(
             ) {
                 return res.status(400).json({
                     success: false,
+
                     message:
                         "A valid job is required.",
                 });
@@ -471,15 +407,19 @@ router.post(
                         String(
                             match?.alert?.userId ||
                                 ""
-                        ).trim() === userId
+                        ).trim() ===
+                        userId
                 );
 
-            res.json({
+            return res.json({
                 success: true,
+
                 matched:
                     matches.length > 0,
+
                 count:
                     matches.length,
+
                 matches,
             });
         } catch (error) {
@@ -488,11 +428,14 @@ router.post(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to match job against alerts.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -500,28 +443,16 @@ router.post(
 
 // ======================================================
 // RECORD ALERT MATCH
-// ======================================================
-//
 // POST /api/job-alerts/:id/match
-//
-// Header:
-//
-// x-user-id: user_123
-//
-// Used when a job actually matches a saved alert.
-//
 // ======================================================
 
 router.post(
     "/:id/match",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alert =
                 await getJobAlertById(
@@ -532,90 +463,7 @@ router.post(
             if (!alert) {
                 return res.status(404).json({
                     success: false,
-                    message:
-                        "Job alert not found.",
-                });
-            }
 
-            const job =
-                req.body || {};
-
-            const updated =
-                await recordAlertMatch(
-                    req.params.id,
-                    job,
-                    userId
-                );
-
-            if (!updated) {
-                return res.status(500).json({
-                    success: false,
-                    message:
-                        "Failed to record alert match.",
-                });
-            }
-
-            res.json({
-                success: true,
-
-                message:
-                    updated.alreadyMatched
-                        ? "Alert match was already recorded."
-                        : "Alert match recorded successfully.",
-
-                alert: updated,
-
-                alreadyMatched:
-                    updated.alreadyMatched === true,
-            });
-        } catch (error) {
-            console.error(
-                "Record Alert Match Error:",
-                error.message
-            );
-
-            res.status(500).json({
-                success: false,
-                message:
-                    "Failed to record alert match.",
-                error: error.message,
-            });
-        }
-    }
-);
-
-// ======================================================
-// TEST ONE ALERT AGAINST A JOB
-// ======================================================
-//
-// POST /api/job-alerts/:id/test
-//
-// Header:
-//
-// x-user-id: user_123
-//
-// ======================================================
-
-router.post(
-    "/:id/test",
-    async (req, res) => {
-        try {
-            const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
-
-            const alert =
-                await getJobAlertById(
-                    req.params.id,
-                    userId
-                );
-
-            if (!alert) {
-                return res.status(404).json({
-                    success: false,
                     message:
                         "Job alert not found.",
                 });
@@ -630,6 +478,100 @@ router.post(
             ) {
                 return res.status(400).json({
                     success: false,
+
+                    message:
+                        "A valid job is required.",
+                });
+            }
+
+            const updated =
+                await recordAlertMatch(
+                    req.params.id,
+                    job,
+                    userId
+                );
+
+            if (!updated) {
+                return res.status(500).json({
+                    success: false,
+
+                    message:
+                        "Failed to record alert match.",
+                });
+            }
+
+            return res.json({
+                success: true,
+
+                message:
+                    updated.alreadyMatched
+                        ? "Alert match was already recorded."
+                        : "Alert match recorded successfully.",
+
+                alert:
+                    updated,
+
+                alreadyMatched:
+                    updated.alreadyMatched ===
+                    true,
+            });
+        } catch (error) {
+            console.error(
+                "Record Alert Match Error:",
+                error.message
+            );
+
+            return res.status(500).json({
+                success: false,
+
+                message:
+                    "Failed to record alert match.",
+
+                error:
+                    error.message,
+            });
+        }
+    }
+);
+
+// ======================================================
+// TEST ONE ALERT AGAINST A JOB
+// POST /api/job-alerts/:id/test
+// ======================================================
+
+router.post(
+    "/:id/test",
+    validateJobAlertId,
+    async (req, res) => {
+        try {
+            const userId =
+                req.user.uid;
+
+            const alert =
+                await getJobAlertById(
+                    req.params.id,
+                    userId
+                );
+
+            if (!alert) {
+                return res.status(404).json({
+                    success: false,
+
+                    message:
+                        "Job alert not found.",
+                });
+            }
+
+            const job =
+                req.body || {};
+
+            if (
+                !job.title &&
+                !job.id
+            ) {
+                return res.status(400).json({
+                    success: false,
+
                     message:
                         "A valid job is required.",
                 });
@@ -642,9 +584,11 @@ router.post(
                     alert
                 );
 
-            res.json({
+            return res.json({
                 success: true,
+
                 alert,
+
                 result,
             });
         } catch (error) {
@@ -653,11 +597,14 @@ router.post(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to test job alert.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -665,34 +612,20 @@ router.post(
 
 // ======================================================
 // GET ONE JOB ALERT
+// GET /api/job-alerts/:id
 // ======================================================
 //
-// GET /api/job-alerts/:id
-//
-// Header:
-//
-// x-user-id: user_123
-//
 // IMPORTANT:
-// This route is below all named routes such as:
-//
-// /active
-// /stats
-// /counts
-// /match
-//
+// This route is below all named routes.
 // ======================================================
 
 router.get(
     "/:id",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alert =
                 await getJobAlertById(
@@ -703,13 +636,15 @@ router.get(
             if (!alert) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
             }
 
-            res.json({
+            return res.json({
                 success: true,
+
                 alert,
             });
         } catch (error) {
@@ -718,11 +653,14 @@ router.get(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to get job alert.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -730,26 +668,16 @@ router.get(
 
 // ======================================================
 // UPDATE JOB ALERT
-// ======================================================
-//
 // PUT /api/job-alerts/:id
-//
-// Header:
-//
-// x-user-id: user_123
-//
 // ======================================================
 
 router.put(
     "/:id",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const existing =
                 await getJobAlertById(
@@ -760,6 +688,7 @@ router.put(
             if (!existing) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
@@ -775,16 +704,20 @@ router.put(
             if (!updated) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
             }
 
-            res.json({
+            return res.json({
                 success: true,
+
                 message:
                     "Job alert updated successfully.",
-                alert: updated,
+
+                alert:
+                    updated,
             });
         } catch (error) {
             console.error(
@@ -792,8 +725,9 @@ router.put(
                 error.message
             );
 
-            res.status(400).json({
+            return res.status(400).json({
                 success: false,
+
                 message:
                     error.message ||
                     "Failed to update job alert.",
@@ -804,26 +738,16 @@ router.put(
 
 // ======================================================
 // ENABLE JOB ALERT
-// ======================================================
-//
 // PATCH /api/job-alerts/:id/enable
-//
-// Header:
-//
-// x-user-id: user_123
-//
 // ======================================================
 
 router.patch(
     "/:id/enable",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alert =
                 await enableJobAlert(
@@ -834,15 +758,18 @@ router.patch(
             if (!alert) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
             }
 
-            res.json({
+            return res.json({
                 success: true,
+
                 message:
                     "Job alert enabled.",
+
                 alert,
             });
         } catch (error) {
@@ -851,11 +778,14 @@ router.patch(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to enable job alert.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -863,26 +793,16 @@ router.patch(
 
 // ======================================================
 // DISABLE JOB ALERT
-// ======================================================
-//
 // PATCH /api/job-alerts/:id/disable
-//
-// Header:
-//
-// x-user-id: user_123
-//
 // ======================================================
 
 router.patch(
     "/:id/disable",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alert =
                 await disableJobAlert(
@@ -893,15 +813,18 @@ router.patch(
             if (!alert) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
             }
 
-            res.json({
+            return res.json({
                 success: true,
+
                 message:
                     "Job alert disabled.",
+
                 alert,
             });
         } catch (error) {
@@ -910,11 +833,14 @@ router.patch(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to disable job alert.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -922,26 +848,16 @@ router.patch(
 
 // ======================================================
 // ACTIVATE JOB ALERT
-// ======================================================
-//
 // PATCH /api/job-alerts/:id/activate
-//
-// Header:
-//
-// x-user-id: user_123
-//
 // ======================================================
 
 router.patch(
     "/:id/activate",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alert =
                 await activateJobAlert(
@@ -952,15 +868,18 @@ router.patch(
             if (!alert) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
             }
 
-            res.json({
+            return res.json({
                 success: true,
+
                 message:
                     "Job alert activated.",
+
                 alert,
             });
         } catch (error) {
@@ -969,11 +888,14 @@ router.patch(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to activate job alert.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -981,26 +903,16 @@ router.patch(
 
 // ======================================================
 // DEACTIVATE JOB ALERT
-// ======================================================
-//
 // PATCH /api/job-alerts/:id/deactivate
-//
-// Header:
-//
-// x-user-id: user_123
-//
 // ======================================================
 
 router.patch(
     "/:id/deactivate",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const alert =
                 await deactivateJobAlert(
@@ -1011,15 +923,18 @@ router.patch(
             if (!alert) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
             }
 
-            res.json({
+            return res.json({
                 success: true,
+
                 message:
                     "Job alert deactivated.",
+
                 alert,
             });
         } catch (error) {
@@ -1028,11 +943,14 @@ router.patch(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to deactivate job alert.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }
@@ -1040,26 +958,16 @@ router.patch(
 
 // ======================================================
 // DELETE JOB ALERT
-// ======================================================
-//
 // DELETE /api/job-alerts/:id
-//
-// Header:
-//
-// x-user-id: user_123
-//
 // ======================================================
 
 router.delete(
     "/:id",
+    validateJobAlertId,
     async (req, res) => {
         try {
             const userId =
-                requireUserId(req, res);
-
-            if (!userId) {
-                return;
-            }
+                req.user.uid;
 
             const existing =
                 await getJobAlertById(
@@ -1070,6 +978,7 @@ router.delete(
             if (!existing) {
                 return res.status(404).json({
                     success: false,
+
                     message:
                         "Job alert not found.",
                 });
@@ -1084,16 +993,20 @@ router.delete(
             if (!deleted) {
                 return res.status(500).json({
                     success: false,
+
                     message:
                         "Failed to delete job alert.",
                 });
             }
 
-            res.json({
+            return res.json({
                 success: true,
+
                 message:
                     "Job alert deleted successfully.",
-                id: req.params.id,
+
+                id:
+                    req.params.id,
             });
         } catch (error) {
             console.error(
@@ -1101,11 +1014,14 @@ router.delete(
                 error.message
             );
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
+
                 message:
                     "Failed to delete job alert.",
-                error: error.message,
+
+                error:
+                    error.message,
             });
         }
     }

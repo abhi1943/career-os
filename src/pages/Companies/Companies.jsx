@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -8,134 +7,54 @@ import {
 } from "react";
 
 import { useNavigate } from "react-router-dom";
-import { CareerContext } from "../../context/CareerContext";
 
-import { calculateJobMatch } from "../../utils/jobMatcher";
-
-import JobCard from "../../components/jobs/JobCard";
-
-import { getSavedJobs } from "../../services/savedJobsService";
+import {
+  Search,
+  MapPin,
+  BriefcaseBusiness,
+  Building2,
+  RefreshCw,
+  ArrowRight,
+} from "lucide-react";
 
 // ======================================================
-// STATES + CITIES
+// COMPANY HELPERS
 // ======================================================
 
-const stateCities = {
-  "Andhra Pradesh": [
-    "Visakhapatnam",
-    "Vijayawada",
-    "Tirupati",
-    "Guntur",
-    "Kurnool",
-    "Nellore",
-    "Kadapa",
-  ],
+const getInitials = (name) => {
+  const cleaned = String(
+    name || "Company"
+  ).trim();
 
-  Telangana: [
-    "Hyderabad",
-    "Warangal",
-    "Karimnagar",
-    "Nizamabad",
-    "Khammam",
-  ],
+  if (!cleaned) {
+    return "CO";
+  }
 
-  Karnataka: [
-    "Bengaluru",
-    "Mysuru",
-    "Mangaluru",
-    "Hubli",
-  ],
+  const words = cleaned
+    .split(/\s+/)
+    .filter(Boolean);
 
-  "Tamil Nadu": [
-    "Chennai",
-    "Coimbatore",
-    "Madurai",
-    "Salem",
-    "Tiruchirappalli",
-  ],
+  if (words.length === 1) {
+    return words[0]
+      .slice(0, 2)
+      .toUpperCase();
+  }
 
-  Maharashtra: [
-    "Mumbai",
-    "Pune",
-    "Nagpur",
-    "Nashik",
-    "Aurangabad",
-  ],
-
-  Delhi: [
-    "New Delhi",
-    "Delhi",
-  ],
-
-  Kerala: [
-    "Kochi",
-    "Thiruvananthapuram",
-    "Kozhikode",
-    "Thrissur",
-  ],
-
-  Gujarat: [
-    "Ahmedabad",
-    "Surat",
-    "Vadodara",
-    "Rajkot",
-  ],
-
-  "Uttar Pradesh": [
-    "Noida",
-    "Lucknow",
-    "Kanpur",
-    "Agra",
-    "Varanasi",
-  ],
-
-  "West Bengal": [
-    "Kolkata",
-  ],
-
-  Rajasthan: [
-    "Jaipur",
-    "Jodhpur",
-    "Udaipur",
-  ],
+  return (
+    words[0][0] +
+    words[1][0]
+  ).toUpperCase();
 };
 
 // ======================================================
-// FILTER OPTIONS
+// WARM-UP CONFIGURATION
 // ======================================================
 
-const experienceOptions = [
-  "Any Experience",
-  "Fresher / 0 years",
-  "0–1 years",
-  "1–3 years",
-  "3–5 years",
-  "5+ years",
-];
+const WARM_POLL_INTERVAL = 1000;
 
-const jobTypeOptions = [
-  "Any Type",
-  "Full-time",
-  "Part-time",
-  "Contract",
-  "Internship",
-];
-
-const workModeOptions = [
-  "Any",
-  "Remote",
-  "Hybrid",
-  "On-site",
-];
-
-const salaryOptions = [
-  "Any Salary",
-  "₹0–3 LPA",
-  "₹3–5 LPA",
-  "₹5–10 LPA",
-  "₹10–20 LPA",
-  "₹20+ LPA",
-];
+// Maximum time Companies page waits for the
+// background job-store warm-up.
+const WARM_MAX_WAIT = 30000;
 
 // ======================================================
 // COMPONENT
@@ -144,885 +63,1030 @@ const salaryOptions = [
 function Companies() {
   const navigate = useNavigate();
 
-  const { student } = useContext(CareerContext);
-
   // ====================================================
-  // SEARCH + FILTER STATE
+  // COMPANY STATE
   // ====================================================
 
-  const [search, setSearch] = useState(
-    "software engineer"
-  );
+  const [companies, setCompanies] =
+    useState([]);
 
-  const [state, setState] = useState(
-    "All States"
-  );
+  const [search, setSearch] =
+    useState("");
 
-  const [city, setCity] = useState(
-    "All Cities"
-  );
+  const [locationFilter, setLocationFilter] =
+    useState("All Locations");
 
-  const [experience, setExperience] =
-    useState("Any Experience");
-
-  const [jobType, setJobType] =
-    useState("Any Type");
-
-  const [workMode, setWorkMode] =
-    useState("Any");
-
-  const [salary, setSalary] =
-    useState("Any Salary");
-
-  // ====================================================
-  // JOB STATE
-  // ====================================================
-
-  const [jobs, setJobs] = useState([]);
-
-  const [page, setPage] = useState(1);
-
-  const [filteredTotal, setFilteredTotal] =
-    useState(0);
-
-  const [hasMore, setHasMore] =
-    useState(false);
+  const [categoryFilter, setCategoryFilter] =
+    useState("All Categories");
 
   const [loading, setLoading] =
-    useState(false);
-
-  const [newJobsCount, setNewJobsCount] =
-    useState(0);
-
-  const [checkingForNewJobs, setCheckingForNewJobs] =
-    useState(false);
-
-  const [loadingMore, setLoadingMore] =
     useState(false);
 
   const [error, setError] =
     useState("");
 
-  const [hasSearched, setHasSearched] =
+  const [hasLoaded, setHasLoaded] =
     useState(false);
 
-  // ====================================================
-  // SAVED JOBS
-  // ====================================================
+  const [page, setPage] =
+    useState(1);
 
-  const [savedJobs, setSavedJobs] =
-    useState([]);
-
-  const [showSavedJobs, setShowSavedJobs] =
+  const [hasMore, setHasMore] =
     useState(false);
 
-  // ====================================================
-  // LOAD SAVED JOBS
-  // ====================================================
+  const [loadingMore, setLoadingMore] =
+    useState(false);
 
-  const loadSavedJobs = useCallback(
-    async () => {
-      try {
-        const result =
-          await getSavedJobs();
+  const [totalCompanies, setTotalCompanies] =
+    useState(0);
 
-        setSavedJobs(
-          Array.isArray(result)
-            ? result
-            : []
-        );
-      } catch (error) {
-        console.error(
-          "CareerOS failed to load saved jobs:",
-          error
-        );
-
-        setSavedJobs([]);
-      }
-    },
-    []
-  );
+  const [totalJobsScanned, setTotalJobsScanned] =
+    useState(0);
 
   // ====================================================
-  // INITIAL SAVED JOB LOAD
+  // WARM-UP STATE
   // ====================================================
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadSavedJobs();
-    }, 0);
+  const [warmingStore, setWarmingStore] =
+    useState(false);
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [loadSavedJobs]);
+  const [warmMessage, setWarmMessage] =
+    useState("");
 
   // ====================================================
-  // SAVED JOB CHANGE
+  // REQUEST REFS
   // ====================================================
-
-  const handleSavedChange =
-    useCallback(async () => {
-      await loadSavedJobs();
-    }, [loadSavedJobs]);
-
-  // ====================================================
-  // REQUEST CONTROL
-  // ====================================================
-
-  const requestIdRef =
-    useRef(0);
 
   const abortControllerRef =
     useRef(null);
 
-  // ====================================================
-  // STATE OPTIONS
-  // ====================================================
+  const warmAbortControllerRef =
+    useRef(null);
 
-  const stateOptions = useMemo(
-    () => Object.keys(stateCities),
-    []
-  );
+  const requestIdRef =
+    useRef(0);
 
-  // ====================================================
-  // CITY OPTIONS
-  // ====================================================
+  const warmRequestRef =
+    useRef(false);
 
-  const cityOptions = useMemo(() => {
-    if (state === "All States") {
-      return [];
-    }
+ 
 
-    const cities =
-      stateCities[state];
-
-    if (!Array.isArray(cities)) {
-      return [];
-    }
-
-    return [
-      "All Cities",
-      ...cities,
-      "Other Cities",
-    ];
-  }, [state]);
 
   // ====================================================
-  // API LOCATION
+  // WAIT
   // ====================================================
 
-  const getApiLocation =
-    useCallback(() => {
-      if (state === "All States") {
-        return "India";
-      }
-
-      if (city === "Other Cities") {
-        return state;
-      }
-
-      if (
-        city &&
-        city !== "All Cities"
-      ) {
-        return city;
-      }
-
-      return state;
-    }, [state, city]);
-
-  // ====================================================
-  // SEARCH JOBS
-  // ====================================================
-
-  const searchJobs =
+  const wait =
     useCallback(
-      async ({
-        pageNumber = 1,
-        append = false,
-      } = {}) => {
-        if (!search.trim()) {
-          setError(
-            "Please enter a job title, skill or keyword."
-          );
+      (milliseconds, signal) =>
+        new Promise(
+          (resolve, reject) => {
+            if (
+              signal?.aborted
+            ) {
+              reject(
+                new DOMException(
+                  "Request aborted",
+                  "AbortError"
+                )
+              );
 
-          return;
-        }
+              return;
+            }
 
-        // ----------------------------------------------
-        // Cancel previous request
-        // ----------------------------------------------
+            const timeout =
+              setTimeout(() => {
+                if (
+                  signal?.aborted
+                ) {
+                  reject(
+                    new DOMException(
+                      "Request aborted",
+                      "AbortError"
+                    )
+                  );
+
+                  return;
+                }
+
+                resolve();
+              }, milliseconds);
+
+            signal?.addEventListener(
+              "abort",
+              () => {
+                clearTimeout(
+                  timeout
+                );
+
+                reject(
+                  new DOMException(
+                    "Request aborted",
+                    "AbortError"
+                  )
+                );
+              },
+              {
+                once: true,
+              }
+            );
+          }
+        ),
+      []
+    );
+
+  // ====================================================
+  // ENSURE JOB STORE IS WARM
+  // ====================================================
+  //
+  // This is the key Step 9 change.
+  //
+  // Direct Companies access:
+  //
+  // /companies
+  //      ↓
+  // /api/jobs/warm
+  //      ↓
+  // already warm → continue
+  //      ↓
+  // warming → wait
+  //      ↓
+  // cold → start background warm
+  //      ↓
+  // poll until warm
+  //
+  // ====================================================
+
+  const ensureJobStoreWarm =
+    useCallback(
+      async () => {
+        // ------------------------------------------------
+        // PREVENT DUPLICATE FRONTEND WARM FLOW
+        // ------------------------------------------------
 
         if (
-          abortControllerRef.current
+          warmRequestRef.current
         ) {
-          abortControllerRef.current.abort();
+          return true;
         }
+
+        warmRequestRef.current =
+          true;
 
         const controller =
           new AbortController();
 
-        abortControllerRef.current =
+        warmAbortControllerRef.current =
           controller;
 
-        const currentRequestId =
-          ++requestIdRef.current;
+        const startedAt =
+          Date.now();
 
-        // ----------------------------------------------
-        // Loading
-        // ----------------------------------------------
+        setWarmingStore(true);
 
-        if (append) {
-          setLoadingMore(true);
-        } else {
-          setLoading(true);
-        }
-
-        setError("");
-        setHasSearched(true);
+        setWarmMessage(
+          "Checking the CareerOS job store..."
+        );
 
         try {
-          const apiLocation =
-            getApiLocation();
-
-          const params =
-            new URLSearchParams();
-
-          params.set(
-            "query",
-            search.trim()
-          );
-
-          params.set(
-            "location",
-            apiLocation
-          );
-
-          params.set(
-            "page",
-            String(pageNumber)
-          );
-
-          params.set(
-            "experience",
-            experience
-          );
-
-          params.set(
-            "jobType",
-            jobType
-          );
-
-          params.set(
-            "workMode",
-            workMode
-          );
-
-          params.set(
-            "salary",
-            salary
-          );
-
-          // --------------------------------------------
-          // LOCATION FILTER
-          // --------------------------------------------
-
-          if (
-            city === "Other Cities"
+          while (
+            Date.now() -
+              startedAt <
+            WARM_MAX_WAIT
           ) {
-            params.set(
-              "cityFilter",
-              "other"
-            );
+            // ============================================
+            // CHECK / START WARM
+            // ============================================
 
-            params.set(
-              "state",
-              state
-            );
-          } else if (
-            city !== "All Cities" &&
-            state !== "All States"
-          ) {
-            params.set(
-              "cityFilter",
-              "city"
-            );
+            const response =
+              await fetch(
+                "https://career-os-api-1h85.onrender.com/api/jobs/warm",
+                {
+                  method: "GET",
+                  signal:
+                    controller.signal,
+                  cache: "no-store",
+                }
+              );
 
-            params.set(
-              "state",
-              state
-            );
+            // ============================================
+            // PARSE RESPONSE
+            // ============================================
 
-            params.set(
-              "city",
-              city
-            );
-          } else if (
-            state !== "All States"
-          ) {
-            params.set(
-              "cityFilter",
-              "all"
-            );
+            let data;
 
-            params.set(
-              "state",
-              state
-            );
-          }
+            try {
+              data =
+                await response.json();
+            } catch {
+              throw new Error(
+                "The server returned an invalid warm-up response."
+              );
+            }
 
-          // --------------------------------------------
-          // API REQUEST
-          // --------------------------------------------
+            // ============================================
+            // SERVER ERROR
+            // ============================================
 
-          const response =
-            await fetch(
-              `http://localhost:5000/api/jobs?${params.toString()}`,
-              {
-                signal:
-                  controller.signal,
+            if (
+              !response.ok &&
+              response.status !== 202
+            ) {
+              throw new Error(
+                data.message ||
+                  "Unable to initialize the CareerOS job store."
+              );
+            }
+
+            // ============================================
+            // ALREADY WARM
+            // ============================================
+
+            if (
+              data?.warm === true ||
+              data?.alreadyWarm === true
+            ) {
+              setWarmMessage(
+                "Job store is ready. Loading companies..."
+              );
+
+              return true;
+            }
+
+            // ============================================
+            // WARMING
+            // ============================================
+
+            if (
+              data?.warming === true
+            ) {
+              setWarmingStore(true);
+
+              const fetched =
+                Number(
+                  data?.warmState
+                    ?.fetchedCount ||
+                    0
+                );
+
+              const stored =
+                Number(
+                  data?.warmState
+                    ?.storedCount ||
+                    0
+                );
+
+              if (
+                fetched > 0 ||
+                stored > 0
+              ) {
+                setWarmMessage(
+                  `Preparing company data... ${stored || fetched} jobs processed.`
+                );
+              } else {
+                setWarmMessage(
+                  "Preparing company data from the job source..."
+                );
               }
+
+              await wait(
+                WARM_POLL_INTERVAL,
+                controller.signal
+              );
+
+              continue;
+            }
+
+            // ============================================
+            // STORE NOT WARM YET
+            // ============================================
+
+            setWarmingStore(true);
+
+            setWarmMessage(
+              "Preparing company data..."
             );
 
-          let data;
-
-          try {
-            data =
-              await response.json();
-          } catch {
-            throw new Error(
-              "The server returned an invalid response."
+            await wait(
+              WARM_POLL_INTERVAL,
+              controller.signal
             );
           }
 
-          if (
-            !response.ok ||
-            !data.success
-          ) {
-            throw new Error(
-              data.message ||
-                "Failed to fetch jobs."
-            );
-          }
+          // =================================================
+          // TIMEOUT
+          // =================================================
 
-          // --------------------------------------------
-          // Ignore old request
-          // --------------------------------------------
-
-          if (
-            currentRequestId !==
-            requestIdRef.current
-          ) {
-            return;
-          }
-
-          const newJobs =
-            Array.isArray(data.jobs)
-              ? data.jobs
-              : [];
-
-          // --------------------------------------------
-          // ADD / REPLACE JOBS
-          // --------------------------------------------
-
-          if (append) {
-            setJobs(
-              (previousJobs) => {
-                const existingIds =
-                  new Set(
-                    previousJobs.map(
-                      (item) =>
-                        String(item.id)
-                    )
-                  );
-
-                const uniqueJobs =
-                  newJobs.filter(
-                    (item) =>
-                      !existingIds.has(
-                        String(item.id)
-                      )
-                  );
-
-                return [
-                  ...previousJobs,
-                  ...uniqueJobs,
-                ];
-              }
-            );
-          } else {
-            setJobs(newJobs);
-          }
-
-          // --------------------------------------------
-          // METADATA
-          // --------------------------------------------
-
-          setFilteredTotal(
-            Number(
-              data.filtered_total ??
-                newJobs.length
-            )
+          throw new Error(
+            "Job data is taking longer than expected to load. Please try again."
           );
-
-          setPage(pageNumber);
-
-          // --------------------------------------------
-          // PAGINATION
-          // --------------------------------------------
-
-          if (
-            typeof data.has_more ===
-            "boolean"
-          ) {
-            setHasMore(
-              data.has_more &&
-                newJobs.length > 0
-            );
-          } else {
-            setHasMore(
-              newJobs.length >= 50
-            );
-          }
         } catch (err) {
           if (
-            err.name ===
+            err?.name ===
             "AbortError"
           ) {
-            return;
+            return false;
           }
 
           console.error(
-            "CareerOS Jobs Error:",
+            "CareerOS Companies Warm-Up Error:",
             err
           );
 
-          if (!append) {
-            setJobs([]);
-            setFilteredTotal(0);
-            setHasMore(false);
-          }
-
-          setError(
-            err.message ||
-              "Unable to load jobs. Please try again."
-          );
+          throw err;
         } finally {
           if (
-            currentRequestId ===
-            requestIdRef.current
+            warmAbortControllerRef.current ===
+            controller
           ) {
-            setLoading(false);
-            setLoadingMore(false);
+            warmAbortControllerRef.current =
+              null;
           }
+
+          warmRequestRef.current =
+            false;
+
+          setWarmingStore(false);
         }
       },
-      [
-        search,
-        experience,
-        jobType,
-        workMode,
-        salary,
-        getApiLocation,
-        state,
-        city,
-      ]
+      [wait]
     );
 
   // ====================================================
-  // INITIAL SEARCH
+  // LOAD COMPANIES
   // ====================================================
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      searchJobs({
-        pageNumber: 1,
-        append: false,
-      });
-    }, 0);
-
-    return () => {
-      clearTimeout(timer);
+  const loadCompanies = useCallback(
+    async ({
+      pageNumber = 1,
+      append = false,
+      ensureWarm = false,
+    } = {}) => {
+      // ------------------------------------------------
+      // CANCEL PREVIOUS COMPANY REQUEST
+      // ------------------------------------------------
 
       if (
         abortControllerRef.current
       ) {
         abortControllerRef.current.abort();
       }
-    };
-  }, [searchJobs]);
 
-  // ====================================================
-  // AUTOMATIC FILTER SEARCH
-  // ====================================================
+      const controller =
+        new AbortController();
 
-  useEffect(() => {
-    const timer =
-      setTimeout(() => {
-        if (!hasSearched) {
-          return;
+      abortControllerRef.current =
+        controller;
+
+      const requestId =
+        ++requestIdRef.current;
+
+      // ------------------------------------------------
+      // LOADING STATE
+      // ------------------------------------------------
+
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+
+      setError("");
+
+      try {
+        // =================================================
+        // DIRECT COMPANIES ACCESS
+        // =================================================
+        //
+        // Only the initial Companies load uses warm-up.
+        //
+        // Refreshing the company list does not need to
+        // start another warm flow because the backend
+        // already protects against duplicate warming.
+        //
+        // =================================================
+
+        if (
+          ensureWarm
+        ) {
+          setWarmMessage(
+            "Checking the CareerOS job store..."
+          );
+
+          const warmReady =
+            await ensureJobStoreWarm();
+
+          if (
+            !warmReady
+          ) {
+            return;
+          }
         }
 
-        searchJobs({
-          pageNumber: 1,
-          append: false,
-        });
-      }, 250);
+        // =================================================
+        // COMPANY API
+        // =================================================
+        //
+        // This endpoint ONLY reads the existing CareerOS
+        // job store.
+        //
+        // It does NOT trigger the Adzuna category search.
+        //
+        // =================================================
 
-    return () =>
-      clearTimeout(timer);
-  }, [
-    state,
-    city,
-    experience,
-    jobType,
-    workMode,
-    salary,
-    hasSearched,
-    searchJobs,
-  ]);
+        const params =
+          new URLSearchParams();
 
-  // ====================================================
-  // AUTOMATIC JOB REFRESH CHECK
-  // ====================================================
+        params.set(
+          "page",
+          String(pageNumber)
+        );
 
-  useEffect(() => {
-    if (
-      !hasSearched ||
-      showSavedJobs
-    ) {
-      return;
-    }
+        const response =
+          await fetch(
+            `https://career-os-api-1h85.onrender.com/api/jobs/companies?${params.toString()}`,
+            {
+              signal:
+                controller.signal,
+              cache: "no-store",
+            }
+          );
 
-    const checkForNewJobs =
-      async () => {
+        // ------------------------------------------------
+        // PARSE RESPONSE
+        // ------------------------------------------------
+
+        let data;
+
+        try {
+          data =
+            await response.json();
+        } catch {
+          throw new Error(
+            "The server returned an invalid response."
+          );
+        }
+
+        // ------------------------------------------------
+        // VALIDATE RESPONSE
+        // ------------------------------------------------
+
         if (
-          checkingForNewJobs
+          !response.ok ||
+          !data.success
+        ) {
+          throw new Error(
+            data.message ||
+              "Failed to load companies."
+          );
+        }
+
+        // ------------------------------------------------
+        // IGNORE STALE REQUEST
+        // ------------------------------------------------
+
+        if (
+          requestId !==
+          requestIdRef.current
         ) {
           return;
         }
 
-        setCheckingForNewJobs(
+        // =================================================
+        // READ COMPANIES FROM BACKEND
+        // =================================================
+
+        const newCompanies =
+          Array.isArray(
+            data.companies
+          )
+            ? data.companies
+            : [];
+
+        // =================================================
+        // APPEND / REPLACE
+        // =================================================
+
+        if (append) {
+          setCompanies(
+            (previousCompanies) => {
+              const companyMap =
+                new Map();
+
+              // --------------------------------------------
+              // EXISTING COMPANIES
+              // --------------------------------------------
+
+              previousCompanies.forEach(
+                (company) => {
+                  if (!company) {
+                    return;
+                  }
+
+                  companyMap.set(
+                    company.id,
+                    company
+                  );
+                }
+              );
+
+              // --------------------------------------------
+              // NEW COMPANIES
+              // --------------------------------------------
+
+              newCompanies.forEach(
+                (company) => {
+                  if (!company) {
+                    return;
+                  }
+
+                  const existing =
+                    companyMap.get(
+                      company.id
+                    );
+
+                  if (!existing) {
+                    companyMap.set(
+                      company.id,
+                      company
+                    );
+
+                    return;
+                  }
+
+                  // ----------------------------------------
+                  // MERGE JOBS
+                  // ----------------------------------------
+
+                  const existingJobs =
+                    Array.isArray(
+                      existing.jobs
+                    )
+                      ? existing.jobs
+                      : [];
+
+                  const newJobs =
+                    Array.isArray(
+                      company.jobs
+                    )
+                      ? company.jobs
+                      : [];
+
+                  const existingJobIds =
+                    new Set(
+                      existingJobs.map(
+                        (job) =>
+                          String(
+                            job?.id ||
+                              job?.redirect_url ||
+                              ""
+                          )
+                      )
+                    );
+
+                  const mergedJobs = [
+                    ...existingJobs,
+                  ];
+
+                  newJobs.forEach(
+                    (job) => {
+                      const jobId =
+                        String(
+                          job?.id ||
+                            job?.redirect_url ||
+                            ""
+                        );
+
+                      if (
+                        !existingJobIds.has(
+                          jobId
+                        )
+                      ) {
+                        existingJobIds.add(
+                          jobId
+                        );
+
+                        mergedJobs.push(
+                          job
+                        );
+                      }
+                    }
+                  );
+
+                  companyMap.set(
+                    company.id,
+                    {
+                      ...existing,
+
+                      ...company,
+
+                      jobs:
+                        mergedJobs,
+
+                      jobCount:
+                        mergedJobs.length,
+                    }
+                  );
+                }
+              );
+
+              return Array.from(
+                companyMap.values()
+              );
+            }
+          );
+        } else {
+          setCompanies(
+            newCompanies
+          );
+        }
+
+        // =================================================
+        // PAGINATION STATE
+        // =================================================
+
+        setPage(
+          pageNumber
+        );
+
+        setHasLoaded(
           true
         );
 
-        try {
-          const apiLocation =
-            getApiLocation();
+        setTotalCompanies(
+          Number(
+            data.total ||
+              newCompanies.length
+          )
+        );
 
-          const params =
-            new URLSearchParams();
+        setTotalJobsScanned(
+          Number(
+            data.jobs_scanned ||
+              0
+          )
+        );
 
-          params.set(
-            "query",
-            search.trim()
-          );
+        setHasMore(
+          Boolean(
+            data.has_more
+          )
+        );
 
-          params.set(
-            "location",
-            apiLocation
-          );
+        setWarmMessage("");
+      } catch (err) {
+        // ------------------------------------------------
+        // ABORTED REQUEST
+        // ------------------------------------------------
 
-          params.set(
-            "page",
-            "1"
-          );
-
-          params.set(
-            "experience",
-            experience
-          );
-
-          params.set(
-            "jobType",
-            jobType
-          );
-
-          params.set(
-            "workMode",
-            workMode
-          );
-
-          params.set(
-            "salary",
-            salary
-          );
-
-          // ------------------------------------------
-          // LOCATION FILTER
-          // ------------------------------------------
-
-          if (
-            city === "Other Cities"
-          ) {
-            params.set(
-              "cityFilter",
-              "other"
-            );
-
-            params.set(
-              "state",
-              state
-            );
-          } else if (
-            city !== "All Cities" &&
-            state !== "All States"
-          ) {
-            params.set(
-              "cityFilter",
-              "city"
-            );
-
-            params.set(
-              "state",
-              state
-            );
-
-            params.set(
-              "city",
-              city
-            );
-          } else if (
-            state !== "All States"
-          ) {
-            params.set(
-              "cityFilter",
-              "all"
-            );
-
-            params.set(
-              "state",
-              state
-            );
-          }
-
-          // ------------------------------------------
-          // CHECK LATEST JOBS
-          // ------------------------------------------
-
-          const response =
-            await fetch(
-              `http://localhost:5000/api/jobs?${params.toString()}`
-            );
-
-          if (!response.ok) {
-            return;
-          }
-
-          const data =
-            await response.json();
-
-          if (!data.success) {
-            return;
-          }
-
-          const latestJobs =
-            Array.isArray(
-              data.jobs
-            )
-              ? data.jobs
-              : [];
-
-          // ------------------------------------------
-          // FIND NEW JOBS
-          // ------------------------------------------
-
-          const existingIds =
-            new Set(
-              jobs.map((job) =>
-                String(job.id)
-              )
-            );
-
-          const newJobs =
-            latestJobs.filter(
-              (job) =>
-                !existingIds.has(
-                  String(job.id)
-                )
-            );
-
-          if (
-            newJobs.length > 0
-          ) {
-            setNewJobsCount(
-              newJobs.length
-            );
-          }
-        } catch (error) {
-          console.error(
-            "CareerOS automatic job check error:",
-            error
-          );
-        } finally {
-          setCheckingForNewJobs(
-            false
-          );
+        if (
+          err.name ===
+          "AbortError"
+        ) {
+          return;
         }
-      };
 
-    // Check every 15 minutes.
-    const refreshInterval =
-      setInterval(
-        checkForNewJobs,
-        15 * 60 * 1000
-      );
+        console.error(
+          "CareerOS Companies Error:",
+          err
+        );
 
-    return () => {
-      clearInterval(
-        refreshInterval
-      );
-    };
-  }, [
-    hasSearched,
-    showSavedJobs,
-    search,
-    experience,
-    jobType,
-    workMode,
-    salary,
-    state,
-    city,
-    getApiLocation,
-    jobs,
-    checkingForNewJobs,
-  ]);
+        // ------------------------------------------------
+        // ERROR STATE
+        // ------------------------------------------------
+
+        if (!append) {
+          setCompanies([]);
+
+          setTotalCompanies(0);
+
+          setTotalJobsScanned(0);
+
+          setHasMore(false);
+        }
+
+        setError(
+          err.message ||
+            "Unable to load companies. Please try again."
+        );
+      } finally {
+        if (
+          requestId ===
+          requestIdRef.current
+        ) {
+          setLoading(false);
+
+          setLoadingMore(false);
+        }
+      }
+    },
+    [ensureJobStoreWarm]
+  );
 
   // ====================================================
-  // FORM SUBMIT
+  // INITIAL LOAD
+  // ====================================================
+  //
+  // IMPORTANT:
+  //
+  // Companies can now be opened directly.
+  //
+  // It first ensures the job store is warm and then
+  // reads companies from the cached store.
+  //
   // ====================================================
 
-  const handleSubmit = (
-    event
-  ) => {
-    event.preventDefault();
+  useEffect(() => {
+  let cancelled = false;
 
-    setShowSavedJobs(false);
-    setNewJobsCount(0);
-    setPage(1);
+  const initializeCompanies = async () => {
+    if (cancelled) {
+      return;
+    }
 
-    searchJobs({
+    await loadCompanies({
       pageNumber: 1,
       append: false,
+      ensureWarm: true,
     });
   };
 
-  // ====================================================
-  // STATE CHANGE
-  // ====================================================
+  initializeCompanies();
 
-  const handleStateChange = (
-    event
-  ) => {
-    const newState =
-      event.target.value;
+  return () => {
+    cancelled = true;
 
-    setState(newState);
-    setCity("All Cities");
-    setShowSavedJobs(false);
+    if (
+      abortControllerRef.current
+    ) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    if (
+      warmAbortControllerRef.current
+    ) {
+      warmAbortControllerRef.current.abort();
+      warmAbortControllerRef.current = null;
+    }
+
+    warmRequestRef.current = false;
   };
+}, [loadCompanies]);
 
   // ====================================================
-  // CITY CHANGE
+  // CATEGORY OPTIONS
   // ====================================================
 
-  const handleCityChange = (
-    event
-  ) => {
-    setCity(
-      event.target.value
+  const categoryOptions =
+    useMemo(() => {
+      const values =
+        new Set();
+
+      companies.forEach(
+        (company) => {
+          if (
+            company?.category
+          ) {
+            values.add(
+              company.category
+            );
+          }
+        }
+      );
+
+      return [
+        "All Categories",
+        ...Array.from(values).sort(
+          (a, b) =>
+            String(a).localeCompare(
+              String(b)
+            )
+        ),
+      ];
+    }, [companies]);
+
+  // ====================================================
+  // LOCATION OPTIONS
+  // ====================================================
+
+  const locationOptions =
+    useMemo(() => {
+      const values =
+        new Set();
+
+      companies.forEach(
+        (company) => {
+          if (
+            company?.location
+          ) {
+            values.add(
+              company.location
+            );
+          }
+        }
+      );
+
+      return [
+        "All Locations",
+        ...Array.from(values).sort(
+          (a, b) =>
+            String(a).localeCompare(
+              String(b)
+            )
+        ),
+      ];
+    }, [companies]);
+
+  // ====================================================
+  // FILTERED COMPANIES
+  // ====================================================
+
+  const filteredCompanies =
+    useMemo(() => {
+      const normalizedSearch =
+        search
+          .trim()
+          .toLowerCase();
+
+      return companies
+        .filter((company) => {
+          // --------------------------------------------
+          // SEARCH
+          // --------------------------------------------
+
+          if (
+            normalizedSearch
+          ) {
+            const searchableText =
+              [
+                company?.name,
+                company?.category,
+                company?.location,
+              ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            if (
+              !searchableText.includes(
+                normalizedSearch
+              )
+            ) {
+              return false;
+            }
+          }
+
+          // --------------------------------------------
+          // LOCATION
+          // --------------------------------------------
+
+          if (
+            locationFilter !==
+              "All Locations" &&
+            company?.location !==
+              locationFilter
+          ) {
+            return false;
+          }
+
+          // --------------------------------------------
+          // CATEGORY
+          // --------------------------------------------
+
+          if (
+            categoryFilter !==
+              "All Categories" &&
+            company?.category !==
+              categoryFilter
+          ) {
+            return false;
+          }
+
+          return true;
+        })
+        .sort((a, b) => {
+          const aCount =
+            Number(
+              a?.jobCount || 0
+            );
+
+          const bCount =
+            Number(
+              b?.jobCount || 0
+            );
+
+          // More jobs first.
+          if (
+            bCount !==
+            aCount
+          ) {
+            return (
+              bCount -
+              aCount
+            );
+          }
+
+          return String(
+            a?.name || ""
+          ).localeCompare(
+            String(
+              b?.name || ""
+            )
+          );
+        });
+    }, [
+      companies,
+      search,
+      locationFilter,
+      categoryFilter,
+    ]);
+
+  // ====================================================
+  // COMPANY OPEN
+  // ====================================================
+
+  const handleCompanyClick =
+    useCallback(
+      (company) => {
+        if (!company) {
+          return;
+        }
+
+        navigate(
+          `/companies/${encodeURIComponent(
+            company.name
+          )}`,
+          {
+            state: {
+              company,
+            },
+          }
+        );
+      },
+      [navigate]
     );
-
-    setShowSavedJobs(false);
-  };
 
   // ====================================================
   // CLEAR FILTERS
   // ====================================================
 
-  const clearFilters = () => {
-    setSearch(
-      "software engineer"
-    );
+  const clearFilters =
+    useCallback(() => {
+      setSearch("");
 
-    setState(
-      "All States"
-    );
+      setLocationFilter(
+        "All Locations"
+      );
 
-    setCity(
-      "All Cities"
-    );
-
-    setExperience(
-      "Any Experience"
-    );
-
-    setJobType(
-      "Any Type"
-    );
-
-    setWorkMode(
-      "Any"
-    );
-
-    setSalary(
-      "Any Salary"
-    );
-
-    setPage(1);
-    setNewJobsCount(0);
-    setError("");
-    setShowSavedJobs(false);
-  };
+      setCategoryFilter(
+        "All Categories"
+      );
+    }, []);
 
   // ====================================================
-  // SHOW / HIDE SAVED JOBS
+  // REFRESH COMPANIES
   // ====================================================
 
-  const handleSavedJobsToggle =
-    useCallback(
-      async () => {
-        const nextValue =
-          !showSavedJobs;
+  const handleRefresh =
+    useCallback(() => {
+      setError("");
 
-        if (nextValue) {
-          await loadSavedJobs();
-        }
+      setHasLoaded(false);
 
-        setShowSavedJobs(
-          nextValue
-        );
-      },
-      [
-        showSavedJobs,
-        loadSavedJobs,
-      ]
-    );
+      loadCompanies({
+        pageNumber: 1,
+        append: false,
+        ensureWarm: false,
+      });
+    }, [loadCompanies]);
 
   // ====================================================
-  // DISPLAY JOBS
+  // RETRY
   // ====================================================
 
-  const displayedJobs =
-    useMemo(() => {
-      return showSavedJobs
-        ? savedJobs
-        : jobs;
-    }, [
-      showSavedJobs,
-      savedJobs,
-      jobs,
-    ]);
+  const handleRetry =
+    useCallback(() => {
+      setError("");
+
+      setHasLoaded(false);
+
+      loadCompanies({
+        pageNumber: 1,
+        append: false,
+        ensureWarm: true,
+      });
+    }, [loadCompanies]);
 
   // ====================================================
   // LOAD MORE
   // ====================================================
 
   const canLoadMore =
-    !showSavedJobs &&
+    !loading &&
+    !loadingMore &&
     hasMore &&
-    jobs.length > 0;
+    companies.length > 0;
 
   // ====================================================
   // RENDER
@@ -1031,41 +1095,39 @@ function Companies() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
 
-      {/* =================================================
+      {/* ==================================================
           HEADER
-      ================================================= */}
+      ================================================== */}
 
       <div className="text-center">
 
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-          Live Job Opportunities
+          Explore Companies
         </h1>
 
         <p className="text-gray-500 mt-4 text-lg">
-          Find jobs matching your skills,
-          experience and location.
+          Discover companies hiring across India
+          and explore their available opportunities.
         </p>
 
       </div>
 
-      {/* =================================================
+      {/* ==================================================
           SEARCH + FILTERS
-      ================================================= */}
+      ================================================== */}
 
-      <form
-        onSubmit={handleSubmit}
-        className="mt-10 bg-white rounded-2xl shadow-md border p-6"
-      >
+      <div className="mt-10 bg-white rounded-2xl shadow-md border p-6">
 
-        {/* SEARCH */}
+        <div className="flex flex-col lg:flex-row gap-3">
 
-        <div className="flex flex-col md:flex-row gap-3">
+          {/* SEARCH */}
 
           <div className="flex-1 relative">
 
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              🔎
-            </span>
+            <Search
+              size={20}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
 
             <input
               type="text"
@@ -1075,192 +1137,89 @@ function Companies() {
                   event.target.value
                 )
               }
-              placeholder="Software Engineer, React, Data Analyst..."
+              placeholder="Search companies..."
               className="w-full border border-gray-300 rounded-xl pl-11 pr-4 py-3.5 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
 
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-7 py-3.5 rounded-xl font-semibold transition"
-          >
-            {loading
-              ? "Searching..."
-              : "🔎 Search Jobs"}
-          </button>
-
-        </div>
-
-        {/* FILTERS */}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mt-5">
-
-          {/* STATE */}
+          {/* LOCATION */}
 
           <select
-            value={state}
-            onChange={
-              handleStateChange
+            value={locationFilter}
+            onChange={(event) =>
+              setLocationFilter(
+                event.target.value
+              )
             }
-            className="border border-gray-300 rounded-xl px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 rounded-xl px-4 py-3.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
           >
 
-            <option value="All States">
-              All States
-            </option>
-
-            {stateOptions.map(
-              (item) => (
+            {locationOptions.map(
+              (location) => (
                 <option
-                  key={item}
-                  value={item}
+                  key={location}
+                  value={location}
                 >
-                  {item}
+                  {location}
                 </option>
               )
             )}
 
           </select>
 
-          {/* CITY */}
+          {/* CATEGORY */}
 
           <select
-            value={city}
-            onChange={
-              handleCityChange
+            value={categoryFilter}
+            onChange={(event) =>
+              setCategoryFilter(
+                event.target.value
+              )
+            }
+            className="border border-gray-300 rounded-xl px-4 py-3.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+          >
+
+            {categoryOptions.map(
+              (category) => (
+                <option
+                  key={category}
+                  value={category}
+                >
+                  {category}
+                </option>
+              )
+            )}
+
+          </select>
+
+          {/* REFRESH */}
+
+          <button
+            type="button"
+            onClick={
+              handleRefresh
             }
             disabled={
-              state ===
-              "All States"
+              loading ||
+              warmingStore
             }
-            className={`border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 ${
-              state === "All States"
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-gray-700"
-            }`}
+            className="flex items-center justify-center gap-2 border border-blue-600 text-blue-600 hover:bg-blue-50 disabled:opacity-50 px-6 py-3.5 rounded-xl font-semibold transition"
           >
 
-            {state ===
-            "All States" ? (
-              <option value="All Cities">
-                Select a state first
-              </option>
-            ) : (
-              cityOptions.map(
-                (item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                )
-              )
-            )}
+            <RefreshCw
+              size={18}
+              className={
+                loading ||
+                warmingStore
+                  ? "animate-spin"
+                  : ""
+              }
+            />
 
-          </select>
+            Refresh
 
-          {/* EXPERIENCE */}
-
-          <select
-            value={experience}
-            onChange={(event) =>
-              setExperience(
-                event.target.value
-              )
-            }
-            className="border border-gray-300 rounded-xl px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-blue-500"
-          >
-
-            {experienceOptions.map(
-              (item) => (
-                <option
-                  key={item}
-                  value={item}
-                >
-                  {item}
-                </option>
-              )
-            )}
-
-          </select>
-
-          {/* JOB TYPE */}
-
-          <select
-            value={jobType}
-            onChange={(event) =>
-              setJobType(
-                event.target.value
-              )
-            }
-            className="border border-gray-300 rounded-xl px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-blue-500"
-          >
-
-            {jobTypeOptions.map(
-              (item) => (
-                <option
-                  key={item}
-                  value={item}
-                >
-                  {item}
-                </option>
-              )
-            )}
-
-          </select>
-
-          {/* WORK MODE */}
-
-          <select
-            value={workMode}
-            onChange={(event) =>
-              setWorkMode(
-                event.target.value
-              )
-            }
-            className="border border-gray-300 rounded-xl px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-blue-500"
-          >
-
-            {workModeOptions.map(
-              (item) => (
-                <option
-                  key={item}
-                  value={item}
-                >
-                  {item}
-                </option>
-              )
-            )}
-
-          </select>
-
-          {/* SALARY */}
-
-          <select
-            value={salary}
-            onChange={(event) =>
-              setSalary(
-                event.target.value
-              )
-            }
-            className="border border-gray-300 rounded-xl px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-blue-500"
-          >
-
-            {salaryOptions.map(
-              (item) => (
-                <option
-                  key={item}
-                  value={item}
-                >
-                  {item}
-                </option>
-              )
-            )}
-
-          </select>
+          </button>
 
         </div>
 
@@ -1268,74 +1227,107 @@ function Companies() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
 
-          <div className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500">
 
-            {state !==
-              "All States" && (
-              <span>
-                📍 {state}
+            {filteredCompanies.length.toLocaleString(
+              "en-IN"
+            )}{" "}
+            companies shown
 
-                {city !==
-                  "All Cities" &&
-                  city !==
-                    "Other Cities" &&
-                  ` • ${city}`}
-
-                {city ===
-                  "Other Cities" &&
-                  " • Other Cities"}
-              </span>
-            )}
-
-          </div>
-
-          <button
-            type="button"
-            onClick={
-              clearFilters
-            }
-            className="text-sm text-gray-500 hover:text-blue-600 font-medium transition"
-          >
-            ✕ Clear Filters
-          </button>
-
-        </div>
-
-      </form>
-
-      {/* =================================================
-          LOADING
-      ================================================= */}
-
-      {loading && (
-        <div className="text-center py-14">
-
-          <div className="text-4xl mb-3">
-            🔄
-          </div>
-
-          <p className="text-gray-500">
-            Finding the latest
-            opportunities...
           </p>
 
-        </div>
-      )}
+          {(search ||
+            locationFilter !==
+              "All Locations" ||
+            categoryFilter !==
+              "All Categories") && (
+            <button
+              type="button"
+              onClick={
+                clearFilters
+              }
+              className="text-sm text-gray-500 hover:text-blue-600 font-medium"
+            >
+              ✕ Clear Filters
+            </button>
+          )}
 
-      {/* =================================================
+        </div>
+
+      </div>
+
+      {/* ==================================================
+          JOB STORE WARMING
+      ================================================== */}
+
+      {loading &&
+        warmingStore && (
+          <div className="text-center py-16">
+
+            <div className="flex justify-center mb-4">
+
+              <RefreshCw
+                size={42}
+                className="text-blue-600 animate-spin"
+              />
+
+            </div>
+
+            <p className="text-gray-700 font-semibold text-lg">
+              Preparing companies...
+            </p>
+
+            <p className="text-gray-500 mt-2">
+              {warmMessage ||
+                "Preparing job data for the Companies page."}
+            </p>
+
+            <p className="text-sm text-gray-400 mt-2">
+              This happens automatically when
+              Companies is opened directly.
+            </p>
+
+          </div>
+        )}
+
+      {/* ==================================================
+          NORMAL LOADING
+      ================================================== */}
+
+      {loading &&
+        !warmingStore && (
+          <div className="text-center py-16">
+
+            <div className="text-4xl mb-3">
+              🔄
+            </div>
+
+            <p className="text-gray-500">
+              Loading companies...
+            </p>
+
+            <p className="text-sm text-gray-400 mt-2">
+              Reading companies from the CareerOS
+              job store.
+            </p>
+
+          </div>
+        )}
+
+      {/* ==================================================
           ERROR
-      ================================================= */}
+      ================================================== */}
 
       {!loading &&
         error && (
-          <div className="mt-8 bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+          <div className="mt-8 bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
 
-            <div className="text-3xl mb-2">
+            <div className="text-4xl mb-3">
               ⚠️
             </div>
 
-            <h2 className="font-bold text-red-700">
-              Unable to load jobs
+            <h2 className="font-bold text-red-700 text-xl">
+              Unable to load companies
             </h2>
 
             <p className="text-red-600 mt-2">
@@ -1344,13 +1336,10 @@ function Companies() {
 
             <button
               type="button"
-              onClick={() =>
-                searchJobs({
-                  pageNumber: 1,
-                  append: false,
-                })
+              onClick={
+                handleRetry
               }
-              className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl"
+              className="mt-5 bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-semibold"
             >
               Try Again
             </button>
@@ -1358,321 +1347,297 @@ function Companies() {
           </div>
         )}
 
-      {/* =================================================
+      {/* ==================================================
           RESULTS
-      ================================================= */}
+      ================================================== */}
 
       {!loading &&
         !error &&
-        hasSearched && (
+        hasLoaded && (
           <div className="mt-10">
 
-            {/* RESULTS HEADER */}
+            {/* ==================================================
+                EMPTY STORE
+            ================================================== */}
 
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            {companies.length === 0 ? (
+              <div className="bg-gray-50 border rounded-2xl text-center p-12">
 
-              <div>
+                <Building2
+                  size={52}
+                  className="mx-auto text-gray-400"
+                />
 
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {showSavedJobs
-                    ? "Saved Jobs"
-                    : "Latest Job Openings"}
+                <h2 className="text-2xl font-bold text-gray-800 mt-5">
+                  No companies available yet
                 </h2>
 
-                <p className="text-gray-500 mt-1">
-
-                  {showSavedJobs ? (
-                    <>
-                      {savedJobs.length.toLocaleString(
-                        "en-IN"
-                      )}{" "}
-                      saved{" "}
-                      {savedJobs.length ===
-                      1
-                        ? "job"
-                        : "jobs"}
-                    </>
-                  ) : (
-                    <>
-                      Showing{" "}
-                      {displayedJobs.length.toLocaleString(
-                        "en-IN"
-                      )}{" "}
-                      {displayedJobs.length ===
-                      1
-                        ? "job"
-                        : "jobs"}
-
-                      {filteredTotal >
-                        0 && (
-                        <>
-                          {" "}
-                          of{" "}
-                          {filteredTotal.toLocaleString(
-                            "en-IN"
-                          )}{" "}
-                          matching jobs
-                        </>
-                      )}
-                    </>
-                  )}
-
+                <p className="text-gray-500 mt-2 max-w-xl mx-auto">
+                  No companies were found in the
+                  CareerOS job store yet. Try refreshing
+                  the page to load the latest job data.
                 </p>
-
-              </div>
-
-              <div className="flex items-center gap-3 flex-wrap">
-
-                {/* NEW JOBS */}
-
-                {newJobsCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNewJobsCount(
-                        0
-                      );
-
-                      searchJobs({
-                        pageNumber: 1,
-                        append: false,
-                      });
-                    }}
-                    className="bg-green-50 border border-green-200 text-green-700 px-5 py-2 rounded-xl font-semibold hover:bg-green-100 transition"
-                  >
-                    🟢 {newJobsCount} new{" "}
-                    {newJobsCount ===
-                    1
-                      ? "job"
-                      : "jobs"}{" "}
-                    found — View New Jobs
-                  </button>
-                )}
-
-                {/* SAVED */}
 
                 <button
                   type="button"
                   onClick={
-                    handleSavedJobsToggle
+                    handleRetry
                   }
-                  className={
-                    showSavedJobs
-                      ? "bg-yellow-500 text-white px-5 py-2 rounded-xl font-semibold transition"
-                      : "border border-yellow-500 text-yellow-600 hover:bg-yellow-50 px-5 py-2 rounded-xl font-semibold transition"
-                  }
+                  className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold"
                 >
-                  {showSavedJobs
-                    ? "← All Jobs"
-                    : `★ Saved Jobs (${savedJobs.length})`}
-                </button>
-
-                {/* REFRESH */}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    searchJobs({
-                      pageNumber: 1,
-                      append: false,
-                    })
-                  }
-                  disabled={loading}
-                  className="border border-blue-600 text-blue-600 hover:bg-blue-50 disabled:opacity-50 px-5 py-2 rounded-xl font-semibold transition"
-                >
-                  🔄 Refresh Jobs
+                  Refresh Companies
                 </button>
 
               </div>
-
-            </div>
-
-            {/* =================================================
-                JOB CARDS
-            ================================================= */}
-
-            {displayedJobs.length >
-            0 ? (
+            ) : (
               <>
+                {/* ==================================================
+                    RESULTS HEADER
+                ================================================== */}
 
-                <div className="grid lg:grid-cols-2 gap-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
 
-                  {displayedJobs.map(
-                    (job) => {
-                      const match =
-                        student
-                          ? calculateJobMatch(
-                              job,
-                              student
-                            )
-                          : null;
+                  <div>
 
-                      const jobKey =
-                        job.id ||
-                        job.redirect_url ||
-                        `${
-                          job.title ||
-                          "job"
-                        }-${
-                          typeof job.company ===
-                          "string"
-                            ? job.company
-                            : job.company
-                                ?.display_name ||
-                              "company"
-                        }`;
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Companies Hiring Now
+                    </h2>
 
-                      return (
-                        <JobCard
-                          key={jobKey}
-                          job={job}
-                          match={match}
-                          onView={() =>
-                            navigate(
-                              `/companies/job/${job.id}`,
-                              {
-                                state: {
-                                  job,
-                                },
-                              }
-                            )
-                          }
-                          onSavedChange={
-                            handleSavedChange
-                          }
-                        />
-                      );
-                    }
-                  )}
+                    <p className="text-gray-500 mt-1">
 
-                </div>
+                      Showing{" "}
 
-                {/* =================================================
-                    LOAD MORE
-                ================================================= */}
-
-                {canLoadMore && (
-                  <div className="flex flex-col items-center mt-10">
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        searchJobs({
-                          pageNumber:
-                            page + 1,
-                          append: true,
-                        })
-                      }
-                      disabled={
-                        loadingMore ||
-                        loading
-                      }
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-3 rounded-xl font-semibold transition"
-                    >
-                      {loadingMore
-                        ? "Loading more jobs..."
-                        : "Load More Jobs →"}
-                    </button>
-
-                    {filteredTotal >
-                      0 && (
-                      <p className="text-sm text-gray-400 mt-3">
-                        Showing{" "}
-                        {jobs.length.toLocaleString(
+                      <span className="font-semibold text-gray-700">
+                        {filteredCompanies.length.toLocaleString(
                           "en-IN"
-                        )}{" "}
-                        of{" "}
-                        {filteredTotal.toLocaleString(
+                        )}
+                      </span>{" "}
+
+                      companies from{" "}
+
+                      <span className="font-semibold text-gray-700">
+                        {totalCompanies.toLocaleString(
                           "en-IN"
-                        )}{" "}
-                        jobs found in the
-                        current search pool
-                      </p>
-                    )}
+                        )}
+                      </span>{" "}
+
+                      discovered
+
+                    </p>
 
                   </div>
-                )}
 
-              </>
-            ) : (
+                  <div className="text-sm text-gray-400">
 
-              /* =================================================
-                 NO RESULTS
-              ================================================= */
+                    {totalJobsScanned.toLocaleString(
+                      "en-IN"
+                    )}{" "}
+                    jobs in store
 
-              <div className="bg-gray-50 border rounded-2xl text-center p-12">
+                  </div>
 
-                <div className="text-5xl mb-4">
-                  🔍
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {showSavedJobs
-                    ? "No saved jobs yet"
-                    : "No matching jobs found"}
-                </h2>
+                {/* ==================================================
+                    COMPANY CARDS
+                ================================================== */}
 
-                <p className="text-gray-500 mt-2">
-                  {showSavedJobs
-                    ? "Save jobs you are interested in and they will appear here."
-                    : "Try changing your filters or searching for another job title."}
-                </p>
+                {filteredCompanies.length > 0 ? (
+                  <>
 
-                <div className="flex flex-col sm:flex-row justify-center gap-3 mt-5">
+                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-                  {showSavedJobs ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowSavedJobs(
-                          false
+                      {filteredCompanies.map(
+                        (company) => (
+                          <div
+                            key={
+                              company.id
+                            }
+                            className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:border-blue-200 transition"
+                          >
+
+                            {/* COMPANY HEADER */}
+
+                            <div className="flex items-start gap-4">
+
+                              <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+
+                                <span className="font-bold text-lg">
+                                  {getInitials(
+                                    company.name
+                                  )}
+                                </span>
+
+                              </div>
+
+                              <div className="min-w-0">
+
+                                <h3 className="text-xl font-bold text-gray-900 truncate">
+                                  {company.name}
+                                </h3>
+
+                                <p className="text-sm text-gray-500 mt-1">
+                                  {company.category ||
+                                    "Other"}
+                                </p>
+
+                              </div>
+
+                            </div>
+
+                            {/* COMPANY INFO */}
+
+                            <div className="mt-6 space-y-3">
+
+                              <div className="flex items-center gap-2 text-gray-600">
+
+                                <MapPin
+                                  size={18}
+                                  className="text-gray-400"
+                                />
+
+                                <span className="text-sm">
+                                  {company.location ||
+                                    "India"}
+                                </span>
+
+                              </div>
+
+                              <div className="flex items-center gap-2 text-gray-600">
+
+                                <BriefcaseBusiness
+                                  size={18}
+                                  className="text-gray-400"
+                                />
+
+                                <span className="text-sm">
+
+                                  {Number(
+                                    company.jobCount ||
+                                      0
+                                  ).toLocaleString(
+                                    "en-IN"
+                                  )}{" "}
+
+                                  open{" "}
+
+                                  {Number(
+                                    company.jobCount ||
+                                      0
+                                  ) === 1
+                                    ? "job"
+                                    : "jobs"}
+
+                                </span>
+
+                              </div>
+
+                            </div>
+
+                            {/* ACTION */}
+
+                            <div className="flex gap-3 mt-6">
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCompanyClick(
+                                    company
+                                  )
+                                }
+                                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold transition"
+                              >
+
+                                View Company
+
+                                <ArrowRight
+                                  size={17}
+                                />
+
+                              </button>
+
+                            </div>
+
+                          </div>
                         )
-                      }
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold"
-                    >
-                      ← Browse Jobs
-                    </button>
-                  ) : (
+                      )}
+
+                    </div>
+
+                    {/* ==================================================
+                        LOAD MORE
+                    ================================================== */}
+
+                    {canLoadMore && (
+                      <div className="flex flex-col items-center mt-10">
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            loadCompanies({
+                              pageNumber:
+                                page + 1,
+                              append: true,
+                              ensureWarm: false,
+                            })
+                          }
+                          disabled={
+                            loadingMore
+                          }
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-3 rounded-xl font-semibold transition"
+                        >
+
+                          {loadingMore
+                            ? "Loading more companies..."
+                            : "Load More Companies →"}
+
+                        </button>
+
+                        <p className="text-sm text-gray-400 mt-3">
+                          More companies are available
+                          in the CareerOS job store.
+                        </p>
+
+                      </div>
+                    )}
+
+                  </>
+                ) : (
+                  /* ==================================================
+                     FILTERED NO RESULTS
+                  ================================================== */
+
+                  <div className="bg-gray-50 border rounded-2xl text-center p-12">
+
+                    <Building2
+                      size={52}
+                      className="mx-auto text-gray-400"
+                    />
+
+                    <h2 className="text-2xl font-bold text-gray-800 mt-5">
+                      No companies found
+                    </h2>
+
+                    <p className="text-gray-500 mt-2">
+                      Try changing your company search
+                      or filters.
+                    </p>
+
                     <button
                       type="button"
                       onClick={
                         clearFilters
                       }
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold"
+                      className="mt-5 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold"
                     >
                       Clear Filters
                     </button>
-                  )}
 
-                </div>
+                  </div>
+                )}
 
-              </div>
+              </>
             )}
-
-          </div>
-        )}
-
-      {/* =================================================
-          INITIAL EMPTY STATE
-      ================================================= */}
-
-      {!loading &&
-        !error &&
-        !hasSearched && (
-          <div className="mt-10 text-center bg-gray-50 rounded-2xl p-12">
-
-            <div className="text-5xl mb-4">
-              💼
-            </div>
-
-            <h2 className="text-2xl font-bold text-gray-800">
-              Find Your Next Opportunity
-            </h2>
-
-            <p className="text-gray-500 mt-2">
-              Search for a job title,
-              technology or location.
-            </p>
 
           </div>
         )}

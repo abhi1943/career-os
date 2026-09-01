@@ -12,19 +12,19 @@ const polytechnic = [
     rating: 4.9,
 
     description:
-      "Learn programming, software development, databases, networking, AI basics, and web technologies. After completion, students can directly join industry or pursue B.Tech through lateral entry.",
+      "Learn programming, software development, databases, networking, AI basics and web technologies. After completion, students can directly join industry or pursue B.Tech through lateral entry.",
 
     streams: [
       "Programming",
       "Web Development",
       "AI Basics",
       "Networking",
-      "Cloud Computing"
+      "Cloud Computing",
     ],
 
     entranceExams: [
       "POLYCET",
-      "ECET (Lateral Entry)"
+      "ECET",
     ],
 
     skills: [
@@ -35,7 +35,7 @@ const polytechnic = [
       "CSS",
       "JavaScript",
       "SQL",
-      "Problem Solving"
+      "Problem Solving",
     ],
 
     topColleges: [
@@ -43,7 +43,7 @@ const polytechnic = [
       "GPT Hyderabad",
       "Andhra Polytechnic",
       "SBTET Colleges",
-      "VNR Polytechnic"
+      "VNR Polytechnic",
     ],
 
     certifications: [
@@ -51,7 +51,7 @@ const polytechnic = [
       "Java",
       "AWS Cloud Practitioner",
       "Web Development",
-      "SQL"
+      "SQL",
     ],
 
     companies: [
@@ -59,7 +59,7 @@ const polytechnic = [
       "Infosys",
       "Wipro",
       "Accenture",
-      "Capgemini"
+      "Capgemini",
     ],
 
     careerOpportunities: [
@@ -67,7 +67,7 @@ const polytechnic = [
       "Web Developer",
       "IT Support Engineer",
       "Network Engineer",
-      "QA Tester"
+      "QA Tester",
     ],
 
     roadmap: [
@@ -76,16 +76,16 @@ const polytechnic = [
       "Build Projects",
       "Internship",
       "Campus Placement",
-      "Software Engineer"
+      "Software Engineer",
     ],
 
     higherStudies: [
       "B.Tech (Lateral Entry)",
       "BCA",
-      "Professional Certifications"
+      "Professional Certifications",
     ],
 
-    futureScope: "Excellent"
+    futureScope: "Excellent",
   },
 
   {
@@ -107,12 +107,12 @@ const polytechnic = [
       "Embedded Systems",
       "IoT",
       "Communication",
-      "Electronics"
+      "Electronics",
     ],
 
     entranceExams: [
       "POLYCET",
-      "ECET"
+      "ECET",
     ],
 
     skills: [
@@ -120,19 +120,19 @@ const polytechnic = [
       "Embedded C",
       "PCB Design",
       "Electronics",
-      "IoT"
+      "IoT",
     ],
 
     topColleges: [
       "Government Polytechnic",
       "SBTET Colleges",
-      "GPT Hyderabad"
+      "GPT Hyderabad",
     ],
 
     certifications: [
       "Embedded Systems",
       "Arduino",
-      "IoT"
+      "IoT",
     ],
 
     companies: [
@@ -140,29 +140,30 @@ const polytechnic = [
       "Intel",
       "Qualcomm",
       "Bosch",
-      "BEL"
+      "BEL",
     ],
 
     careerOpportunities: [
       "Embedded Engineer",
       "Electronics Technician",
       "IoT Engineer",
-      "Field Engineer"
+      "Field Engineer",
     ],
 
     roadmap: [
       "Complete Diploma",
       "Learn Embedded Systems",
+      "Build Practical Projects",
       "Internship",
-      "Placement"
+      "Placement",
     ],
 
     higherStudies: [
       "B.Tech ECE",
-      "B.Tech EEE"
+      "B.Tech EEE",
     ],
 
-    futureScope: "Excellent"
+    futureScope: "Excellent",
   },
 
   {
@@ -184,56 +185,57 @@ const polytechnic = [
       "Manufacturing",
       "Automobile",
       "Production",
-      "CAD"
+      "CAD",
     ],
 
     entranceExams: [
       "POLYCET",
-      "ECET"
+      "ECET",
     ],
 
     skills: [
       "AutoCAD",
       "SolidWorks",
       "Manufacturing",
-      "Machine Design"
+      "Machine Design",
     ],
 
     topColleges: [
       "Government Polytechnic",
-      "SBTET Colleges"
+      "SBTET Colleges",
     ],
 
     certifications: [
       "AutoCAD",
       "SolidWorks",
-      "CNC Programming"
+      "CNC Programming",
     ],
 
     companies: [
       "Tata Motors",
       "Mahindra",
       "Ashok Leyland",
-      "L&T"
+      "L&T",
     ],
 
     careerOpportunities: [
       "Mechanical Engineer",
       "Production Engineer",
-      "Maintenance Engineer"
+      "Maintenance Engineer",
     ],
 
     roadmap: [
       "Complete Diploma",
       "Industrial Training",
-      "Placement"
+      "Internship",
+      "Placement",
     ],
 
     higherStudies: [
-      "B.Tech Mechanical"
+      "B.Tech Mechanical",
     ],
 
-    futureScope: "High"
+    futureScope: "High",
   },
 
   {
@@ -254,55 +256,56 @@ const polytechnic = [
     streams: [
       "Construction",
       "Surveying",
-      "Architecture Basics"
+      "Architecture Basics",
     ],
 
     entranceExams: [
       "POLYCET",
-      "ECET"
+      "ECET",
     ],
 
     skills: [
       "AutoCAD",
       "Surveying",
       "Estimation",
-      "Building Design"
+      "Building Design",
     ],
 
     topColleges: [
       "Government Polytechnic",
-      "SBTET Colleges"
+      "SBTET Colleges",
     ],
 
     certifications: [
       "AutoCAD",
-      "Civil 3D"
+      "Civil 3D",
     ],
 
     companies: [
       "L&T",
       "Shapoorji Pallonji",
       "NCC",
-      "Afcons"
+      "Afcons",
     ],
 
     careerOpportunities: [
       "Site Engineer",
       "Civil Engineer",
-      "Survey Engineer"
+      "Survey Engineer",
     ],
 
     roadmap: [
       "Complete Diploma",
       "Site Training",
-      "Placement"
+      "Internship",
+      "Placement",
     ],
 
     higherStudies: [
-      "B.Tech Civil"
+      "B.Tech Civil",
     ],
 
-    futureScope: "High"
+    futureScope: "High",
   },
 
   {
@@ -323,56 +326,57 @@ const polytechnic = [
     streams: [
       "Power Systems",
       "Automation",
-      "Electrical Design"
+      "Electrical Design",
     ],
 
     entranceExams: [
       "POLYCET",
-      "ECET"
+      "ECET",
     ],
 
     skills: [
       "PLC",
       "Electrical Machines",
       "Power Systems",
-      "Automation"
+      "Automation",
     ],
 
     topColleges: [
       "Government Polytechnic",
-      "GPT Hyderabad"
+      "GPT Hyderabad",
     ],
 
     certifications: [
       "PLC",
-      "Industrial Automation"
+      "Industrial Automation",
     ],
 
     companies: [
       "ABB",
       "Siemens",
       "Schneider Electric",
-      "BHEL"
+      "BHEL",
     ],
 
     careerOpportunities: [
       "Electrical Engineer",
       "Maintenance Engineer",
-      "Automation Engineer"
+      "Automation Engineer",
     ],
 
     roadmap: [
       "Complete Diploma",
       "Industrial Training",
-      "Placement"
+      "Internship",
+      "Placement",
     ],
 
     higherStudies: [
-      "B.Tech EEE"
+      "B.Tech EEE",
     ],
 
-    futureScope: "High"
-  }
+    futureScope: "High",
+  },
 ];
 
 export default polytechnic;

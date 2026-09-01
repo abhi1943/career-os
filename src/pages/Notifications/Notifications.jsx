@@ -19,191 +19,280 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 function Notifications() {
-    const { user, authLoading } = useAuth();
+    const {
+        user,
+        authLoading,
+    } = useAuth();
 
-    const [notifications, setNotifications] =
-        useState([]);
+    const [
+        notifications,
+        setNotifications,
+    ] = useState([]);
 
-    const [loading, setLoading] =
-        useState(true);
+    const [
+        loading,
+        setLoading,
+    ] = useState(true);
 
-    const [error, setError] =
-        useState("");
+    const [
+        error,
+        setError,
+    ] = useState("");
 
     // ======================================================
     // LOAD NOTIFICATIONS
     // ======================================================
 
-    const loadNotifications = useCallback(
-        async () => {
-            try {
-                /*
-                 * Yield once before updating state.
-                 * This prevents the React set-state-in-effect
-                 * lint rule from treating this as a
-                 * synchronous effect update.
-                 */
-                await Promise.resolve();
+    const loadNotifications =
+        useCallback(
+            async () => {
+                try {
+                    await Promise.resolve();
 
-                setLoading(true);
-                setError("");
+                    setLoading(true);
+                    setError("");
 
-                // ==================================================
-                // AUTHENTICATION CHECK
-                // ==================================================
+                    // ==================================================
+                    // AUTHENTICATION CHECK
+                    // ==================================================
 
-                if (!user?.uid) {
-                    setNotifications([]);
+                    if (!user?.uid) {
+                        setNotifications([]);
 
-                    setError(
-                        "Please sign in to view your notifications."
-                    );
+                        setError(
+                            "Please sign in to view your notifications."
+                        );
 
-                    return;
-                }
-
-                // ==================================================
-                // GET USER-SPECIFIC JOB ALERT STATS
-                // ==================================================
-
-                const response = await fetch(
-                    "http://localhost:5000/api/job-alerts/stats",
-                    {
-                        method: "GET",
-                        headers: {
-                            "x-user-id":
-                                user.uid,
-                        },
+                        return;
                     }
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        "Failed to load notification information"
-                    );
-                }
-
-                const data =
-                    await response.json();
-
-                const generatedNotifications =
-                    [];
-
-                // ==================================================
-                // JOB ALERT NOTIFICATION
-                // ==================================================
-
-                if (
-                    data?.success &&
-                    data?.stats
-                ) {
-                    const enabledAlerts =
-                        Number(
-                            data.stats.enabled ||
-                                0
-                        );
-
-                    const totalAlerts =
-                        Number(
-                            data.stats.total ||
-                                0
-                        );
 
                     // ==================================================
-                    // ACTIVE ALERTS
+                    // GET FIREBASE ID TOKEN
                     // ==================================================
 
-                    if (enabledAlerts > 0) {
-                        generatedNotifications.push(
+                    const idToken =
+                        await user.getIdToken();
+
+                    if (!idToken) {
+                        setNotifications([]);
+
+                        setError(
+                            "Authentication token is missing. Please sign in again."
+                        );
+
+                        console.warn(
+                            "CareerOS: Firebase ID token is missing."
+                        );
+
+                        return;
+                    }
+
+                    // ==================================================
+                    // GET USER-SPECIFIC JOB ALERT STATS
+                    // ==================================================
+
+                    const response =
+                        await fetch(
+                            "https://career-os-api-1h85.onrender.com/api/job-alerts/stats",
                             {
-                                id: "job-alert-active",
-                                type: "job-alert",
-                                title: "Job Alerts are active",
-                                message:
-                                    `CareerOS is monitoring ${enabledAlerts} enabled job alert${
-                                        enabledAlerts ===
-                                        1
-                                            ? ""
-                                            : "s"
-                                    } for you.`,
-                                time: "Active",
-                                icon: Bell,
+                                method: "GET",
+
+                                headers: {
+                                    Authorization:
+                                        `Bearer ${idToken}`,
+
+                                    "Content-Type":
+                                        "application/json",
+                                },
                             }
                         );
-                    }
 
                     // ==================================================
-                    // NO ALERTS
-                    // ==================================================
-
-                    if (totalAlerts === 0) {
-                        generatedNotifications.push(
-                            {
-                                id: "create-job-alert",
-                                type: "job-alert",
-                                title: "Create your first Job Alert",
-                                message:
-                                    "Set up a job alert to receive opportunities matching your career interests.",
-                                time: "Get started",
-                                icon: Briefcase,
-                            }
-                        );
-                    }
-
-                    // ==================================================
-                    // ALL ALERTS DISABLED
+                    // AUTHENTICATION FAILURE
                     // ==================================================
 
                     if (
-                        totalAlerts > 0 &&
-                        enabledAlerts === 0
+                        response.status ===
+                        401
                     ) {
-                        generatedNotifications.push(
-                            {
-                                id: "job-alert-disabled",
-                                type: "job-alert",
-                                title: "Your Job Alerts are disabled",
-                                message:
-                                    "You have saved job alerts, but none of them are currently enabled.",
-                                time: "Attention",
-                                icon: Bell,
-                            }
+                        setNotifications([]);
+
+                        setError(
+                            "Your authentication session has expired. Please sign in again."
+                        );
+
+                        console.warn(
+                            "CareerOS: Job alert authentication failed."
+                        );
+
+                        return;
+                    }
+
+                    // ==================================================
+                    // OTHER API ERRORS
+                    // ==================================================
+
+                    if (!response.ok) {
+                        throw new Error(
+                            `Failed to load notification information (${response.status})`
                         );
                     }
+
+                    const data =
+                        await response.json();
+
+                    const generatedNotifications =
+                        [];
+
+                    // ==================================================
+                    // JOB ALERT NOTIFICATION
+                    // ==================================================
+
+                    if (
+                        data?.success &&
+                        data?.stats
+                    ) {
+                        const enabledAlerts =
+                            Number(
+                                data.stats.enabled ||
+                                    0
+                            );
+
+                        const totalAlerts =
+                            Number(
+                                data.stats.total ||
+                                    0
+                            );
+
+                        // ==================================================
+                        // ACTIVE ALERTS
+                        // ==================================================
+
+                        if (
+                            enabledAlerts >
+                            0
+                        ) {
+                            generatedNotifications.push(
+                                {
+                                    id: "job-alert-active",
+
+                                    type: "job-alert",
+
+                                    title:
+                                        "Job Alerts are active",
+
+                                    message:
+                                        `CareerOS is monitoring ${enabledAlerts} enabled job alert${
+                                            enabledAlerts ===
+                                            1
+                                                ? ""
+                                                : "s"
+                                        } for you.`,
+
+                                    time: "Active",
+
+                                    icon: Bell,
+                                }
+                            );
+                        }
+
+                        // ==================================================
+                        // NO ALERTS
+                        // ==================================================
+
+                        if (
+                            totalAlerts ===
+                            0
+                        ) {
+                            generatedNotifications.push(
+                                {
+                                    id: "create-job-alert",
+
+                                    type: "job-alert",
+
+                                    title:
+                                        "Create your first Job Alert",
+
+                                    message:
+                                        "Set up a job alert to receive opportunities matching your career interests.",
+
+                                    time: "Get started",
+
+                                    icon: Briefcase,
+                                }
+                            );
+                        }
+
+                        // ==================================================
+                        // ALL ALERTS DISABLED
+                        // ==================================================
+
+                        if (
+                            totalAlerts >
+                                0 &&
+                            enabledAlerts ===
+                                0
+                        ) {
+                            generatedNotifications.push(
+                                {
+                                    id: "job-alert-disabled",
+
+                                    type: "job-alert",
+
+                                    title:
+                                        "Your Job Alerts are disabled",
+
+                                    message:
+                                        "You have saved job alerts, but none of them are currently enabled.",
+
+                                    time: "Attention",
+
+                                    icon: Bell,
+                                }
+                            );
+                        }
+                    }
+
+                    // ==================================================
+                    // CAREEROS STATUS
+                    // ==================================================
+
+                    generatedNotifications.push(
+                        {
+                            id: "careeros-monitoring",
+
+                            type: "system",
+
+                            title:
+                                "CareerOS opportunity monitoring",
+
+                            message:
+                                "CareerOS is ready to help you discover jobs and career opportunities.",
+
+                            time: "System",
+
+                            icon: CheckCircle,
+                        }
+                    );
+
+                    setNotifications(
+                        generatedNotifications
+                    );
+                } catch (error) {
+                    console.error(
+                        "Notifications Error:",
+                        error
+                    );
+
+                    setError(
+                        "Unable to load notifications right now."
+                    );
+                } finally {
+                    setLoading(false);
                 }
-
-                // ==================================================
-                // CAREEROS STATUS
-                // ==================================================
-
-                generatedNotifications.push({
-                    id: "careeros-monitoring",
-                    type: "system",
-                    title: "CareerOS opportunity monitoring",
-                    message:
-                        "CareerOS is ready to help you discover jobs and career opportunities.",
-                    time: "System",
-                    icon: CheckCircle,
-                });
-
-                setNotifications(
-                    generatedNotifications
-                );
-            } catch (error) {
-                console.error(
-                    "Notifications Error:",
-                    error
-                );
-
-                setError(
-                    "Unable to load notifications right now."
-                );
-            } finally {
-                setLoading(false);
-            }
-        },
-        [user]
-    );
+            },
+            [user]
+        );
 
     // ======================================================
     // WAIT FOR AUTHENTICATION
@@ -245,7 +334,9 @@ function Notifications() {
     if (authLoading) {
         return (
             <div className="min-h-screen bg-gray-50">
+
                 <div className="max-w-6xl mx-auto px-6 py-12">
+
                     <div className="bg-white rounded-2xl shadow-sm border p-10 text-center">
 
                         <RefreshCw
@@ -258,7 +349,9 @@ function Notifications() {
                         </p>
 
                     </div>
+
                 </div>
+
             </div>
         );
     }
@@ -270,7 +363,9 @@ function Notifications() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50">
+
                 <div className="max-w-6xl mx-auto px-6 py-12">
+
                     <div className="bg-white rounded-2xl shadow-sm border p-10 text-center">
 
                         <RefreshCw
@@ -283,7 +378,9 @@ function Notifications() {
                         </p>
 
                     </div>
+
                 </div>
+
             </div>
         );
     }
@@ -294,6 +391,7 @@ function Notifications() {
 
     return (
         <div className="min-h-screen bg-gray-50">
+
             <div className="max-w-6xl mx-auto px-6 py-10">
 
                 {/* HEADER */}
@@ -301,13 +399,16 @@ function Notifications() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
                     <div>
+
                         <div className="flex items-center gap-3">
 
                             <div className="h-12 w-12 rounded-2xl bg-blue-100 flex items-center justify-center">
+
                                 <Bell
                                     size={24}
                                     className="text-blue-600"
                                 />
+
                             </div>
 
                             <div>
@@ -323,6 +424,7 @@ function Notifications() {
                             </div>
 
                         </div>
+
                     </div>
 
                     <button
@@ -508,6 +610,7 @@ function Notifications() {
                                                                 16
                                                             }
                                                         />
+
                                                     </Link>
                                                 )}
 
@@ -541,6 +644,7 @@ function Notifications() {
                                                                 16
                                                             }
                                                         />
+
                                                     </Link>
                                                 )}
 
@@ -574,6 +678,7 @@ function Notifications() {
                                                                 16
                                                             }
                                                         />
+
                                                     </Link>
                                                 )}
 
@@ -611,8 +716,10 @@ function Notifications() {
                 </div>
 
             </div>
+
         </div>
     );
 }
 
 export default Notifications;
+

@@ -6,8 +6,11 @@ const professionalCareers = [
     category: "Technology",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹6 LPA - ₹30 LPA",
+    averageSalary: "₹6 LPA - ₹30 LPA",
     growth: "Excellent",
+    rating: 4.9,
 
     description:
       "Designs, develops, tests and maintains software applications and systems.",
@@ -22,6 +25,16 @@ const professionalCareers = [
       "B.Sc Computer Science",
       "MCA"
     ],
+
+    streams: [
+      "Software Development",
+      "Web Development",
+      "Application Development",
+      "Cloud Computing",
+      "Backend Development"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Java",
@@ -48,6 +61,47 @@ const professionalCareers = [
       "AWS"
     ],
 
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "IIT Hyderabad",
+      "NIT Trichy",
+      "IIIT Hyderabad"
+    ],
+
+    certifications: [
+      "AWS Cloud Practitioner",
+      "Oracle Java Certification",
+      "Microsoft Azure Fundamentals"
+    ],
+
+    companies: [
+      "TCS",
+      "Infosys",
+      "Wipro",
+      "Accenture",
+      "Cognizant",
+      "Amazon",
+      "Microsoft",
+      "Google"
+    ],
+
+    careerOpportunities: [
+      "Software Engineer",
+      "Software Developer",
+      "Application Developer",
+      "Backend Developer",
+      "Full Stack Developer"
+    ],
+
+    jobRoles: [
+      "Software Engineer",
+      "Software Developer",
+      "Application Developer",
+      "Backend Developer",
+      "Full Stack Developer"
+    ],
+
     roadmap: [
       "Programming Fundamentals",
       "Object-Oriented Programming",
@@ -70,30 +124,14 @@ const professionalCareers = [
       "Full Stack Web Application"
     ],
 
-    certifications: [
-      "AWS Cloud Practitioner",
-      "Oracle Java Certification",
-      "Microsoft Azure Fundamentals"
+    higherStudies: [
+      "M.Tech",
+      "MS",
+      "MCA",
+      "MBA"
     ],
 
-    jobRoles: [
-      "Software Engineer",
-      "Software Developer",
-      "Application Developer",
-      "Backend Developer",
-      "Full Stack Developer"
-    ],
-
-    companies: [
-      "TCS",
-      "Infosys",
-      "Wipro",
-      "Accenture",
-      "Cognizant",
-      "Amazon",
-      "Microsoft",
-      "Google"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -103,8 +141,11 @@ const professionalCareers = [
     category: "Technology",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹7 LPA - ₹35 LPA",
+    averageSalary: "₹7 LPA - ₹35 LPA",
     growth: "Excellent",
+    rating: 4.9,
 
     description:
       "Builds complete frontend and backend web applications.",
@@ -118,6 +159,15 @@ const professionalCareers = [
       "B.Sc Computer Science",
       "MCA"
     ],
+
+    streams: [
+      "Frontend Development",
+      "Backend Development",
+      "Web Development",
+      "Cloud Deployment"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "HTML",
@@ -145,6 +195,44 @@ const professionalCareers = [
       "Docker"
     ],
 
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "IIIT Hyderabad",
+      "NIT Trichy",
+      "VIT"
+    ],
+
+    certifications: [
+      "Meta Full Stack Developer",
+      "AWS Cloud Practitioner",
+      "Microsoft Azure Fundamentals"
+    ],
+
+    companies: [
+      "Amazon",
+      "Microsoft",
+      "Google",
+      "TCS",
+      "Infosys",
+      "Accenture",
+      "Capgemini"
+    ],
+
+    careerOpportunities: [
+      "Full Stack Developer",
+      "Full Stack Engineer",
+      "Web Developer",
+      "Software Engineer"
+    ],
+
+    jobRoles: [
+      "Full Stack Developer",
+      "Full Stack Engineer",
+      "Web Developer",
+      "Software Engineer"
+    ],
+
     roadmap: [
       "HTML & CSS",
       "JavaScript ES6+",
@@ -170,27 +258,14 @@ const professionalCareers = [
       "Career Guidance Platform"
     ],
 
-    certifications: [
-      "Meta Full Stack Developer",
-      "AWS Cloud Practitioner"
+    higherStudies: [
+      "M.Tech",
+      "MCA",
+      "MS Computer Science",
+      "MBA"
     ],
 
-    jobRoles: [
-      "Full Stack Developer",
-      "Full Stack Engineer",
-      "Web Developer",
-      "Software Engineer"
-    ],
-
-    companies: [
-      "Amazon",
-      "Microsoft",
-      "Google",
-      "TCS",
-      "Infosys",
-      "Accenture",
-      "Capgemini"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -200,8 +275,11 @@ const professionalCareers = [
     category: "Technology",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹5 LPA - ₹20 LPA",
+    averageSalary: "₹5 LPA - ₹20 LPA",
     growth: "Excellent",
+    rating: 4.8,
 
     description:
       "Develops modern responsive user interfaces.",
@@ -215,6 +293,15 @@ const professionalCareers = [
       "B.Sc Computer Science",
       "MCA"
     ],
+
+    streams: [
+      "Web Development",
+      "UI Development",
+      "React Development",
+      "Frontend Engineering"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "HTML",
@@ -237,6 +324,45 @@ const professionalCareers = [
       "Bootstrap",
       "Vite",
       "Git"
+    ],
+
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "IIIT Hyderabad",
+      "VIT",
+      "NIT Trichy"
+    ],
+
+    certifications: [
+      "Meta Front-End Developer",
+      "Microsoft Web Development Certification"
+    ],
+
+    companies: [
+      "Google",
+      "Microsoft",
+      "Amazon",
+      "Infosys",
+      "TCS",
+      "Accenture",
+      "Wipro"
+    ],
+
+    careerOpportunities: [
+      "Frontend Developer",
+      "React Developer",
+      "UI Developer",
+      "Web Developer",
+      "Frontend Engineer"
+    ],
+
+    jobRoles: [
+      "Frontend Developer",
+      "React Developer",
+      "UI Developer",
+      "Web Developer",
+      "Frontend Engineer"
     ],
 
     roadmap: [
@@ -262,28 +388,14 @@ const professionalCareers = [
       "Career Guidance Website"
     ],
 
-    certifications: [
-      "Meta Front-End Developer",
-      "Microsoft Web Development Certification"
+    higherStudies: [
+      "MCA",
+      "M.Tech",
+      "MS Computer Science",
+      "MBA"
     ],
 
-    jobRoles: [
-      "Frontend Developer",
-      "React Developer",
-      "UI Developer",
-      "Web Developer",
-      "Frontend Engineer"
-    ],
-
-    companies: [
-      "Google",
-      "Microsoft",
-      "Amazon",
-      "Infosys",
-      "TCS",
-      "Accenture",
-      "Wipro"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -293,8 +405,11 @@ const professionalCareers = [
     category: "Technology",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹6 LPA - ₹25 LPA",
+    averageSalary: "₹6 LPA - ₹25 LPA",
     growth: "Excellent",
+    rating: 4.8,
 
     description:
       "Creates APIs, databases and backend systems.",
@@ -308,6 +423,15 @@ const professionalCareers = [
       "BCA",
       "MCA"
     ],
+
+    streams: [
+      "Backend Development",
+      "API Development",
+      "Database Engineering",
+      "Server-Side Development"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Java",
@@ -334,6 +458,46 @@ const professionalCareers = [
       "Docker"
     ],
 
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "IIIT Hyderabad",
+      "NIT Trichy",
+      "VIT"
+    ],
+
+    certifications: [
+      "Oracle Java Certification",
+      "AWS Cloud Practitioner",
+      "Microsoft Azure Fundamentals"
+    ],
+
+    companies: [
+      "Amazon",
+      "Microsoft",
+      "Google",
+      "TCS",
+      "Infosys",
+      "Accenture",
+      "Cognizant"
+    ],
+
+    careerOpportunities: [
+      "Backend Developer",
+      "Java Developer",
+      "Node.js Developer",
+      "API Developer",
+      "Backend Engineer"
+    ],
+
+    jobRoles: [
+      "Backend Developer",
+      "Java Developer",
+      "Node.js Developer",
+      "API Developer",
+      "Backend Engineer"
+    ],
+
     roadmap: [
       "Programming Fundamentals",
       "Object-Oriented Programming",
@@ -357,29 +521,14 @@ const professionalCareers = [
       "Job Portal Backend"
     ],
 
-    certifications: [
-      "Oracle Java Certification",
-      "AWS Cloud Practitioner",
-      "Microsoft Azure Fundamentals"
+    higherStudies: [
+      "M.Tech",
+      "MCA",
+      "MS Computer Science",
+      "MBA"
     ],
 
-    jobRoles: [
-      "Backend Developer",
-      "Java Developer",
-      "Node.js Developer",
-      "API Developer",
-      "Backend Engineer"
-    ],
-
-    companies: [
-      "Amazon",
-      "Microsoft",
-      "Google",
-      "TCS",
-      "Infosys",
-      "Accenture",
-      "Cognizant"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -389,8 +538,11 @@ const professionalCareers = [
     category: "Artificial Intelligence",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹10 LPA - ₹45 LPA",
+    averageSalary: "₹10 LPA - ₹45 LPA",
     growth: "Excellent",
+    rating: 5.0,
 
     description:
       "Builds Artificial Intelligence solutions.",
@@ -405,6 +557,16 @@ const professionalCareers = [
       "M.Tech AI / ML",
       "MCA"
     ],
+
+    streams: [
+      "Machine Learning",
+      "Deep Learning",
+      "Natural Language Processing",
+      "Computer Vision",
+      "Generative AI"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Python",
@@ -427,6 +589,48 @@ const professionalCareers = [
       "Hugging Face",
       "Jupyter",
       "Git"
+    ],
+
+    topColleges: [
+      "IIT Hyderabad",
+      "IIIT Hyderabad",
+      "IIT Madras",
+      "IIT Bombay",
+      "VIT"
+    ],
+
+    certifications: [
+      "AWS Machine Learning",
+      "Microsoft Azure AI Fundamentals",
+      "Google Cloud Machine Learning",
+      "DeepLearning.AI"
+    ],
+
+    companies: [
+      "Google",
+      "Microsoft",
+      "Amazon",
+      "IBM",
+      "TCS",
+      "Infosys",
+      "Accenture",
+      "NVIDIA"
+    ],
+
+    careerOpportunities: [
+      "AI Engineer",
+      "Machine Learning Engineer",
+      "AI Developer",
+      "NLP Engineer",
+      "Computer Vision Engineer"
+    ],
+
+    jobRoles: [
+      "AI Engineer",
+      "Machine Learning Engineer",
+      "AI Developer",
+      "NLP Engineer",
+      "Computer Vision Engineer"
     ],
 
     roadmap: [
@@ -452,29 +656,14 @@ const professionalCareers = [
       "Resume Analyzer"
     ],
 
-    certifications: [
-      "AWS Machine Learning",
-      "Microsoft Azure AI Fundamentals",
-      "Google Cloud Machine Learning"
+    higherStudies: [
+      "M.Tech AI",
+      "MS AI",
+      "MS Data Science",
+      "PhD AI"
     ],
 
-    jobRoles: [
-      "AI Engineer",
-      "Machine Learning Engineer",
-      "AI Developer",
-      "NLP Engineer",
-      "Computer Vision Engineer"
-    ],
-
-    companies: [
-      "Google",
-      "Microsoft",
-      "Amazon",
-      "IBM",
-      "TCS",
-      "Infosys",
-      "Accenture"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -484,8 +673,11 @@ const professionalCareers = [
     category: "Data Science",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹8 LPA - ₹35 LPA",
+    averageSalary: "₹8 LPA - ₹35 LPA",
     growth: "Excellent",
+    rating: 4.9,
 
     description:
       "Analyzes data and develops predictive models.",
@@ -501,6 +693,15 @@ const professionalCareers = [
       "M.Sc Data Science",
       "MCA"
     ],
+
+    streams: [
+      "Data Science",
+      "Data Analytics",
+      "Machine Learning",
+      "Business Intelligence"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Python",
@@ -522,6 +723,45 @@ const professionalCareers = [
       "Power BI",
       "Tableau",
       "Jupyter"
+    ],
+
+    topColleges: [
+      "IIT Madras",
+      "IIT Hyderabad",
+      "IIIT Hyderabad",
+      "VIT",
+      "IIT Delhi"
+    ],
+
+    certifications: [
+      "IBM Data Science",
+      "Microsoft Power BI",
+      "Google Data Analytics",
+      "AWS Machine Learning"
+    ],
+
+    companies: [
+      "Amazon",
+      "Google",
+      "Microsoft",
+      "IBM",
+      "Accenture",
+      "TCS",
+      "Infosys"
+    ],
+
+    careerOpportunities: [
+      "Data Scientist",
+      "Data Analyst",
+      "Machine Learning Engineer",
+      "Business Intelligence Analyst"
+    ],
+
+    jobRoles: [
+      "Data Scientist",
+      "Data Analyst",
+      "Machine Learning Engineer",
+      "Business Intelligence Analyst"
     ],
 
     roadmap: [
@@ -547,28 +787,560 @@ const professionalCareers = [
       "Movie Recommendation System"
     ],
 
-    certifications: [
-      "IBM Data Science",
-      "Microsoft Power BI",
-      "Google Data Analytics"
+    higherStudies: [
+      "MS Data Science",
+      "M.Tech Data Science",
+      "M.Sc Data Science",
+      "PhD Data Science"
     ],
 
-    jobRoles: [
-      "Data Scientist",
-      "Data Analyst",
-      "Machine Learning Engineer",
-      "Business Intelligence Analyst"
+    futureScope: "Excellent"
+  },
+
+  {
+    id: "data-analyst",
+    name: "Data Analyst",
+    icon: "📈",
+    category: "Data Analytics",
+    duration: "Learning + Career",
+    eligibility: "B.Tech / Degree",
+
+    salary: "₹5 LPA - ₹20 LPA",
+    averageSalary: "₹5 LPA - ₹20 LPA",
+    growth: "Excellent",
+    rating: 4.8,
+
+    description:
+      "Analyzes data to identify trends, generate insights and support business decisions.",
+
+    overview:
+      "Data Analysts collect, clean, analyze and visualize data to help organizations make better decisions.",
+
+    education: [
+      "B.Tech / B.E",
+      "B.Sc Data Science",
+      "B.Sc Statistics",
+      "BCA",
+      "B.Com",
+      "BBA",
+      "MCA"
+    ],
+
+    streams: [
+      "Data Analytics",
+      "Business Intelligence",
+      "Business Analytics",
+      "Reporting"
+    ],
+
+    entranceExams: [],
+
+    skills: [
+      "Excel",
+      "SQL",
+      "Python",
+      "Pandas",
+      "Statistics",
+      "Data Cleaning",
+      "Data Visualization",
+      "Power BI",
+      "Tableau"
+    ],
+
+    technologies: [
+      "Microsoft Excel",
+      "SQL",
+      "Python",
+      "Pandas",
+      "NumPy",
+      "Power BI",
+      "Tableau",
+      "MySQL",
+      "Jupyter"
+    ],
+
+    topColleges: [
+      "IIT Madras",
+      "Christ University",
+      "Loyola College",
+      "University of Delhi",
+      "Osmania University"
+    ],
+
+    certifications: [
+      "Google Data Analytics",
+      "Microsoft Power BI",
+      "IBM Data Analyst"
     ],
 
     companies: [
+      "TCS",
+      "Infosys",
+      "Accenture",
+      "Cognizant",
+      "Deloitte",
       "Amazon",
+      "Microsoft"
+    ],
+
+    careerOpportunities: [
+      "Data Analyst",
+      "Junior Data Analyst",
+      "Business Intelligence Analyst",
+      "Reporting Analyst",
+      "Data Visualization Analyst"
+    ],
+
+    jobRoles: [
+      "Data Analyst",
+      "Junior Data Analyst",
+      "Business Intelligence Analyst",
+      "Reporting Analyst",
+      "Data Visualization Analyst"
+    ],
+
+    roadmap: [
+      "Excel Fundamentals",
+      "Advanced Excel",
+      "Statistics",
+      "SQL",
+      "Data Cleaning",
+      "Python",
+      "Pandas & NumPy",
+      "Data Visualization",
+      "Power BI",
+      "Tableau",
+      "Build Data Analysis Projects",
+      "Create Portfolio",
+      "Interview Preparation",
+      "Apply for Jobs"
+    ],
+
+    projects: [
+      "Sales Data Analysis",
+      "Customer Analysis Dashboard",
+      "Employee Data Analysis",
+      "E-Commerce Data Analysis",
+      "Business Performance Dashboard"
+    ],
+
+    higherStudies: [
+      "MBA",
+      "M.Sc Data Science",
+      "MCA",
+      "MS Data Analytics"
+    ],
+
+    futureScope: "Excellent"
+  },
+
+  {
+    id: "business-analyst",
+    name: "Business Analyst",
+    icon: "📊",
+    category: "Business & Analytics",
+    duration: "Learning + Career",
+    eligibility: "B.Tech / Degree",
+
+    salary: "₹6 LPA - ₹25 LPA",
+    averageSalary: "₹6 LPA - ₹25 LPA",
+    growth: "Excellent",
+    rating: 4.8,
+
+    description:
+      "Analyzes business requirements and uses data to improve business decisions and processes.",
+
+    overview:
+      "Business Analysts bridge the gap between business requirements and technology by analyzing processes, requirements and data.",
+
+    education: [
+      "B.Tech / B.E",
+      "BBA",
+      "B.Com",
+      "BCA",
+      "B.Sc",
+      "MBA"
+    ],
+
+    streams: [
+      "Business Analysis",
+      "Business Intelligence",
+      "Process Analysis",
+      "Product Analysis"
+    ],
+
+    entranceExams: [],
+
+    skills: [
+      "Business Analysis",
+      "Excel",
+      "SQL",
+      "Statistics",
+      "Data Analysis",
+      "Problem Solving",
+      "Communication",
+      "Requirements Gathering",
+      "Power BI",
+      "Critical Thinking"
+    ],
+
+    technologies: [
+      "Microsoft Excel",
+      "SQL",
+      "Power BI",
+      "Tableau",
+      "Jira",
+      "Confluence",
+      "MySQL"
+    ],
+
+    topColleges: [
+      "IIM Bangalore",
+      "IIM Ahmedabad",
+      "IIM Calcutta",
+      "Christ University",
+      "NMIMS"
+    ],
+
+    certifications: [
+      "ECBA",
+      "Google Data Analytics",
+      "Microsoft Power BI"
+    ],
+
+    companies: [
+      "Deloitte",
+      "Accenture",
+      "TCS",
+      "Infosys",
+      "Cognizant",
+      "Amazon",
+      "Microsoft"
+    ],
+
+    careerOpportunities: [
+      "Business Analyst",
+      "Junior Business Analyst",
+      "Business Intelligence Analyst",
+      "Process Analyst",
+      "Product Analyst"
+    ],
+
+    jobRoles: [
+      "Business Analyst",
+      "Junior Business Analyst",
+      "Business Intelligence Analyst",
+      "Process Analyst",
+      "Product Analyst"
+    ],
+
+    roadmap: [
+      "Business Analysis Fundamentals",
+      "Excel",
+      "Statistics",
+      "SQL",
+      "Data Analysis",
+      "Requirements Gathering",
+      "Business Process Analysis",
+      "Power BI",
+      "Dashboard Development",
+      "Documentation",
+      "Build Business Analysis Projects",
+      "Create Portfolio",
+      "Interview Preparation",
+      "Apply for Jobs"
+    ],
+
+    projects: [
+      "Sales Performance Analysis",
+      "Business Process Improvement",
+      "Customer Segmentation Analysis",
+      "Business Intelligence Dashboard",
+      "Market Analysis Project"
+    ],
+
+    higherStudies: [
+      "MBA",
+      "PGDM",
+      "MS Business Analytics",
+      "M.Sc Business Analytics"
+    ],
+
+    futureScope: "Excellent"
+  },
+
+  {
+    id: "machine-learning-engineer",
+    name: "Machine Learning Engineer",
+    icon: "🧠",
+    category: "Artificial Intelligence",
+    duration: "Learning + Career",
+    eligibility: "B.Tech / Degree",
+
+    salary: "₹8 LPA - ₹35 LPA",
+    averageSalary: "₹8 LPA - ₹35 LPA",
+    growth: "Excellent",
+    rating: 4.9,
+
+    description:
+      "Builds and deploys machine learning models and intelligent systems.",
+
+    overview:
+      "Machine Learning Engineers develop, train, evaluate and deploy machine learning models for real-world applications.",
+
+    education: [
+      "B.Tech / B.E Computer Science",
+      "B.Tech AI & ML",
+      "B.Tech Data Science",
+      "B.Sc Data Science",
+      "M.Tech AI / ML",
+      "MCA"
+    ],
+
+    streams: [
+      "Machine Learning",
+      "Deep Learning",
+      "MLOps",
+      "Artificial Intelligence"
+    ],
+
+    entranceExams: [],
+
+    skills: [
+      "Python",
+      "Statistics",
+      "Linear Algebra",
+      "Machine Learning",
+      "Deep Learning",
+      "Data Processing",
+      "Model Evaluation",
+      "Feature Engineering",
+      "Problem Solving"
+    ],
+
+    technologies: [
+      "Python",
+      "NumPy",
+      "Pandas",
+      "Scikit-learn",
+      "TensorFlow",
+      "PyTorch",
+      "Jupyter",
+      "MLflow",
+      "Git"
+    ],
+
+    topColleges: [
+      "IIT Hyderabad",
+      "IIIT Hyderabad",
+      "IIT Madras",
+      "IIT Bombay",
+      "VIT"
+    ],
+
+    certifications: [
+      "AWS Machine Learning",
+      "Google Cloud Machine Learning",
+      "Microsoft Azure AI Fundamentals"
+    ],
+
+    companies: [
       "Google",
       "Microsoft",
+      "Amazon",
       "IBM",
+      "NVIDIA",
+      "Accenture",
+      "TCS"
+    ],
+
+    careerOpportunities: [
+      "Machine Learning Engineer",
+      "ML Engineer",
+      "Machine Learning Developer",
+      "AI/ML Engineer",
+      "Applied Machine Learning Engineer"
+    ],
+
+    jobRoles: [
+      "Machine Learning Engineer",
+      "ML Engineer",
+      "Machine Learning Developer",
+      "AI/ML Engineer",
+      "Applied Machine Learning Engineer"
+    ],
+
+    roadmap: [
+      "Python Programming",
+      "Mathematics",
+      "Statistics",
+      "NumPy & Pandas",
+      "Data Preprocessing",
+      "Machine Learning",
+      "Regression & Classification",
+      "Clustering",
+      "Feature Engineering",
+      "Deep Learning",
+      "Model Deployment",
+      "Build ML Projects",
+      "Portfolio",
+      "Interview Preparation",
+      "Apply for Jobs"
+    ],
+
+    projects: [
+      "House Price Prediction",
+      "Customer Churn Prediction",
+      "Recommendation System",
+      "Fraud Detection",
+      "Image Classification"
+    ],
+
+    higherStudies: [
+      "MS AI",
+      "MS Data Science",
+      "M.Tech AI",
+      "PhD Machine Learning"
+    ],
+
+    futureScope: "Excellent"
+  },
+
+  {
+    id: "research-analyst",
+    name: "Research Analyst",
+    icon: "🔬",
+    category: "Research & Analytics",
+    duration: "Learning + Career",
+    eligibility: "B.Tech / Degree",
+
+    salary: "₹5 LPA - ₹20 LPA",
+    averageSalary: "₹5 LPA - ₹20 LPA",
+    growth: "High",
+    rating: 4.6,
+
+    description:
+      "Conducts research and analyzes data to generate meaningful insights.",
+
+    overview:
+      "Research Analysts collect information, analyze datasets, identify trends and prepare reports to support research and decision-making.",
+
+    education: [
+      "B.Tech / B.E",
+      "B.Sc",
+      "B.Com",
+      "BBA",
+      "BCA",
+      "M.Sc",
+      "MBA"
+    ],
+
+    streams: [
+      "Market Research",
+      "Data Research",
+      "Business Research",
+      "Economic Research"
+    ],
+
+    entranceExams: [],
+
+    skills: [
+      "Research",
+      "Data Analysis",
+      "Statistics",
+      "Excel",
+      "SQL",
+      "Python",
+      "Critical Thinking",
+      "Report Writing",
+      "Data Visualization",
+      "Communication"
+    ],
+
+    technologies: [
+      "Excel",
+      "SQL",
+      "Python",
+      "Pandas",
+      "Power BI",
+      "Tableau",
+      "Jupyter"
+    ],
+
+    topColleges: [
+      "IIM Ahmedabad",
+      "IIM Bangalore",
+      "Delhi University",
+      "Jawaharlal Nehru University",
+      "Christ University"
+    ],
+
+    certifications: [
+      "Google Data Analytics",
+      "IBM Data Analyst",
+      "Microsoft Power BI"
+    ],
+
+    companies: [
+      "Deloitte",
+      "KPMG",
+      "EY",
+      "PwC",
       "Accenture",
       "TCS",
       "Infosys"
-    ]
+    ],
+
+    careerOpportunities: [
+      "Research Analyst",
+      "Market Research Analyst",
+      "Research Associate",
+      "Data Research Analyst",
+      "Business Research Analyst"
+    ],
+
+    jobRoles: [
+      "Research Analyst",
+      "Market Research Analyst",
+      "Research Associate",
+      "Data Research Analyst",
+      "Business Research Analyst"
+    ],
+
+    roadmap: [
+      "Research Fundamentals",
+      "Statistics",
+      "Excel",
+      "Data Collection",
+      "SQL",
+      "Python",
+      "Data Cleaning",
+      "Data Analysis",
+      "Data Visualization",
+      "Research Report Writing",
+      "Build Research Projects",
+      "Create Portfolio",
+      "Interview Preparation",
+      "Apply for Jobs"
+    ],
+
+    projects: [
+      "Market Research Analysis",
+      "Consumer Behavior Analysis",
+      "Industry Research Report",
+      "Survey Data Analysis",
+      "Economic Data Analysis"
+    ],
+
+    higherStudies: [
+      "MBA",
+      "M.Sc",
+      "MA",
+      "MS Research",
+      "PhD"
+    ],
+
+    futureScope: "High"
   },
 
   {
@@ -578,8 +1350,11 @@ const professionalCareers = [
     category: "Cloud & Infrastructure",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹8 LPA - ₹30 LPA",
+    averageSalary: "₹8 LPA - ₹30 LPA",
     growth: "Excellent",
+    rating: 4.8,
 
     description:
       "Designs and manages cloud infrastructure.",
@@ -593,6 +1368,15 @@ const professionalCareers = [
       "B.Sc Computer Science",
       "MCA"
     ],
+
+    streams: [
+      "Cloud Computing",
+      "Cloud Infrastructure",
+      "Cloud Security",
+      "Cloud Architecture"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Cloud Computing",
@@ -613,6 +1397,44 @@ const professionalCareers = [
       "Kubernetes",
       "Terraform",
       "Git"
+    ],
+
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "IIIT Hyderabad",
+      "NIT Trichy",
+      "VIT"
+    ],
+
+    certifications: [
+      "AWS Cloud Practitioner",
+      "AWS Solutions Architect",
+      "Microsoft Azure Fundamentals",
+      "Google Cloud Certification"
+    ],
+
+    companies: [
+      "Amazon",
+      "Microsoft",
+      "Google",
+      "IBM",
+      "Oracle",
+      "Accenture"
+    ],
+
+    careerOpportunities: [
+      "Cloud Engineer",
+      "Cloud Developer",
+      "Cloud Administrator",
+      "Cloud Architect"
+    ],
+
+    jobRoles: [
+      "Cloud Engineer",
+      "Cloud Developer",
+      "Cloud Administrator",
+      "Cloud Architect"
     ],
 
     roadmap: [
@@ -638,27 +1460,13 @@ const professionalCareers = [
       "Containerized Application"
     ],
 
-    certifications: [
-      "AWS Cloud Practitioner",
-      "AWS Solutions Architect",
-      "Microsoft Azure Fundamentals"
+    higherStudies: [
+      "M.Tech Cloud Computing",
+      "MS Cloud Computing",
+      "MBA"
     ],
 
-    jobRoles: [
-      "Cloud Engineer",
-      "Cloud Developer",
-      "Cloud Administrator",
-      "Cloud Architect"
-    ],
-
-    companies: [
-      "Amazon",
-      "Microsoft",
-      "Google",
-      "IBM",
-      "Oracle",
-      "Accenture"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -668,8 +1476,11 @@ const professionalCareers = [
     category: "Cloud & Infrastructure",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹8 LPA - ₹30 LPA",
+    averageSalary: "₹8 LPA - ₹30 LPA",
     growth: "Excellent",
+    rating: 4.8,
 
     description:
       "Automates deployment and infrastructure.",
@@ -682,6 +1493,15 @@ const professionalCareers = [
       "BCA",
       "MCA"
     ],
+
+    streams: [
+      "DevOps",
+      "Cloud Infrastructure",
+      "CI/CD",
+      "Site Reliability"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Linux",
@@ -703,6 +1523,44 @@ const professionalCareers = [
       "AWS",
       "Terraform",
       "Prometheus"
+    ],
+
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "IIIT Hyderabad",
+      "NIT Trichy",
+      "VIT"
+    ],
+
+    certifications: [
+      "AWS Cloud Practitioner",
+      "Certified Kubernetes Application Developer",
+      "Docker Certification",
+      "Terraform Certification"
+    ],
+
+    companies: [
+      "Amazon",
+      "Microsoft",
+      "Google",
+      "Infosys",
+      "TCS",
+      "Accenture"
+    ],
+
+    careerOpportunities: [
+      "DevOps Engineer",
+      "Site Reliability Engineer",
+      "Cloud Engineer",
+      "DevOps Developer"
+    ],
+
+    jobRoles: [
+      "DevOps Engineer",
+      "Site Reliability Engineer",
+      "Cloud Engineer",
+      "DevOps Developer"
     ],
 
     roadmap: [
@@ -728,27 +1586,13 @@ const professionalCareers = [
       "Cloud Deployment Pipeline"
     ],
 
-    certifications: [
-      "AWS Cloud Practitioner",
-      "Certified Kubernetes Application Developer",
-      "Docker Certification"
+    higherStudies: [
+      "M.Tech",
+      "MS Cloud Computing",
+      "MBA"
     ],
 
-    jobRoles: [
-      "DevOps Engineer",
-      "Site Reliability Engineer",
-      "Cloud Engineer",
-      "DevOps Developer"
-    ],
-
-    companies: [
-      "Amazon",
-      "Microsoft",
-      "Google",
-      "Infosys",
-      "TCS",
-      "Accenture"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -758,8 +1602,11 @@ const professionalCareers = [
     category: "Cyber Security",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹7 LPA - ₹30 LPA",
+    averageSalary: "₹7 LPA - ₹30 LPA",
     growth: "Excellent",
+    rating: 4.8,
 
     description:
       "Protects systems against cyber threats.",
@@ -773,6 +1620,16 @@ const professionalCareers = [
       "BCA",
       "MCA"
     ],
+
+    streams: [
+      "Network Security",
+      "Application Security",
+      "Ethical Hacking",
+      "Cloud Security",
+      "Security Operations"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Networking",
@@ -792,6 +1649,44 @@ const professionalCareers = [
       "Burp Suite",
       "Kali Linux",
       "SIEM"
+    ],
+
+    topColleges: [
+      "IIIT Hyderabad",
+      "VIT",
+      "SRM University",
+      "Amrita Vishwa Vidyapeetham",
+      "IIT Kanpur"
+    ],
+
+    certifications: [
+      "CompTIA Security+",
+      "Certified Ethical Hacker",
+      "Cisco CyberOps",
+      "CISSP"
+    ],
+
+    companies: [
+      "IBM",
+      "Microsoft",
+      "Amazon",
+      "TCS",
+      "Wipro",
+      "Accenture"
+    ],
+
+    careerOpportunities: [
+      "Cyber Security Engineer",
+      "Security Analyst",
+      "Security Engineer",
+      "SOC Analyst"
+    ],
+
+    jobRoles: [
+      "Cyber Security Engineer",
+      "Security Analyst",
+      "Security Engineer",
+      "SOC Analyst"
     ],
 
     roadmap: [
@@ -816,27 +1711,13 @@ const professionalCareers = [
       "Intrusion Detection System"
     ],
 
-    certifications: [
-      "CompTIA Security+",
-      "Certified Ethical Hacker",
-      "Cisco CyberOps"
+    higherStudies: [
+      "M.Tech Cyber Security",
+      "MS Cyber Security",
+      "MBA"
     ],
 
-    jobRoles: [
-      "Cyber Security Engineer",
-      "Security Analyst",
-      "Security Engineer",
-      "SOC Analyst"
-    ],
-
-    companies: [
-      "IBM",
-      "Microsoft",
-      "Amazon",
-      "TCS",
-      "Wipro",
-      "Accenture"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -846,8 +1727,11 @@ const professionalCareers = [
     category: "Mobile Development",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹6 LPA - ₹25 LPA",
+    averageSalary: "₹6 LPA - ₹25 LPA",
     growth: "Excellent",
+    rating: 4.7,
 
     description:
       "Develops Android and iOS applications.",
@@ -861,6 +1745,15 @@ const professionalCareers = [
       "B.Sc Computer Science",
       "MCA"
     ],
+
+    streams: [
+      "Android Development",
+      "iOS Development",
+      "Cross-Platform Development",
+      "Mobile UI Development"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Programming",
@@ -878,6 +1771,43 @@ const professionalCareers = [
       "Kotlin",
       "Dart",
       "Firebase"
+    ],
+
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "VIT",
+      "SRM University",
+      "IIIT Hyderabad"
+    ],
+
+    certifications: [
+      "Google Associate Android Developer",
+      "Meta React Native",
+      "Flutter Certification"
+    ],
+
+    companies: [
+      "Google",
+      "Amazon",
+      "Microsoft",
+      "TCS",
+      "Infosys",
+      "Accenture"
+    ],
+
+    careerOpportunities: [
+      "Mobile App Developer",
+      "Android Developer",
+      "Flutter Developer",
+      "React Native Developer"
+    ],
+
+    jobRoles: [
+      "Mobile App Developer",
+      "Android Developer",
+      "Flutter Developer",
+      "React Native Developer"
     ],
 
     roadmap: [
@@ -903,26 +1833,14 @@ const professionalCareers = [
       "Chat Application"
     ],
 
-    certifications: [
-      "Google Associate Android Developer",
-      "Meta React Native"
+    higherStudies: [
+      "MCA",
+      "M.Tech",
+      "MS Computer Science",
+      "MBA"
     ],
 
-    jobRoles: [
-      "Mobile App Developer",
-      "Android Developer",
-      "Flutter Developer",
-      "React Native Developer"
-    ],
-
-    companies: [
-      "Google",
-      "Amazon",
-      "Microsoft",
-      "TCS",
-      "Infosys",
-      "Accenture"
-    ]
+    futureScope: "Excellent"
   },
 
   {
@@ -932,8 +1850,11 @@ const professionalCareers = [
     category: "Design",
     duration: "Learning + Career",
     eligibility: "Any Degree",
+
     salary: "₹5 LPA - ₹20 LPA",
+    averageSalary: "₹5 LPA - ₹20 LPA",
     growth: "High",
+    rating: 4.7,
 
     description:
       "Designs engaging digital user experiences.",
@@ -948,6 +1869,16 @@ const professionalCareers = [
       "Design Diploma"
     ],
 
+    streams: [
+      "UI Design",
+      "UX Design",
+      "Product Design",
+      "Interaction Design",
+      "UX Research"
+    ],
+
+    entranceExams: [],
+
     skills: [
       "User Research",
       "Wireframing",
@@ -961,7 +1892,45 @@ const professionalCareers = [
       "Figma",
       "Adobe XD",
       "Adobe Photoshop",
-      "Adobe Illustrator"
+      "Adobe Illustrator",
+      "FigJam"
+    ],
+
+    topColleges: [
+      "National Institute of Design",
+      "IIT Bombay",
+      "IIT Hyderabad",
+      "Srishti Manipal Institute",
+      "MIT Institute of Design"
+    ],
+
+    certifications: [
+      "Google UX Design",
+      "Adobe UX Design",
+      "Interaction Design Foundation Certification"
+    ],
+
+    companies: [
+      "Google",
+      "Microsoft",
+      "Amazon",
+      "Adobe",
+      "Infosys",
+      "Accenture"
+    ],
+
+    careerOpportunities: [
+      "UI Designer",
+      "UX Designer",
+      "Product Designer",
+      "UX Researcher"
+    ],
+
+    jobRoles: [
+      "UI Designer",
+      "UX Designer",
+      "Product Designer",
+      "UX Researcher"
     ],
 
     roadmap: [
@@ -986,26 +1955,14 @@ const professionalCareers = [
       "Career App Design"
     ],
 
-    certifications: [
-      "Google UX Design",
-      "Adobe UX Design"
+    higherStudies: [
+      "M.Des",
+      "MBA",
+      "MS Design",
+      "Design Specialization"
     ],
 
-    jobRoles: [
-      "UI Designer",
-      "UX Designer",
-      "Product Designer",
-      "UX Researcher"
-    ],
-
-    companies: [
-      "Google",
-      "Microsoft",
-      "Amazon",
-      "Adobe",
-      "Infosys",
-      "Accenture"
-    ]
+    futureScope: "High"
   },
 
   {
@@ -1015,8 +1972,11 @@ const professionalCareers = [
     category: "Software Testing",
     duration: "Learning + Career",
     eligibility: "B.Tech / Degree",
+
     salary: "₹5 LPA - ₹18 LPA",
+    averageSalary: "₹5 LPA - ₹18 LPA",
     growth: "High",
+    rating: 4.6,
 
     description:
       "Tests software quality and reliability.",
@@ -1030,6 +1990,16 @@ const professionalCareers = [
       "B.Sc Computer Science",
       "MCA"
     ],
+
+    streams: [
+      "Manual Testing",
+      "Automation Testing",
+      "API Testing",
+      "Performance Testing",
+      "Quality Assurance"
+    ],
+
+    entranceExams: [],
 
     skills: [
       "Manual Testing",
@@ -1049,6 +2019,43 @@ const professionalCareers = [
       "Jira",
       "SQL",
       "Git"
+    ],
+
+    topColleges: [
+      "IIT Bombay",
+      "IIT Madras",
+      "VIT",
+      "NIT Trichy",
+      "IIIT Hyderabad"
+    ],
+
+    certifications: [
+      "ISTQB Foundation Level",
+      "Selenium Certification",
+      "Postman API Certification"
+    ],
+
+    companies: [
+      "TCS",
+      "Infosys",
+      "Wipro",
+      "Accenture",
+      "Cognizant",
+      "Capgemini"
+    ],
+
+    careerOpportunities: [
+      "QA Engineer",
+      "Test Engineer",
+      "Automation Tester",
+      "Software Test Engineer"
+    ],
+
+    jobRoles: [
+      "QA Engineer",
+      "Test Engineer",
+      "Automation Tester",
+      "Software Test Engineer"
     ],
 
     roadmap: [
@@ -1072,26 +2079,14 @@ const professionalCareers = [
       "Web Application Test Suite"
     ],
 
-    certifications: [
-      "ISTQB Foundation Level",
-      "Selenium Certification"
+    higherStudies: [
+      "M.Tech",
+      "MCA",
+      "MS Computer Science",
+      "MBA"
     ],
 
-    jobRoles: [
-      "QA Engineer",
-      "Test Engineer",
-      "Automation Tester",
-      "Software Test Engineer"
-    ],
-
-    companies: [
-      "TCS",
-      "Infosys",
-      "Wipro",
-      "Accenture",
-      "Cognizant",
-      "Capgemini"
-    ]
+    futureScope: "High"
   }
 ];
 

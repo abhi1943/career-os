@@ -1,3 +1,4 @@
+
 export function generatePortfolio(resume) {
 
     return {
@@ -53,6 +54,43 @@ export function generatePortfolio(resume) {
         experience: [
 
             ...(resume.experience || [])
+
+        ],
+
+        // ======================================================
+        // CAREER OBJECTIVE
+        // ======================================================
+
+        careerObjective:
+            resume.careerObjective || "",
+
+        // ======================================================
+        // CERTIFICATIONS
+        // ======================================================
+
+        certifications: [
+
+            ...(resume.certifications || [])
+
+        ],
+
+        // ======================================================
+        // ACHIEVEMENTS
+        // ======================================================
+
+        achievements: [
+
+            ...(resume.achievements || [])
+
+        ],
+
+        // ======================================================
+        // LANGUAGES
+        // ======================================================
+
+        languages: [
+
+            ...(resume.languages || [])
 
         ]
 

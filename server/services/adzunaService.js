@@ -1,3 +1,4 @@
+
 const axios = require("axios");
 const dns = require("dns");
 const https = require("https");
@@ -18,16 +19,12 @@ const adzunaHttpsAgent = new https.Agent({
 // ======================================================
 
 const ADZUNA_RESULTS_PER_PAGE = 50;
-
 const MAX_FILTER_PAGES = 5;
-
 const MAX_REQUESTED_PAGE = 100;
-
-const ADZUNA_TIMEOUT = 60000;
-
-const ADZUNA_MAX_RETRIES = 3;
-
-const ADZUNA_RETRY_DELAY = 2000;
+const CATEGORY_MAX_PAGES = 5;
+const ADZUNA_TIMEOUT = 30000;
+const ADZUNA_MAX_RETRIES = 2;
+const ADZUNA_RETRY_DELAY = 2500;
 
 // ======================================================
 // ADZUNA CAREER CATEGORIES
@@ -83,214 +80,6 @@ const ADZUNA_CATEGORIES = {
 
     TRAVEL:
         "travel-jobs",
-};
-
-// ======================================================
-// CAREEROS OFFICIAL JOB CATEGORIES
-// ======================================================
-
-const CAREEROS_JOB_CATEGORIES = {
-    IT: {
-        key: "it",
-        label: "IT",
-        queries: [
-            "software engineer",
-            "software developer",
-            "frontend developer",
-            "backend developer",
-            "full stack developer",
-            "Java developer",
-            "Python developer",
-            "data analyst",
-            "data scientist",
-            "DevOps engineer",
-            "cloud engineer",
-            "cybersecurity",
-            "UI UX designer",
-            "mobile developer",
-        ],
-    },
-
-    NON_IT: {
-        key: "non-it",
-        label: "Non-IT",
-        queries: [
-            "business operations",
-            "operations executive",
-            "office executive",
-            "administrative executive",
-            "customer service executive",
-            "customer support",
-            "retail executive",
-            "logistics executive",
-            "warehouse executive",
-            "field executive",
-        ],
-    },
-
-    MEDICAL: {
-        key: "medical",
-        label: "Medical",
-        queries: [
-            "MBBS",
-            "doctor",
-            "medical officer",
-            "nurse",
-            "pharmacist",
-            "BDS",
-            "dentist",
-            "physiotherapist",
-            "medical laboratory technician",
-            "radiology technician",
-            "clinical research associate",
-            "medical coder",
-            "medical representative",
-        ],
-    },
-
-    ENGINEERING: {
-        key: "engineering",
-        label: "Engineering",
-        queries: [
-            "civil engineer",
-            "electrical engineer",
-            "electronics engineer",
-            "chemical engineer",
-            "industrial engineer",
-            "automotive engineer",
-            "structural engineer",
-            "engineering graduate",
-        ],
-    },
-
-    MECHANICAL: {
-        key: "mechanical",
-        label: "Mechanical",
-        queries: [
-            "mechanical engineer",
-            "mechanical design engineer",
-            "production engineer",
-            "manufacturing engineer",
-            "maintenance engineer",
-            "automotive engineer",
-            "CAD engineer",
-            "CNC engineer",
-        ],
-    },
-
-    EDUCATION: {
-        key: "education",
-        label: "Education",
-        queries: [
-            "teacher",
-            "school teacher",
-            "lecturer",
-            "professor",
-            "faculty",
-            "teaching",
-            "tutor",
-            "academic coordinator",
-        ],
-    },
-
-    FINANCE_ACCOUNTING: {
-        key: "finance-accounting",
-        label: "Finance & Accounting",
-        queries: [
-            "accountant",
-            "accounting",
-            "finance executive",
-            "financial analyst",
-            "banking",
-            "auditor",
-            "tax accountant",
-            "accounts executive",
-        ],
-    },
-
-    GOVERNMENT: {
-        key: "government",
-        label: "Government",
-        queries: [
-            "government jobs",
-            "government employee",
-            "public sector",
-            "public administration",
-            "government officer",
-            "civil services",
-        ],
-    },
-
-    SALES_MARKETING: {
-        key: "sales-marketing",
-        label: "Sales & Marketing",
-        queries: [
-            "sales executive",
-            "sales manager",
-            "business development",
-            "marketing executive",
-            "digital marketing",
-            "marketing manager",
-            "business development executive",
-        ],
-    },
-
-    HR: {
-        key: "hr",
-        label: "HR",
-        queries: [
-            "HR executive",
-            "human resources",
-            "HR recruiter",
-            "recruiter",
-            "recruitment",
-            "talent acquisition",
-            "HR manager",
-        ],
-    },
-
-    DESIGN: {
-        key: "design",
-        label: "Design",
-        queries: [
-            "graphic designer",
-            "UI UX designer",
-            "UX designer",
-            "UI designer",
-            "web designer",
-            "product designer",
-            "creative designer",
-        ],
-    },
-
-    SKILLED_TRADES: {
-        key: "skilled-trades",
-        label: "Skilled Trades",
-        queries: [
-            "electrician",
-            "plumber",
-            "welder",
-            "carpenter",
-            "technician",
-            "machine operator",
-            "CNC operator",
-            "maintenance technician",
-            "fitter",
-        ],
-    },
-
-    OTHER: {
-        key: "other",
-        label: "Other",
-        queries: [
-            "general jobs",
-            "office jobs",
-            "field jobs",
-            "support executive",
-            "operations",
-            "assistant",
-        ],
-    },
 };
 
 // ======================================================
@@ -494,128 +283,6 @@ const CAREEROS_CATEGORY_SEARCH_CONFIG = {
     },
 };
 
-// ======================================================
-// BROAD CAREER CATEGORIES
-// ======================================================
-
-const BROAD_JOB_CATEGORIES = [
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.IT.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.IT.label,
-        query:
-            "software developer technology IT",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.NON_IT.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.NON_IT.label,
-        query:
-            "business operations office customer service",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.MEDICAL.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.MEDICAL.label,
-        query:
-            "medical doctor nurse healthcare hospital",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.ENGINEERING.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.ENGINEERING.label,
-        query:
-            "civil electrical electronics engineer",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.MECHANICAL.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.MECHANICAL.label,
-        query:
-            "mechanical production manufacturing engineer",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.EDUCATION.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.EDUCATION.label,
-        query:
-            "teacher lecturer professor faculty",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.FINANCE_ACCOUNTING.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.FINANCE_ACCOUNTING.label,
-        query:
-            "accountant finance accounting banking",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.GOVERNMENT.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.GOVERNMENT.label,
-        query:
-            "government public sector administration",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.SALES_MARKETING.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.SALES_MARKETING.label,
-        query:
-            "sales marketing business development",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.HR.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.HR.label,
-        query:
-            "human resources HR recruiter recruitment",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.DESIGN.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.DESIGN.label,
-        query:
-            "graphic designer UI UX web designer",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.SKILLED_TRADES.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.SKILLED_TRADES.label,
-        query:
-            "electrician plumber welder technician",
-    },
-
-    {
-        category:
-            CAREEROS_JOB_CATEGORIES.OTHER.key,
-        label:
-            CAREEROS_JOB_CATEGORIES.OTHER.label,
-        query:
-            "general office field support jobs",
-    },
-];
 
 // ======================================================
 // MEDICAL QUERY MAP
@@ -641,7 +308,7 @@ const MEDICAL_QUERY_MAP = {
         "physician physicians medical doctor doctor clinical physician hospital physician",
 
     "medical doctor":
-        "medical doctor doctor physician MBBS medical officer duty doctor resident doctor",
+        "medical doctor doctor physician MBBS medical officer duty medical officer resident doctor",
 
     "medical officer":
         "medical officer medical doctor MBBS doctor duty medical officer physician hospital doctor",
@@ -1194,13 +861,6 @@ function getCareerOSCategoryQueries(category = "") {
         : [];
 }
 
-function getCareerOSCategoryQuery(category = "") {
-    const queries =
-        getCareerOSCategoryQueries(category);
-
-    return queries.join(" ");
-}
-
 function getCareerOSCategoryAdzunaCategory(
     category = ""
 ) {
@@ -1469,7 +1129,9 @@ function normalizeQuery(query = "") {
     );
 }
 
-// ======================================================
+// Part 2
+
+//// ======================================================
 // TEXT HELPER
 // ======================================================
 
@@ -1481,8 +1143,7 @@ function getJobText(job) {
     const location =
         typeof job.location === "string"
             ? job.location
-            : job.location?.display_name ||
-              "";
+            : job.location?.display_name || "";
 
     const category =
         typeof job.category === "string"
@@ -1492,8 +1153,7 @@ function getJobText(job) {
     const company =
         typeof job.company === "string"
             ? job.company
-            : job.company?.display_name ||
-              "";
+            : job.company?.display_name || "";
 
     return `
         ${job.title || ""}
@@ -1540,8 +1200,7 @@ function getExperienceLevel(job) {
 
     if (
         fresherKeywords.some(
-            (keyword) =>
-                text.includes(keyword)
+            (keyword) => text.includes(keyword)
         )
     ) {
         return "Fresher / 0 years";
@@ -1570,8 +1229,7 @@ function getExperienceLevel(job) {
 
     if (
         seniorKeywords.some(
-            (keyword) =>
-                text.includes(keyword)
+            (keyword) => text.includes(keyword)
         )
     ) {
         return "5+ years";
@@ -1582,37 +1240,30 @@ function getExperienceLevel(job) {
             regex: /\b(?:8|9|10|11|12|13|14|15|16|17|18|19|20)\+?\s*years?\b/i,
             result: "5+ years",
         },
-
         {
             regex: /\b5\s*(?:-|–|—|to)\s*(?:6|7|8|9|10)\s*years?\b/i,
             result: "5+ years",
         },
-
         {
             regex: /\b(?:6|7)\s*(?:-|–|—|to)\s*(?:8|9|10)\s*years?\b/i,
             result: "5+ years",
         },
-
         {
             regex: /\b(?:3|4)\s*(?:-|–|—|to)\s*(?:5|6|7)\s*years?\b/i,
             result: "3–5 years",
         },
-
         {
             regex: /\b2\s*(?:-|–|—|to)\s*4\s*years?\b/i,
             result: "1–3 years",
         },
-
         {
             regex: /\b1\s*(?:-|–|—|to)\s*3\s*years?\b/i,
             result: "1–3 years",
         },
-
         {
             regex: /\b0\s*(?:-|–|—|to)\s*1\s*years?\b/i,
             result: "0–1 years",
         },
-
         {
             regex: /\b1\s*(?:-|–|—|to)\s*2\s*years?\b/i,
             result: "0–1 years",
@@ -1634,32 +1285,24 @@ function getExperienceLevel(job) {
     }
 
     if (
-        /\b(?:5|6|7)\+?\s*years?\b/i.test(
-            text
-        )
+        /\b(?:5|6|7)\+?\s*years?\b/i.test(text)
     ) {
         return "5+ years";
     }
 
     if (
-        /\b(?:3|4)\+?\s*years?\b/i.test(
-            text
-        )
+        /\b(?:3|4)\+?\s*years?\b/i.test(text)
     ) {
         return "3–5 years";
     }
 
     if (
-        /\b(?:1|2)\+?\s*years?\b/i.test(
-            text
-        )
+        /\b(?:1|2)\+?\s*years?\b/i.test(text)
     ) {
         return "1–3 years";
     }
 
-    if (
-        /\b0\s*years?\b/i.test(text)
-    ) {
+    if (/\b0\s*years?\b/i.test(text)) {
         return "Fresher / 0 years";
     }
 
@@ -1690,9 +1333,7 @@ function getWorkMode(job) {
         return "Remote";
     }
 
-    if (
-        explicitMode.includes("hybrid")
-    ) {
+    if (explicitMode.includes("hybrid")) {
         return "Hybrid";
     }
 
@@ -1787,9 +1428,7 @@ function getJobType(job) {
     const text = getJobText(job);
 
     if (
-        /\b(intern|internship|trainee)\b/i.test(
-            text
-        )
+        /\b(intern|internship|trainee)\b/i.test(text)
     ) {
         return "Internship";
     }
@@ -2094,11 +1733,9 @@ function getUniqueJobId(job) {
 
     const fallbackId = [
         job.title || "",
-
         typeof job.company === "string"
             ? job.company
             : job.company?.display_name || "",
-
         typeof job.location === "string"
             ? job.location
             : job.location?.display_name || "",
@@ -2124,7 +1761,6 @@ function removeDuplicateJobs(jobs) {
     }
 
     const seen = new Set();
-
     const unique = [];
 
     for (const job of jobs) {
@@ -2140,7 +1776,6 @@ function removeDuplicateJobs(jobs) {
         }
 
         seen.add(id);
-
         unique.push(job);
     }
 
@@ -2200,9 +1835,7 @@ function shouldRetryAdzunaError(error) {
         "EHOSTUNREACH",
     ];
 
-    return retryableCodes.includes(
-        code
-    );
+    return retryableCodes.includes(code);
 }
 
 // ======================================================
@@ -2254,25 +1887,7 @@ async function fetchAdzunaPage({
             const normalizedQuery =
                 normalizeQuery(query);
 
-            console.log(
-                `🌐 Calling Adzuna: ${url}`
-            );
-
-            console.log(
-                `   Query: ${normalizedQuery}`
-            );
-
-            console.log(
-                `   Category: ${
-                    category || "ANY"
-                }`
-            );
-
-            console.log(
-                `   Location: ${
-                    location || "India"
-                }`
-            );
+            
 
             if (attempt > 1) {
                 console.log(
@@ -2281,21 +1896,13 @@ async function fetchAdzunaPage({
             }
 
             const params = {
-                app_id:
-                    appId,
-
-                app_key:
-                    appKey,
-
+                app_id: appId,
+                app_key: appKey,
                 results_per_page:
                     ADZUNA_RESULTS_PER_PAGE,
-
-                what:
-                    normalizedQuery,
-
+                what: normalizedQuery,
                 where:
-                    location ||
-                    "India",
+                    location || "India",
             };
 
             if (category) {
@@ -2325,20 +1932,6 @@ async function fetchAdzunaPage({
                     }
                 );
 
-            console.log(
-                `✅ Adzuna response received: ${response.status}`
-            );
-
-            console.log(
-                `📊 Adzuna returned ${
-                    Array.isArray(
-                        response.data?.results
-                    )
-                        ? response.data.results.length
-                        : 0
-                } jobs`
-            );
-
             return response.data;
         } catch (error) {
             lastError = error;
@@ -2355,26 +1948,18 @@ async function fetchAdzunaPage({
                 "❌ Adzuna request failed:",
                 {
                     attempt,
-
                     maxRetries:
                         ADZUNA_MAX_RETRIES,
-
                     code:
                         error.code,
-
                     message:
                         error.message,
-
                     status,
-
                     statusText:
                         error.response
                             ?.statusText,
-
                     category,
-
                     query,
-
                     url,
                 }
             );
@@ -2394,11 +1979,7 @@ async function fetchAdzunaPage({
                 ADZUNA_RETRY_DELAY *
                 attempt;
 
-            console.log(
-                `⏳ Waiting ${
-                    delay / 1000
-                }s before Adzuna retry...`
-            );
+            
 
             await wait(delay);
         }
@@ -2413,23 +1994,6 @@ async function fetchAdzunaPage({
 
 // ======================================================
 // SEARCH SPECIFIC CATEGORY
-// ======================================================
-//
-// Used for direct searches such as:
-//
-// MBBS
-// doctor
-// nurse
-// accountant
-// teacher
-// React developer
-//
-// IMPORTANT:
-//
-// First attempt uses the query/category combination.
-// If the category request fails, fallback is performed
-// without category.
-//
 // ======================================================
 
 async function searchSpecificCategory({
@@ -2456,9 +2020,7 @@ async function searchSpecificCategory({
                 categoryError?.message
         );
 
-        console.log(
-            `🔁 Retrying "${query}" without Adzuna category...`
-        );
+        
 
         return fetchAdzunaPage({
             appId,
@@ -2471,83 +2033,29 @@ async function searchSpecificCategory({
     }
 }
 
-// ======================================================
-// SEARCH CAREEROS CATEGORY
-// ======================================================
-//
-// CareerOS categories contain multiple job types.
-//
-// Example:
-//
-// medical
-//   -> nurse
-//   -> staff nurse
-//   -> registered nurse
-//   -> doctor
-//   -> medical officer
-//   -> MBBS
-//   -> pharmacist
-//   -> dentist
-//
-// IMPORTANT:
-//
-// We intentionally perform KEYWORD-FIRST searches.
-//
-// This prevents Adzuna's category classification from
-// hiding valid jobs.
-//
-// For example:
-//
-// MBBS
-// Nurse
-// Teacher
-//
-// may be classified differently by Adzuna depending on
-// employer/job metadata.
-//
-// Therefore the CareerOS category is primarily enforced
-// by its query list rather than a mandatory Adzuna
-// category filter.
-//
-// ======================================================
-
 async function searchCareerOSCategory({
     appId,
     appKey,
     category,
     location,
-    page = 1,
 }) {
     const queries =
         getCareerOSCategoryQueries(
             category
         );
 
-    if (
-        queries.length === 0
-    ) {
+    if (queries.length === 0) {
         return {
             results: [],
-
             count: 0,
-
             total: 0,
-
             filtered_total: 0,
-
             filtered_count: 0,
-
             jobs_scanned: 0,
-
             filtered_pages_scanned: 1,
-
             has_more: false,
-
-            careeros_category:
-                category,
-
+            careeros_category: category,
             category_queries: [],
-
             category_queries_successful: 0,
         };
     }
@@ -2561,263 +2069,194 @@ async function searchCareerOSCategory({
 
     let successfulQueries = 0;
 
-    console.log(
-        `\n======================================================`
-    );
+    const QUERY_CONCURRENCY = 3;
 
-    console.log(
-        `🔎 CAREEROS CATEGORY SEARCH: ${category}`
-    );
-
-    console.log(
-        `📋 Category queries: ${queries.length}`
-    );
-
-    console.log(
-        `🏷️ Configured Adzuna category: ${
-            configuredAdzunaCategory ||
-            "KEYWORD SEARCH"
-        }`
-    );
-
-    console.log(
-        `======================================================`
-    );
-
-    for (
-        const categoryQuery of queries
-    ) {
-        try {
-            console.log(
-                `🔍 CareerOS category query: "${categoryQuery}"`
-            );
-
-            let data;
-
-            // --------------------------------------------------
-            // KEYWORD-FIRST SEARCH
-            // --------------------------------------------------
-            //
-            // This is the important change.
-            //
-            // We do NOT force Adzuna category on the first
-            // request because keyword results are broader.
-            //
-            // This improves recall for:
-            //
-            // MBBS
-            // doctor
-            // nurse
-            // teacher
-            // accountant
-            // technician
-            //
-            // --------------------------------------------------
-
+    const processQuery =
+        async (categoryQuery) => {
             try {
-                data =
-                    await fetchAdzunaPage({
-                        appId,
+                
 
-                        appKey,
+                const queryJobs = [];
 
-                        query:
-                            categoryQuery,
+                let querySuccessful = false;
 
-                        location,
-
-                        page,
-
-                        category:
-                            null,
-                    });
-            } catch (keywordError) {
-                console.error(
-                    `❌ Keyword search failed for "${categoryQuery}":`,
-                    keywordError?.response
-                        ?.data ||
-                        keywordError?.message
-                );
-
-                // --------------------------------------------------
-                // SECONDARY CATEGORY FALLBACK
-                // --------------------------------------------------
-
-                if (
-                    configuredAdzunaCategory
+                for (
+                    let currentPage = 1;
+                    currentPage <= CATEGORY_MAX_PAGES;
+                    currentPage++
                 ) {
-                    console.log(
-                        `🔁 Retrying "${categoryQuery}" with Adzuna category "${configuredAdzunaCategory}"`
+                    let data;
+
+                    try {
+                        data =
+                            await fetchAdzunaPage({
+                                appId,
+                                appKey,
+                                query:
+                                    categoryQuery,
+                                location,
+                                page:
+                                    currentPage,
+                                category:
+                                    null,
+                            });
+                    } catch (keywordError) {
+                        console.error(
+                            `❌ Keyword search failed for "${categoryQuery}" page ${currentPage}:`,
+                            keywordError?.response
+                                ?.data ||
+                                keywordError?.message
+                        );
+
+                        if (
+                            configuredAdzunaCategory
+                        ) {
+                            try {
+                                data =
+                                    await fetchAdzunaPage({
+                                        appId,
+                                        appKey,
+                                        query:
+                                            categoryQuery,
+                                        location,
+                                        page:
+                                            currentPage,
+                                        category:
+                                            configuredAdzunaCategory,
+                                    });
+                            } catch (categoryError) {
+                                console.error(
+                                    `❌ Category fallback also failed for "${categoryQuery}" page ${currentPage}:`,
+                                    categoryError?.response
+                                        ?.data ||
+                                        categoryError?.message
+                                );
+
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+
+                    const results =
+                        Array.isArray(
+                            data?.results
+                        )
+                            ? data.results
+                            : [];
+
+                    
+
+                    if (
+                        results.length > 0
+                    ) {
+                        querySuccessful =
+                            true;
+                    }
+
+                    const taggedResults =
+                        results.map(
+                            (job) => ({
+                                ...job,
+
+                                careeros_category:
+                                    category,
+
+                                careeros_search_query:
+                                    categoryQuery,
+
+                                careeros_search_page:
+                                    currentPage,
+                            })
+                        );
+
+                    queryJobs.push(
+                        ...taggedResults
                     );
 
-                    data =
-                        await fetchAdzunaPage({
-                            appId,
-
-                            appKey,
-
-                            query:
-                                categoryQuery,
-
-                            location,
-
-                            page,
-
-                            category:
-                                configuredAdzunaCategory,
-                        });
-                } else {
-                    throw keywordError;
+                    if (
+                        results.length <
+                        ADZUNA_RESULTS_PER_PAGE
+                    ) {
+                        break;
+                    }
                 }
-            }
 
-            const results =
-                Array.isArray(
-                    data?.results
-                )
-                    ? data.results
-                    : [];
+                if (querySuccessful) {
+                    successfulQueries++;
+                }
 
-            console.log(
-                `📊 "${categoryQuery}" returned ${results.length} jobs`
-            );
-
-            if (
-                results.length > 0
-            ) {
-                successfulQueries++;
-            }
-
-            const taggedResults =
-                results.map(
-                    (job) => ({
-                        ...job,
-
-                        careeros_category:
-                            category,
-
-                        careeros_search_query:
-                            categoryQuery,
-                    })
+                return queryJobs;
+            } catch (error) {
+                console.error(
+                    `❌ CareerOS category query failed: "${categoryQuery}"`,
+                    error?.response?.data ||
+                        error?.message
                 );
 
-            allJobs.push(
-                ...taggedResults
+                return [];
+            }
+        };
+
+    for (
+        let i = 0;
+        i < queries.length;
+        i += QUERY_CONCURRENCY
+    ) {
+        const batch =
+            queries.slice(
+                i,
+                i + QUERY_CONCURRENCY
             );
-        } catch (error) {
-            console.error(
-                `❌ CareerOS category query failed: "${categoryQuery}"`,
-                error?.response
-                    ?.data ||
-                    error?.message
+
+        const batchResults =
+            await Promise.all(
+                batch.map(
+                    processQuery
+                )
+            );
+
+        for (
+            const results of batchResults
+        ) {
+            allJobs.push(
+                ...results
             );
         }
     }
-
-    // ==================================================
-    // REMOVE DUPLICATES
-    // ==================================================
 
     const uniqueJobs =
         removeDuplicateJobs(
             allJobs
         );
 
-    // ==================================================
-    // ENRICH JOBS
-    // ==================================================
-
     const jobs =
         uniqueJobs.map(
             enrichJob
         );
 
-    console.log(
-        `\n✅ CareerOS category "${category}" completed`
-    );
-
-    console.log(
-        `📊 Successful queries: ${successfulQueries}/${queries.length}`
-    );
-
-    console.log(
-        `📊 Raw jobs: ${allJobs.length}`
-    );
-
-    console.log(
-        `📊 Unique jobs: ${jobs.length}`
-    );
-
     return {
-        results:
-            jobs,
-
-        count:
-            jobs.length,
-
-        total:
-            jobs.length,
-
-        filtered_total:
-            jobs.length,
-
-        filtered_count:
-            jobs.length,
-
-        jobs_scanned:
-            jobs.length,
-
-        filtered_pages_scanned:
-            1,
-
+        results: jobs,
+        count: jobs.length,
+        total: jobs.length,
+        filtered_total: jobs.length,
+        filtered_count: jobs.length,
+        jobs_scanned: jobs.length,
+        filtered_pages_scanned: 1,
         has_more:
             successfulQueries > 0,
-
         careeros_category:
             category,
-
         category_queries:
             queries,
-
         category_queries_successful:
             successfulQueries,
     };
 }
 
-
-// SEARCH ALL CAREEROS CATEGORIES
 // ======================================================
-//
-// Used when the Jobs page opens with:
-//
-// query = all jobs
-// category = ""
-//
-// PERFORMANCE:
-//
-// Categories are processed with controlled concurrency.
-//
-// Instead of:
-//
-// IT
-//   ↓
-// Non-IT
-//   ↓
-// Medical
-//   ↓
-// Engineering
-//   ↓
-// ...
-//
-// We process a small number of categories in parallel:
-//
-// IT          Non-IT       Medical
-// Engineering Mechanical  Education
-// ...
-//
-// This significantly reduces total waiting time while
-// avoiding a large burst of simultaneous Adzuna requests.
-//
+// SEARCH ALL CAREEROS CATEGORIES
 // ======================================================
 
 async function searchAllJobCategories({
@@ -2846,21 +2285,7 @@ async function searchAllJobCategories({
         "other",
     ];
 
-    // ==================================================
-    // PERFORMANCE CONFIGURATION
-    // ==================================================
-    //
-    // Maximum number of useful jobs CareerOS wants
-    // before stopping additional category requests.
-    //
-    // This prevents unnecessary Adzuna requests when
-    // enough jobs have already been collected.
-    //
-    // ==================================================
-
     const CATEGORY_CONCURRENCY = 3;
-
-    const TARGET_JOBS = 150;
 
     const filters = {
         experience,
@@ -2869,53 +2294,17 @@ async function searchAllJobCategories({
         salary,
     };
 
-    console.log(
-        `\n======================================================`
-    );
-
-    console.log(
-        `🌎 CAREEROS ALL JOBS SEARCH`
-    );
-
-    console.log(
-        `📍 Location: ${location}`
-    );
-
-    console.log(
-        `📂 Categories: ${categories.length}`
-    );
-
-    console.log(
-        `⚡ Category concurrency: ${CATEGORY_CONCURRENCY}`
-    );
-
-    console.log(
-        `🎯 Target jobs: ${TARGET_JOBS}`
-    );
-
-    console.log(
-        `======================================================`
-    );
-
-    // ==================================================
-    // SEARCH ONE CATEGORY
-    // ==================================================
-
     async function searchOneCategory(
         category
     ) {
         try {
-            console.log(
-                `\n🔎 Loading CareerOS category: ${category}`
-            );
-
             const data =
                 await searchCareerOSCategory({
                     appId,
                     appKey,
                     category,
                     location,
-                    page,
+                    
                 });
 
             const jobs =
@@ -2924,10 +2313,6 @@ async function searchAllJobCategories({
                 )
                     ? data.results
                     : [];
-
-            console.log(
-                `📊 ${category}: ${jobs.length} unique jobs`
-            );
 
             return {
                 category,
@@ -2949,76 +2334,19 @@ async function searchAllJobCategories({
         }
     }
 
-    // ==================================================
-    // CONTROLLED CONCURRENCY + EARLY STOP
-    // ==================================================
-    //
-    // We still process categories in batches.
-    //
-    // Example:
-    //
-    // Batch 1 → IT, Non-IT, Medical
-    // Batch 2 → Engineering, Mechanical, Education
-    //
-    // After every completed batch we check whether
-    // enough useful jobs have already been collected.
-    //
-    // If TARGET_JOBS is reached, no more category
-    // requests are started.
-    //
-    // ==================================================
-
     const categoryResults = [];
-
-    let collectedJobCount = 0;
 
     for (
         let start = 0;
         start < categories.length;
         start += CATEGORY_CONCURRENCY
     ) {
-        // --------------------------------------------------
-        // STOP BEFORE STARTING ANOTHER BATCH
-        // --------------------------------------------------
-
-        if (
-            collectedJobCount >=
-            TARGET_JOBS
-        ) {
-            console.log(
-                `\n🛑 Target reached (${collectedJobCount} jobs).`
-            );
-
-            console.log(
-                `⏭️ Skipping remaining category requests.`
-            );
-
-            break;
-        }
-
         const batch =
             categories.slice(
                 start,
                 start +
                     CATEGORY_CONCURRENCY
             );
-
-        console.log(
-            `\n⚡ Starting category batch ${
-                Math.floor(
-                    start /
-                        CATEGORY_CONCURRENCY
-                ) + 1
-            }`
-        );
-
-        console.log(
-            `📂 Categories: ${batch.join(", ")}`
-        );
-
-        // --------------------------------------------------
-        // RUN CURRENT BATCH IN PARALLEL
-        // --------------------------------------------------
 
         const batchResults =
             await Promise.all(
@@ -3033,124 +2361,12 @@ async function searchAllJobCategories({
         categoryResults.push(
             ...batchResults
         );
-
-        // --------------------------------------------------
-        // COUNT UNIQUE + FILTERED JOBS
-        // --------------------------------------------------
-        //
-        // This count is only used to determine whether
-        // another batch is necessary.
-        //
-        // Final deduplication is still performed below.
-        //
-        // --------------------------------------------------
-
-        const temporaryJobIds =
-            new Set();
-
-        let temporaryCount =
-            0;
-
-        for (
-            const result of
-                categoryResults
-        ) {
-            if (
-                !result ||
-                !Array.isArray(
-                    result.jobs
-                )
-            ) {
-                continue;
-            }
-
-            for (
-                const job of
-                    result.jobs
-            ) {
-                if (!job) {
-                    continue;
-                }
-
-                const jobId =
-                    getUniqueJobId(job);
-
-                if (!jobId) {
-                    continue;
-                }
-
-                if (
-                    temporaryJobIds.has(
-                        jobId
-                    )
-                ) {
-                    continue;
-                }
-
-                if (
-                    !jobMatchesFilters(
-                        job,
-                        filters
-                    )
-                ) {
-                    continue;
-                }
-
-                temporaryJobIds.add(
-                    jobId
-                );
-
-                temporaryCount++;
-            }
-        }
-
-        collectedJobCount =
-            temporaryCount;
-
-        console.log(
-            `📈 Useful jobs collected so far: ${collectedJobCount}`
-        );
-
-        console.log(
-            `🎯 Target: ${TARGET_JOBS}`
-        );
-
-        console.log(
-            `✅ Category batch completed`
-        );
-
-        // --------------------------------------------------
-        // STOP AFTER CURRENT BATCH
-        // --------------------------------------------------
-
-        if (
-            collectedJobCount >=
-            TARGET_JOBS
-        ) {
-            console.log(
-                `\n🛑 Target of ${TARGET_JOBS} jobs reached.`
-            );
-
-            console.log(
-                `⏭️ Remaining categories will not be requested.`
-            );
-
-            break;
-        }
     }
-
-    // ==================================================
-    // COMBINE + DEDUPLICATE
-    // ==================================================
 
     const allJobs = [];
 
     const seenJobIds =
         new Set();
-
-    // ==================================================
-    // PRESERVE ORIGINAL CATEGORY ORDER
-    // ==================================================
 
     for (
         const category of categories
@@ -3194,10 +2410,6 @@ async function searchAllJobCategories({
                 continue;
             }
 
-            // --------------------------------------------------
-            // APPLY REQUESTED FILTERS
-            // --------------------------------------------------
-
             if (
                 !jobMatchesFilters(
                     job,
@@ -3217,10 +2429,6 @@ async function searchAllJobCategories({
         }
     }
 
-    // ==================================================
-    // STATISTICS
-    // ==================================================
-
     const successfulCategories =
         categoryResults.filter(
             (result) =>
@@ -3233,34 +2441,6 @@ async function searchAllJobCategories({
     const skippedCategories =
         categories.length -
         requestedCategories;
-
-    console.log(
-        `\n======================================================`
-    );
-
-    console.log(
-        `✅ ALL JOBS SEARCH COMPLETED`
-    );
-
-    console.log(
-        `📂 Requested categories: ${requestedCategories}/${categories.length}`
-    );
-
-    console.log(
-        `⏭️ Skipped categories: ${skippedCategories}`
-    );
-
-    console.log(
-        `📂 Successful categories: ${successfulCategories}/${requestedCategories}`
-    );
-
-    console.log(
-        `📊 Unique jobs: ${allJobs.length}`
-    );
-
-    console.log(
-        `======================================================`
-    );
 
     return {
         success: true,
@@ -3285,19 +2465,14 @@ async function searchAllJobCategories({
         results_per_page:
             allJobs.length,
 
-        has_more:
-            false,
+        has_more: false,
 
         experience,
-
         jobType,
-
         workMode,
-
         salary,
 
-        category:
-            "All",
+        category: "All",
 
         filtered_pages_scanned:
             page,
@@ -3305,22 +2480,14 @@ async function searchAllJobCategories({
         jobs_scanned:
             allJobs.length,
 
-        // --------------------------------------------------
-        // PERFORMANCE INFORMATION
-        // --------------------------------------------------
-
         categories_requested:
             requestedCategories,
 
         categories_skipped:
             skippedCategories,
 
-        target_jobs:
-            TARGET_JOBS,
-
-        target_reached:
-            allJobs.length >=
-            TARGET_JOBS,
+        categories_successful:
+            successfulCategories,
     };
 }
 
@@ -3331,22 +2498,12 @@ async function searchAllJobCategories({
 async function searchJobs({
     query = "all jobs",
     category = "",
-
     location = "India",
-
     page = 1,
-
-    experience =
-        "Any Experience",
-
-    jobType =
-        "Any Type",
-
-    workMode =
-        "Any",
-
-    salary =
-        "Any Salary",
+    experience = "Any Experience",
+    jobType = "Any Type",
+    workMode = "Any",
+    salary = "Any Salary",
 }) {
     const appId =
         process.env.ADZUNA_APP_ID;
@@ -3399,32 +2556,6 @@ async function searchJobs({
     const categorySearchQuery =
         categorySearchQueries.join(" ");
 
-    const categoryAdzunaCategory =
-        careerOSCategoryConfig
-            ?.adzunaCategory ||
-        null;
-
-    console.log(
-        `🗂️ CareerOS requested category: ${
-            selectedCareerOSCategory ||
-            "ALL"
-        }`
-    );
-
-    console.log(
-        `🔎 CareerOS category query: ${
-            categorySearchQuery ||
-            "NONE"
-        }`
-    );
-
-    console.log(
-        `🏷️ CareerOS Adzuna category: ${
-            categoryAdzunaCategory ||
-            "KEYWORD SEARCH"
-        }`
-    );
-
     // ==================================================
     // FILTERS
     // ==================================================
@@ -3444,11 +2575,6 @@ async function searchJobs({
     // ==================================================
     // ALL JOBS
     // ==================================================
-    //
-    // If no category is selected and query is broad,
-    // search all CareerOS categories.
-    //
-    // ==================================================
 
     if (
         isBroadJobSearch(query) &&
@@ -3457,20 +2583,13 @@ async function searchJobs({
         const broadData =
             await searchAllJobCategories({
                 appId,
-
                 appKey,
-
                 location,
-
                 page:
                     requestedPage,
-
                 experience,
-
                 jobType,
-
                 workMode,
-
                 salary,
             });
 
@@ -3515,14 +2634,7 @@ async function searchJobs({
     }
 
     // ==================================================
-    // DETECT ADZUNA CATEGORY FROM QUERY
-    // ==================================================
-    //
-    // Explicit CareerOS category always has priority.
-    //
-    // If no CareerOS category was selected, detect a
-    // suitable Adzuna category from the query.
-    //
+    // DETECT ADZUNA CATEGORY
     // ==================================================
 
     const detectedQueryCategory =
@@ -3535,15 +2647,8 @@ async function searchJobs({
             ? null
             : detectedQueryCategory;
 
-    console.log(
-        `🎯 CareerOS detected Adzuna category for "${query}": ${
-            detectedCategory ||
-            "NONE"
-        }`
-    );
-
     // ==================================================
-    // EFFECTIVE SEARCH QUERY
+    // EFFECTIVE QUERY
     // ==================================================
 
     const effectiveQuery =
@@ -3552,21 +2657,8 @@ async function searchJobs({
             ? categorySearchQuery
             : query;
 
-    console.log(
-        `🔍 CareerOS effective query: "${effectiveQuery}"`
-    );
-
     // ==================================================
-    // CAREEROS SPECIFIC CATEGORY
-    // ==================================================
-    //
-    // Example:
-    //
-    // category = medical
-    // query = all jobs
-    //
-    // Searches the individual medical queries.
-    //
+    // CAREEROS CATEGORY
     // ==================================================
 
     if (
@@ -3575,16 +2667,11 @@ async function searchJobs({
         const categoryData =
             await searchCareerOSCategory({
                 appId,
-
                 appKey,
-
                 category:
                     selectedCareerOSCategory,
-
                 location,
-
-                page:
-                    requestedPage,
+                
             });
 
         const categoryJobs =
@@ -3642,17 +2729,12 @@ async function searchJobs({
         const data =
             await searchSpecificCategory({
                 appId,
-
                 appKey,
-
                 query:
                     effectiveQuery,
-
                 location,
-
                 page:
                     requestedPage,
-
                 category:
                     detectedCategory,
             });
@@ -3673,8 +2755,7 @@ async function searchJobs({
 
         const total =
             Number(
-                data?.count ||
-                0
+                data?.count || 0
             );
 
         return {
@@ -3707,23 +2788,15 @@ async function searchJobs({
     // ==================================================
     // FILTERED SEARCH
     // ==================================================
-    //
-    // Fetch multiple pages so filters do not accidentally
-    // produce zero jobs simply because the first Adzuna
-    // page did not contain matching jobs.
-    //
-    // ==================================================
 
     const allJobs = [];
 
-    let firstResponse =
-        null;
+    let firstResponse = null;
 
     let lastFetchedPage =
         requestedPage;
 
-    let reachedEnd =
-        false;
+    let reachedEnd = false;
 
     for (
         let currentPage =
@@ -3739,17 +2812,12 @@ async function searchJobs({
             const data =
                 await searchSpecificCategory({
                     appId,
-
                     appKey,
-
                     query:
                         effectiveQuery,
-
                     location,
-
                     page:
                         currentPage,
-
                     category:
                         detectedCategory,
                 });
@@ -3772,9 +2840,7 @@ async function searchJobs({
             if (
                 pageJobs.length === 0
             ) {
-                reachedEnd =
-                    true;
-
+                reachedEnd = true;
                 break;
             }
 
@@ -3786,16 +2852,13 @@ async function searchJobs({
                 pageJobs.length <
                 ADZUNA_RESULTS_PER_PAGE
             ) {
-                reachedEnd =
-                    true;
-
+                reachedEnd = true;
                 break;
             }
         } catch (error) {
             console.error(
                 `Adzuna page ${currentPage} failed:`,
-                error?.response
-                    ?.data ||
+                error?.response?.data ||
                     error?.message
             );
 
@@ -3807,18 +2870,10 @@ async function searchJobs({
         }
     }
 
-    // ==================================================
-    // UNIQUE JOBS
-    // ==================================================
-
     const uniqueJobs =
         removeDuplicateJobs(
             allJobs
         );
-
-    // ==================================================
-    // FILTER JOBS
-    // ==================================================
 
     const filteredJobs =
         uniqueJobs.filter(
@@ -3829,18 +2884,10 @@ async function searchJobs({
                 )
         );
 
-    // ==================================================
-    // ENRICH
-    // ==================================================
-
     const enrichedJobs =
         filteredJobs.map(
             enrichJob
         );
-
-    // ==================================================
-    // TOTAL
-    // ==================================================
 
     const total =
         Number(
@@ -3848,20 +2895,12 @@ async function searchJobs({
             0
         );
 
-    // ==================================================
-    // PAGINATION
-    // ==================================================
-
     const hasMore =
         !reachedEnd &&
         lastFetchedPage <
             requestedPage +
                 MAX_FILTER_PAGES -
                 1;
-
-    // ==================================================
-    // RESPONSE
-    // ==================================================
 
     return {
         ...(firstResponse || {}),

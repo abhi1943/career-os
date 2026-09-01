@@ -1,97 +1,326 @@
+
 import axios from "axios";
 
-import { auth } from "../firebase/firebase";
+import {
+    getAuth,
+} from "firebase/auth";
+
+
 
 // ======================================================
 // API
 // ======================================================
 
 const API_URL =
-    "http://localhost:5000/api/saved-jobs";
+    "https://career-os-api-1h85.onrender.com/api/saved-jobs";
+
 
 // ======================================================
-// GET CURRENT FIREBASE USER ID
-// ======================================================
-//
-// Firebase Auth is the source of the current user.
-// The backend receives this UID through x-user-id.
-//
+// FIREBASE TOKEN
 // ======================================================
 
-function getCurrentUserId() {
-    return String(
-        auth.currentUser?.uid || ""
-    ).trim();
-}
+async function getFirebaseIdToken() {
 
-// ======================================================
-// CREATE AUTHENTICATED REQUEST CONFIG
-// ======================================================
-//
-// Every Saved Jobs API request must contain the
-// currently logged-in Firebase user's UID.
-//
-// ======================================================
+    const firebaseAuth =
+        getAuth();
 
-function getRequestConfig() {
-    const userId =
-        getCurrentUserId();
+    const currentUser =
+        firebaseAuth.currentUser;
 
-    if (!userId) {
+    if (!currentUser) {
         throw new Error(
-            "Authentication required."
+            "User must be authenticated."
         );
     }
 
+    return currentUser.getIdToken();
+}
+
+
+// ======================================================
+// REQUEST CONFIG
+// ======================================================
+
+async function getRequestConfig() {
+
+    const token =
+        await getFirebaseIdToken();
+
     return {
         headers: {
-            "x-user-id": userId,
+            Authorization:
+                `Bearer ${token}`,
+            "Content-Type":
+                "application/json",
         },
     };
 }
 
+
 // ======================================================
-// NORMALIZE JOB ID
-// ======================================================
-//
-// CareerOS jobs can come from different sources.
-// Always use the same ID format everywhere.
-//
+// GET STABLE JOB ID
 // ======================================================
 
-export function getSavedJobId(job) {
+function getSavedJobId(job) {
+
     if (!job) {
         return "";
     }
 
     const id =
-        job.id ||
-        job.redirect_url ||
-        job.redirectUrl ||
-        `${job.title || ""}-${
-            typeof job.company === "string"
-                ? job.company
-                : job.company?.display_name ||
-                  job.company?.name ||
-                  ""
-        }`;
+        job.id ??
+        job.job_id ??
+        job.jobId ??
+        job.redirect_url ??
+        job.redirectUrl ??
+        "";
 
     return String(id).trim();
 }
 
+
 // ======================================================
-// NORMALIZE JOB
+// ALLOWED SAVED-JOB FIELDS
 // ======================================================
 //
-// Keeps the saved job object consistent across:
-// Jobs → Save → Saved Jobs → Job Details
+// IMPORTANT:
+//
+// Jobs returned by CareerOS contain additional internal
+// metadata used by the job store.
+//
+// Examples:
+//
+// careeros_category
+// careeros_search_query
+// firstSeenAt
+// lastUpdatedAt
+// storedAt
+// expiresAt
+// searchText
+// match
+//
+// Those fields must NOT be sent to the saved-jobs API.
+//
+// We keep only the public job fields that the backend
+// saved-job validator accepts.
 //
 // ======================================================
 
-export function normalizeSavedJob(job) {
-    if (!job) {
+const SAVED_JOB_FIELDS = [
+    // --------------------------------------------------
+    // Core identity
+    // --------------------------------------------------
+
+    "id",
+    "job_id",
+    "jobId",
+
+    // --------------------------------------------------
+    // Basic job information
+    // --------------------------------------------------
+
+    "title",
+    "description",
+
+    "url",
+    "redirect_url",
+    "redirectUrl",
+
+    // --------------------------------------------------
+    // Company
+    // --------------------------------------------------
+
+    "company",
+
+    "company_id",
+
+    // --------------------------------------------------
+    // Location
+    // --------------------------------------------------
+
+    "location",
+
+    "location_area",
+    "location_display_name",
+    "location_country",
+    "location_region",
+    "location_city",
+    "location_area_name",
+
+    // --------------------------------------------------
+    // Salary
+    // --------------------------------------------------
+
+    "salary",
+    "salary_min",
+    "salary_max",
+    "salary_is_predicted",
+
+    // --------------------------------------------------
+    // Job type
+    // --------------------------------------------------
+
+    "job_type",
+    "jobType",
+    "detected_job_type",
+
+    "contract_type",
+    "contract_time",
+
+    "type",
+
+    // --------------------------------------------------
+    // Work mode
+    // --------------------------------------------------
+
+    "workMode",
+    "work_mode",
+    "detected_work_mode",
+
+    // --------------------------------------------------
+    // Experience
+    // --------------------------------------------------
+
+    "experience",
+    "detected_experience",
+
+    "experienceLevel",
+    "experience_level",
+
+    // --------------------------------------------------
+    // Category
+    // --------------------------------------------------
+
+    "category",
+    "job_category",
+    "jobCategory",
+
+    "careerOSCategory",
+    "careerosCategory",
+
+    // --------------------------------------------------
+    // Skills
+    // --------------------------------------------------
+
+    "skills",
+
+    "tags",
+
+    "technologies",
+
+    "requirements",
+
+    "responsibilities",
+
+    "benefits",
+
+    // --------------------------------------------------
+    // Adzuna information
+    // --------------------------------------------------
+
+    "created",
+    "created_at",
+
+    "category_id",
+    "category_label",
+
+    "latitude",
+    "longitude",
+
+    "adref",
+
+    "source",
+    "publisher",
+
+    "snippet",
+
+    // --------------------------------------------------
+    // Provider information
+    // --------------------------------------------------
+
+    "provider",
+    "provider_id",
+
+    "source_id",
+
+    // --------------------------------------------------
+    // Search information
+    // --------------------------------------------------
+
+    "search_query",
+    "searchQuery",
+
+    "search_location",
+    "searchLocation",
+
+    // --------------------------------------------------
+    // Job metadata
+    // --------------------------------------------------
+
+    "education",
+    "department",
+    "industry",
+    "seniority",
+];
+
+
+// ======================================================
+// SANITIZE SAVED JOB
+// ======================================================
+//
+// This is the important fix.
+//
+// CareerOS job objects can contain internal job-store
+// fields. We remove those fields before sending the
+// object to:
+//
+//     POST /api/saved-jobs
+//
+// This keeps the backend validation strict while allowing
+// Jobs / Companies / Job Details to use enriched objects.
+//
+// ======================================================
+
+export function sanitizeSavedJob(job) {
+
+    if (
+        !job ||
+        typeof job !== "object" ||
+        Array.isArray(job)
+    ) {
         return null;
     }
+
+    const sanitizedJob = {};
+
+    for (
+        const field of SAVED_JOB_FIELDS
+    ) {
+
+        if (
+            Object.prototype.hasOwnProperty.call(
+                job,
+                field
+            )
+        ) {
+
+            const value =
+                job[field];
+
+            if (
+                value !== undefined &&
+                value !== null
+            ) {
+
+                sanitizedJob[field] =
+                    value;
+            }
+        }
+    }
+
+    // --------------------------------------------------
+    // ALWAYS USE STABLE ID
+    // --------------------------------------------------
 
     const jobId =
         getSavedJobId(job);
@@ -100,37 +329,106 @@ export function normalizeSavedJob(job) {
         return null;
     }
 
-    return {
-        ...job,
-        id: jobId,
-    };
+    sanitizedJob.id =
+        jobId;
+
+    // --------------------------------------------------
+    // REMOVE INTERNAL / STORE FIELDS
+    // --------------------------------------------------
+    //
+    // Explicitly delete them as an extra safety layer.
+    //
+    // --------------------------------------------------
+
+    delete sanitizedJob.__CLASS__;
+
+    delete sanitizedJob.searchText;
+
+    delete sanitizedJob.firstSeenAt;
+
+    delete sanitizedJob.lastUpdatedAt;
+
+    delete sanitizedJob.storedAt;
+
+    delete sanitizedJob.expiresAt;
+
+    delete sanitizedJob.careeros_category;
+
+    delete sanitizedJob.careeros_search_query;
+
+    delete sanitizedJob.careeros_search_page;
+
+    delete sanitizedJob.match;
+
+    return sanitizedJob;
 }
+
+
+// ======================================================
+// NORMALIZE JOB
+// ======================================================
+//
+// Keeps the saved job object consistent across:
+//
+// Jobs
+//   ↓
+// Save
+//   ↓
+// Saved Jobs
+//   ↓
+// Job Details
+//
+// ======================================================
+
+export function normalizeSavedJob(job) {
+
+    const sanitizedJob =
+        sanitizeSavedJob(job);
+
+    if (!sanitizedJob) {
+        return null;
+    }
+
+    return sanitizedJob;
+}
+
 
 // ======================================================
 // CHECK SAVED
 // ======================================================
 
-export async function isJobSaved(jobId) {
+export async function isJobSaved(
+    jobId
+) {
+
     const normalizedJobId =
-        String(jobId || "").trim();
+        String(
+            jobId || ""
+        ).trim();
 
     if (!normalizedJobId) {
         return false;
     }
 
     try {
+
+        const config =
+            await getRequestConfig();
+
         const response =
             await axios.get(
                 `${API_URL}/${encodeURIComponent(
                     normalizedJobId
                 )}`,
-                getRequestConfig()
+                config
             );
 
         return Boolean(
             response?.data?.saved
         );
+
     } catch (error) {
+
         console.error(
             "CareerOS: Check saved job error:",
             error.response?.data ||
@@ -141,26 +439,37 @@ export async function isJobSaved(jobId) {
     }
 }
 
+
 // ======================================================
 // SAVE JOB
 // ======================================================
 
-export async function saveJob(job) {
+export async function saveJob(
+    job
+) {
+
     const normalizedJob =
         normalizeSavedJob(job);
 
     if (!normalizedJob) {
+
         throw new Error(
             "Invalid job. Unable to save job."
         );
     }
 
     try {
+
+        const config =
+            await getRequestConfig();
+
+        
+
         const response =
             await axios.post(
                 API_URL,
                 normalizedJob,
-                getRequestConfig()
+                config
             );
 
         const savedJob =
@@ -169,6 +478,7 @@ export async function saveJob(job) {
             null;
 
         if (!savedJob) {
+
             throw new Error(
                 "Server did not return the saved job."
             );
@@ -177,7 +487,9 @@ export async function saveJob(job) {
         return normalizeSavedJob(
             savedJob
         );
+
     } catch (error) {
+
         console.error(
             "CareerOS: Save job error:",
             error.response?.data ||
@@ -188,6 +500,7 @@ export async function saveJob(job) {
     }
 }
 
+
 // ======================================================
 // REMOVE SAVED JOB
 // ======================================================
@@ -195,20 +508,27 @@ export async function saveJob(job) {
 export async function removeSavedJob(
     jobId
 ) {
+
     const normalizedJobId =
-        String(jobId || "").trim();
+        String(
+            jobId || ""
+        ).trim();
 
     if (!normalizedJobId) {
         return false;
     }
 
     try {
+
+        const config =
+            await getRequestConfig();
+
         const response =
             await axios.delete(
                 `${API_URL}/${encodeURIComponent(
                     normalizedJobId
                 )}`,
-                getRequestConfig()
+                config
             );
 
         if (
@@ -219,7 +539,9 @@ export async function removeSavedJob(
         }
 
         return true;
+
     } catch (error) {
+
         console.error(
             "CareerOS: Remove saved job error:",
             error.response?.data ||
@@ -230,6 +552,7 @@ export async function removeSavedJob(
     }
 }
 
+
 // ======================================================
 // TOGGLE SAVED JOB
 // ======================================================
@@ -237,32 +560,44 @@ export async function removeSavedJob(
 export async function toggleSavedJob(
     job
 ) {
+
     const normalizedJob =
         normalizeSavedJob(job);
 
     if (!normalizedJob) {
+
         throw new Error(
             "Invalid job. Unable to toggle saved state."
         );
     }
 
+    // --------------------------------------------------
+    // MAKE SURE AUTHENTICATION EXISTS
+    // --------------------------------------------------
+
+    await getFirebaseIdToken();
+
     const jobId =
         normalizedJob.id;
 
     const currentlySaved =
-        await isJobSaved(jobId);
+        await isJobSaved(
+            jobId
+        );
 
-    // ==================================================
+    // --------------------------------------------------
     // REMOVE
-    // ==================================================
+    // --------------------------------------------------
 
     if (currentlySaved) {
+
         const removed =
             await removeSavedJob(
                 jobId
             );
 
         if (!removed) {
+
             throw new Error(
                 "Failed to remove saved job."
             );
@@ -271,9 +606,9 @@ export async function toggleSavedJob(
         return false;
     }
 
-    // ==================================================
+    // --------------------------------------------------
     // SAVE
-    // ==================================================
+    // --------------------------------------------------
 
     const saved =
         await saveJob(
@@ -281,6 +616,7 @@ export async function toggleSavedJob(
         );
 
     if (!saved) {
+
         throw new Error(
             "Failed to save job."
         );
@@ -289,16 +625,22 @@ export async function toggleSavedJob(
     return true;
 }
 
+
 // ======================================================
 // GET ALL SAVED JOBS
 // ======================================================
 
 export async function getSavedJobs() {
+
     try {
+
+        const config =
+            await getRequestConfig();
+
         const response =
             await axios.get(
                 API_URL,
-                getRequestConfig()
+                config
             );
 
         const jobs =
@@ -312,9 +654,9 @@ export async function getSavedJobs() {
                 ? response.data.data
                 : [];
 
-        // ==================================================
-        // NORMALIZE + REMOVE INVALID JOBS
-        // ==================================================
+        // ------------------------------------------------
+        // NORMALIZE
+        // ------------------------------------------------
 
         const normalizedJobs =
             jobs
@@ -326,33 +668,41 @@ export async function getSavedJobs() {
                 )
                 .filter(Boolean);
 
-        // ==================================================
+        // ------------------------------------------------
         // REMOVE DUPLICATES
-        // ==================================================
+        // ------------------------------------------------
 
         const seen =
             new Set();
 
         return normalizedJobs.filter(
             (job) => {
+
                 const jobId =
                     getSavedJobId(
                         job
                     );
 
+                if (!jobId) {
+                    return false;
+                }
+
                 if (
-                    !jobId ||
                     seen.has(jobId)
                 ) {
                     return false;
                 }
 
-                seen.add(jobId);
+                seen.add(
+                    jobId
+                );
 
                 return true;
             }
         );
+
     } catch (error) {
+
         console.error(
             "CareerOS: Get saved jobs error:",
             error.response?.data ||
@@ -369,15 +719,12 @@ export async function getSavedJobs() {
 
 export async function getSavedJobCount() {
     try {
-        const response =
-            await axios.get(
-                `${API_URL}/count`,
-                getRequestConfig()
-            );
+        const jobs = await getSavedJobs();
 
-        return Number(
-            response?.data?.count || 0
-        );
+        return Array.isArray(jobs)
+            ? jobs.length
+            : 0;
+
     } catch (error) {
         console.error(
             "CareerOS: Get saved job count error:",
@@ -388,3 +735,19 @@ export async function getSavedJobCount() {
         return 0;
     }
 }
+
+// ======================================================
+// DEFAULT EXPORT
+// ======================================================
+
+export default {
+    saveJob,
+    removeSavedJob,
+    toggleSavedJob,
+    isJobSaved,
+    getSavedJobs,
+    getSavedJobCount,
+    normalizeSavedJob,
+    sanitizeSavedJob,
+};
+

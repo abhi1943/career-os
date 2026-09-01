@@ -1,27 +1,35 @@
 function RoadmapProgress({
-    roadmap,
-    completedSkills,
+    roadmap = [],
+    completedSkills = [],
 }) {
 
     const allSkills = roadmap.flatMap(
-        item => item.skills || []
+        (item) =>
+            Array.isArray(item?.skills)
+                ? item.skills
+                : []
     );
 
-    const totalSkills = allSkills.length;
+    const totalSkills =
+        allSkills.length;
 
     const completedCount =
-        allSkills.filter(skill =>
-            completedSkills.includes(skill)
+        allSkills.filter(
+            (skill) =>
+                completedSkills.includes(skill)
         ).length;
 
     const percentage =
         totalSkills === 0
             ? 0
             : Math.round(
-                (completedCount / totalSkills) * 100
+                (completedCount /
+                    totalSkills) *
+                100
             );
 
     return (
+
         <div className="bg-white rounded-3xl shadow-lg p-6">
 
             <div className="flex justify-between items-center">
@@ -38,6 +46,7 @@ function RoadmapProgress({
 
                 </div>
 
+
                 <div className="text-right">
 
                     <p className="text-sm text-gray-500">
@@ -52,6 +61,7 @@ function RoadmapProgress({
 
             </div>
 
+
             <div className="bg-gray-200 h-4 rounded-full mt-6 overflow-hidden">
 
                 <div
@@ -63,11 +73,13 @@ function RoadmapProgress({
 
             </div>
 
+
             <p className="text-sm text-gray-500 mt-3">
-                Click a skill to mark it as completed.
+                Click a skill above to mark it as completed.
             </p>
 
         </div>
+
     );
 }
 

@@ -4,6 +4,7 @@ import App from "./App";
 
 import CareerProvider from "./context/CareerContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
+import { CollegeFavoritesProvider } from "./context/CollegeFavoritesContext";
 import { CompareProvider } from "./context/CompareContext";
 import { GoalProvider } from "./context/GoalContext";
 import { AssessmentProvider } from "./context/AssessmentContext";
@@ -16,11 +17,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <GoalProvider>
       <CompareProvider>
         <FavoritesProvider>
-          <CareerProvider>
-            <AssessmentProvider>
-              <App />
-            </AssessmentProvider>
-          </CareerProvider>
+          <CollegeFavoritesProvider>
+            <CareerProvider>
+              <AssessmentProvider>
+                <App />
+              </AssessmentProvider>
+            </CareerProvider>
+          </CollegeFavoritesProvider>
         </FavoritesProvider>
       </CompareProvider>
     </GoalProvider>

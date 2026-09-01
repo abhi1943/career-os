@@ -27,8 +27,44 @@ export function AuthProvider({ children }) {
         const unsubscribe =
             onAuthStateChanged(
                 auth,
-                (currentUser) => {
+                async (currentUser) => {
                     setUser(currentUser);
+
+                    /*
+                     * Step 3:
+                     * Warm the backend job store immediately
+                     * after Firebase authentication succeeds.
+                     *
+                     * Authentication should NOT fail if warming
+                     * has an error, so the request is intentionally
+                     * handled independently.
+                     */
+                    if (currentUser) {
+                        try {
+                            const response =
+                                await fetch("/api/jobs/warm");
+
+                            if (!response.ok) {
+                                throw new Error(
+                                    `Job warm request failed: ${response.status}`
+                                );
+                            }
+
+                            const data =
+                                await response.json();
+
+                            console.log(
+                                "[CareerOS] Job store warm:",
+                                data
+                            );
+                        } catch (error) {
+                            console.error(
+                                "[CareerOS] Failed to warm job store:",
+                                error
+                            );
+                        }
+                    }
+
                     setAuthLoading(false);
                 }
             );

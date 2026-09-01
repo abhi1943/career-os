@@ -10,9 +10,7 @@ import CareerFilters from "./CareerFilters";
 function CareerExplorer() {
   const { student } = useContext(CareerContext);
 
-  console.log("CareerExplorer Student:", student);
-  console.log("Education:", student?.education);
-  console.log("Specialization:", student?.specialization);
+
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] =
@@ -27,7 +25,6 @@ function CareerExplorer() {
     // getCareerOptions expects the complete student object
     const careers = getCareerOptions(student);
 
-    console.log("Careers:", careers);
 
     return careers.filter((career) => {
       if (!career || !career.name) {

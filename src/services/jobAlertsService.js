@@ -1,12 +1,14 @@
 import axios from "axios";
 
+import { auth } from "../firebase/firebase";
+
 // ======================================================
 // CareerOS Job Alerts Service
 // STEP 21 — USER-SPECIFIC ALERT REQUESTS
 // ======================================================
 
 const API_URL =
-    "http://localhost:5000/api/job-alerts";
+    "https://career-os-api-1h85.onrender.com/api/job-alerts";
 
 // ======================================================
 // GET CAREEROS USER ID
@@ -38,11 +40,40 @@ function getCareerOSUserId() {
 // API CONFIG
 // ======================================================
 
-function getApiConfig() {
+async function getApiConfig() {
+    const currentUser =
+        auth.currentUser;
+
+    if (!currentUser) {
+        throw new Error(
+            "User is not authenticated."
+        );
+    }
+
+    const idToken =
+        await currentUser.getIdToken();
+
+    if (!idToken) {
+        throw new Error(
+            "Firebase ID token is missing."
+        );
+    }
+
+    const userId =
+        String(
+            currentUser.uid || ""
+        ).trim();
+
     return {
         headers: {
-            "x-user-id":
-                getCareerOSUserId(),
+            Authorization:
+                `Bearer ${idToken}`,
+
+            "Content-Type":
+                "application/json",
+
+            "X-CareerOS-User-Id":
+                userId,
         },
     };
 }
@@ -232,11 +263,18 @@ export async function createJobAlert(
     }
 
     try {
+        const config =
+            await getApiConfig();
+
         const response =
             await axios.post(
                 API_URL,
-                normalized,
-                getApiConfig()
+                {
+                    ...normalized,
+                    userId:
+                        getCareerOSUserId(),
+                },
+                config
             );
 
         const createdAlert =
@@ -277,10 +315,13 @@ export async function createJobAlert(
 
 export async function getJobAlerts() {
     try {
+        const config =
+            await getApiConfig();
+
         const response =
             await axios.get(
                 API_URL,
-                getApiConfig()
+                config
             );
 
         const alerts =
@@ -332,12 +373,15 @@ export async function getJobAlert(
     }
 
     try {
+        const config =
+            await getApiConfig();
+
         const response =
             await axios.get(
                 `${API_URL}/${encodeURIComponent(
                     normalizedId
                 )}`,
-                getApiConfig()
+                config
             );
 
         const alert =
@@ -400,13 +444,16 @@ export async function updateJobAlert(
     }
 
     try {
+        const config =
+            await getApiConfig();
+
         const response =
             await axios.put(
                 `${API_URL}/${encodeURIComponent(
                     normalizedId
                 )}`,
                 normalizedUpdates,
-                getApiConfig()
+                config
             );
 
         const updatedAlert =
@@ -458,12 +505,15 @@ export async function deleteJobAlert(
     }
 
     try {
+        const config =
+            await getApiConfig();
+
         const response =
             await axios.delete(
                 `${API_URL}/${encodeURIComponent(
                     normalizedId
                 )}`,
-                getApiConfig()
+                config
             );
 
         return (
@@ -505,13 +555,16 @@ export async function enableJobAlert(
     }
 
     try {
+        const config =
+            await getApiConfig();
+
         const response =
             await axios.patch(
                 `${API_URL}/${encodeURIComponent(
                     normalizedId
                 )}/enable`,
                 {},
-                getApiConfig()
+                config
             );
 
         const alert =
@@ -557,13 +610,16 @@ export async function disableJobAlert(
     }
 
     try {
+        const config =
+            await getApiConfig();
+
         const response =
             await axios.patch(
                 `${API_URL}/${encodeURIComponent(
                     normalizedId
                 )}/disable`,
                 {},
-                getApiConfig()
+                config
             );
 
         const alert =

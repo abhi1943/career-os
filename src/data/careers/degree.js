@@ -7,6 +7,7 @@ const degree = [
     duration: "3 Years",
     eligibility: "Intermediate",
 
+    salary: "₹4 LPA - ₹18 LPA",
     averageSalary: "₹4 LPA - ₹18 LPA",
     growth: "Excellent",
     rating: 4.9,
@@ -14,11 +15,20 @@ const degree = [
     description:
       "BCA is one of the best undergraduate programs for students interested in software development, programming, web technologies and IT careers.",
 
+    overview:
+      "BCA provides a strong foundation in computer applications, programming, databases, web development and software development. It is suitable for students who want to build careers in the IT and software industry.",
+
+    education: [
+      "Intermediate / 10+2",
+      "10+2 with Mathematics or Computer Science where required"
+    ],
+
     streams: [
       "Software Development",
       "Web Development",
       "Mobile Apps",
-      "Cloud Computing"
+      "Cloud Computing",
+      "Database Management"
     ],
 
     entranceExams: [
@@ -33,23 +43,37 @@ const degree = [
       "React",
       "SQL",
       "Git",
-      "Problem Solving"
+      "Problem Solving",
+      "Data Structures",
+      "Database Management"
+    ],
+
+    technologies: [
+      "Java",
+      "Python",
+      "JavaScript",
+      "React",
+      "Node.js",
+      "MySQL",
+      "Git",
+      "HTML",
+      "CSS"
     ],
 
     topColleges: [
       "Christ University",
       "Loyola College",
-      "SRM",
+      "SRM University",
       "VIT",
       "Amity University"
     ],
 
     certifications: [
-      "AWS",
-      "Java",
-      "Python",
-      "React",
-      "Azure"
+      "AWS Cloud Practitioner",
+      "Oracle Java Certification",
+      "Python Certification",
+      "Meta Front-End Developer",
+      "Microsoft Azure Fundamentals"
     ],
 
     companies: [
@@ -57,7 +81,8 @@ const degree = [
       "Infosys",
       "Wipro",
       "Accenture",
-      "Capgemini"
+      "Capgemini",
+      "Cognizant"
     ],
 
     careerOpportunities: [
@@ -65,20 +90,43 @@ const degree = [
       "Frontend Developer",
       "Backend Developer",
       "QA Engineer",
-      "System Administrator"
+      "System Administrator",
+      "Web Developer"
+    ],
+
+    jobRoles: [
+      "Software Developer",
+      "Frontend Developer",
+      "Backend Developer",
+      "QA Engineer",
+      "System Administrator",
+      "Web Developer"
     ],
 
     roadmap: [
       "Complete BCA",
-      "Learn Full Stack",
-      "Projects",
-      "Internship",
+      "Learn Programming",
+      "Learn Data Structures",
+      "Build Projects",
+      "Learn Full Stack Development",
+      "Complete Internship",
+      "Build Resume & Portfolio",
+      "Prepare for Interviews",
       "Placement"
+    ],
+
+    projects: [
+      "Student Management System",
+      "E-Commerce Website",
+      "Job Portal",
+      "Weather Application",
+      "Career Guidance Platform"
     ],
 
     higherStudies: [
       "MCA",
       "MBA",
+      "M.Sc Computer Science",
       "MS"
     ],
 
@@ -93,6 +141,7 @@ const degree = [
     duration: "3 Years",
     eligibility: "Intermediate",
 
+    salary: "₹4 LPA - ₹16 LPA",
     averageSalary: "₹4 LPA - ₹16 LPA",
     growth: "High",
     rating: 4.8,
@@ -100,15 +149,25 @@ const degree = [
     description:
       "Focuses on computer science fundamentals, programming, databases and software engineering.",
 
+    overview:
+      "B.Sc Computer Science develops strong foundations in programming, computer systems, databases, algorithms and software development. It can lead to careers in software, data and technology.",
+
+    education: [
+      "Intermediate / 10+2",
+      "10+2 with Mathematics or Computer Science where required"
+    ],
+
     streams: [
       "Programming",
-      "AI",
+      "Artificial Intelligence",
       "Networking",
-      "Software Engineering"
+      "Software Engineering",
+      "Database Management"
     ],
 
     entranceExams: [
-      "CUET"
+      "CUET",
+      "University Entrance Exams"
     ],
 
     skills: [
@@ -116,46 +175,89 @@ const degree = [
       "Java",
       "C++",
       "SQL",
-      "Linux"
+      "Linux",
+      "Data Structures",
+      "Algorithms",
+      "Problem Solving"
+    ],
+
+    technologies: [
+      "Python",
+      "Java",
+      "C++",
+      "SQL",
+      "Linux",
+      "Git",
+      "MySQL"
     ],
 
     topColleges: [
       "Loyola College",
-      "St. Xavier's",
-      "Madras Christian College"
+      "St. Xavier's College",
+      "Madras Christian College",
+      "University of Delhi",
+      "Osmania University"
     ],
 
     certifications: [
-      "Python",
-      "AWS",
-      "Oracle SQL"
+      "Python Certification",
+      "AWS Cloud Practitioner",
+      "Oracle SQL Certification",
+      "Java Certification"
     ],
 
     companies: [
       "Infosys",
       "TCS",
       "Cognizant",
-      "IBM"
+      "IBM",
+      "Accenture",
+      "Wipro"
     ],
 
     careerOpportunities: [
       "Software Engineer",
       "Data Analyst",
       "Programmer",
-      "Database Administrator"
+      "Database Administrator",
+      "Web Developer",
+      "System Administrator"
+    ],
+
+    jobRoles: [
+      "Software Engineer",
+      "Data Analyst",
+      "Programmer",
+      "Database Administrator",
+      "Web Developer",
+      "System Administrator"
     ],
 
     roadmap: [
       "Complete Degree",
-      "Projects",
-      "Internship",
+      "Learn Programming",
+      "Learn Data Structures",
+      "Learn Databases",
+      "Build Projects",
+      "Complete Internship",
+      "Build Portfolio",
+      "Prepare for Interviews",
       "Placement"
     ],
 
+    projects: [
+      "Student Management System",
+      "Library Management System",
+      "Data Analysis Project",
+      "Web Application",
+      "Database Management System"
+    ],
+
     higherStudies: [
-      "M.Sc",
+      "M.Sc Computer Science",
       "MCA",
-      "MBA"
+      "MBA",
+      "MS Computer Science"
     ],
 
     futureScope: "Excellent"
@@ -169,6 +271,7 @@ const degree = [
     duration: "3 Years",
     eligibility: "Intermediate",
 
+    salary: "₹3 LPA - ₹15 LPA",
     averageSalary: "₹3 LPA - ₹15 LPA",
     growth: "High",
     rating: 4.7,
@@ -176,15 +279,25 @@ const degree = [
     description:
       "Ideal for students interested in finance, accounting, taxation, banking and business.",
 
+    overview:
+      "B.Com provides knowledge of accounting, finance, taxation, economics, business and commerce. It provides career opportunities in finance, accounting, banking and business operations.",
+
+    education: [
+      "Intermediate / 10+2",
+      "Commerce stream preferred for many institutions"
+    ],
+
     streams: [
       "Accounting",
       "Finance",
       "Taxation",
-      "Banking"
+      "Banking",
+      "Business"
     ],
 
     entranceExams: [
-      "CUET"
+      "CUET",
+      "University Entrance Exams"
     ],
 
     skills: [
@@ -192,47 +305,86 @@ const degree = [
       "Excel",
       "Finance",
       "GST",
-      "Communication"
+      "Communication",
+      "Financial Analysis",
+      "Taxation"
+    ],
+
+    technologies: [
+      "Microsoft Excel",
+      "Tally",
+      "Power BI",
+      "SAP",
+      "Accounting Software"
     ],
 
     topColleges: [
-      "SRCC",
-      "Loyola",
-      "Christ University"
+      "Shri Ram College of Commerce",
+      "Loyola College",
+      "Christ University",
+      "Hindu College",
+      "Hansraj College"
     ],
 
     certifications: [
       "Tally",
       "Financial Modeling",
-      "GST"
+      "GST Certification",
+      "Microsoft Excel",
+      "Power BI"
     ],
 
     companies: [
       "Deloitte",
       "EY",
       "KPMG",
-      "PwC"
+      "PwC",
+      "HDFC Bank",
+      "ICICI Bank"
     ],
 
     careerOpportunities: [
       "Accountant",
       "Auditor",
       "Financial Analyst",
-      "Tax Consultant"
+      "Tax Consultant",
+      "Banking Executive",
+      "Business Analyst"
+    ],
+
+    jobRoles: [
+      "Accountant",
+      "Auditor",
+      "Financial Analyst",
+      "Tax Consultant",
+      "Banking Executive",
+      "Business Analyst"
     ],
 
     roadmap: [
-      "Degree",
-      "Certification",
-      "Internship",
-      "Placement"
+      "Complete B.Com",
+      "Learn Accounting",
+      "Learn Excel",
+      "Complete Professional Certification",
+      "Build Practical Skills",
+      "Complete Internship",
+      "Prepare for Placement"
+    ],
+
+    projects: [
+      "Financial Analysis Project",
+      "Business Accounting Project",
+      "GST Analysis",
+      "Sales Analysis Dashboard",
+      "Financial Modeling Project"
     ],
 
     higherStudies: [
       "M.Com",
       "MBA",
       "CA",
-      "CMA"
+      "CMA",
+      "CS"
     ],
 
     futureScope: "High"
@@ -246,6 +398,7 @@ const degree = [
     duration: "3 Years",
     eligibility: "Intermediate",
 
+    salary: "₹4 LPA - ₹18 LPA",
     averageSalary: "₹4 LPA - ₹18 LPA",
     growth: "Excellent",
     rating: 4.8,
@@ -253,60 +406,109 @@ const degree = [
     description:
       "BBA develops business, leadership, management and entrepreneurship skills.",
 
+    overview:
+      "BBA develops knowledge of business management, marketing, finance, human resources, operations and entrepreneurship. It is a strong foundation for management careers and MBA studies.",
+
+    education: [
+      "Intermediate / 10+2"
+    ],
+
     streams: [
       "Marketing",
-      "HR",
+      "Human Resources",
       "Finance",
-      "Operations"
+      "Operations",
+      "Entrepreneurship"
     ],
 
     entranceExams: [
       "CUET",
-      "University Entrance"
+      "University Entrance Exams",
+      "IPMAT"
     ],
 
     skills: [
       "Leadership",
       "Communication",
       "Marketing",
-      "Management"
+      "Management",
+      "Business Analysis",
+      "Negotiation",
+      "Presentation"
+    ],
+
+    technologies: [
+      "Microsoft Excel",
+      "Power BI",
+      "Google Analytics",
+      "CRM Software",
+      "Microsoft PowerPoint"
     ],
 
     topColleges: [
-      "IIM Indore (IPM)",
+      "IIM Indore",
       "NMIMS",
-      "Christ University"
+      "Christ University",
+      "Shaheed Sukhdev College of Business Studies",
+      "IIM Rohtak"
     ],
 
     certifications: [
       "Digital Marketing",
-      "Excel",
-      "Google Analytics"
+      "Microsoft Excel",
+      "Google Analytics",
+      "Financial Modeling"
     ],
 
     companies: [
       "Amazon",
       "Flipkart",
       "Deloitte",
-      "Reliance"
+      "Reliance",
+      "Accenture",
+      "TCS"
     ],
 
     careerOpportunities: [
       "Business Analyst",
       "HR Executive",
       "Marketing Executive",
-      "Sales Manager"
+      "Sales Manager",
+      "Operations Executive",
+      "Business Development Executive"
+    ],
+
+    jobRoles: [
+      "Business Analyst",
+      "HR Executive",
+      "Marketing Executive",
+      "Sales Manager",
+      "Operations Executive",
+      "Business Development Executive"
     ],
 
     roadmap: [
-      "Degree",
-      "Internship",
-      "MBA",
-      "Placement"
+      "Complete Degree",
+      "Develop Communication Skills",
+      "Learn Business Fundamentals",
+      "Complete Internship",
+      "Develop Industry Skills",
+      "Prepare for MBA or Placement"
+    ],
+
+    projects: [
+      "Marketing Research Project",
+      "Business Plan",
+      "Sales Analysis",
+      "HR Management Project",
+      "Business Intelligence Dashboard"
     ],
 
     higherStudies: [
-      "MBA"
+      "MBA",
+      "PGDM",
+      "M.Com",
+      "MS Management"
     ],
 
     futureScope: "Excellent"
@@ -320,6 +522,7 @@ const degree = [
     duration: "3 Years",
     eligibility: "Intermediate",
 
+    salary: "₹3 LPA - ₹12 LPA",
     averageSalary: "₹3 LPA - ₹12 LPA",
     growth: "Good",
     rating: 4.5,
@@ -327,58 +530,107 @@ const degree = [
     description:
       "Suitable for students interested in civil services, journalism, teaching and public administration.",
 
+    overview:
+      "BA provides broad knowledge in humanities and social sciences. Students can specialize in subjects such as history, political science, economics and English and pursue careers in education, media, public administration and competitive examinations.",
+
+    education: [
+      "Intermediate / 10+2"
+    ],
+
     streams: [
       "History",
       "Political Science",
       "Economics",
-      "English"
+      "English",
+      "Sociology"
     ],
 
     entranceExams: [
-      "CUET"
+      "CUET",
+      "University Entrance Exams"
     ],
 
     skills: [
       "Writing",
       "Communication",
       "Research",
-      "Public Speaking"
+      "Public Speaking",
+      "Critical Thinking",
+      "Analysis"
+    ],
+
+    technologies: [
+      "Microsoft Office",
+      "Microsoft Word",
+      "Microsoft Excel",
+      "PowerPoint",
+      "Digital Research Tools"
     ],
 
     topColleges: [
-      "Delhi University",
-      "JNU",
-      "Osmania University"
+      "University of Delhi",
+      "Jawaharlal Nehru University",
+      "Osmania University",
+      "Loyola College",
+      "Madras Christian College"
     ],
 
     certifications: [
       "Content Writing",
-      "Digital Marketing"
+      "Digital Marketing",
+      "Public Speaking",
+      "Journalism Certification"
     ],
 
     companies: [
       "Media Houses",
-      "Government",
-      "NGOs"
+      "Government Organizations",
+      "NGOs",
+      "Publishing Companies",
+      "Educational Institutions"
     ],
 
     careerOpportunities: [
-      "IAS",
+      "Civil Services",
       "Teacher",
       "Journalist",
-      "Content Writer"
+      "Content Writer",
+      "Public Relations Executive",
+      "Research Assistant"
+    ],
+
+    jobRoles: [
+      "Civil Services Officer",
+      "Teacher",
+      "Journalist",
+      "Content Writer",
+      "Public Relations Executive",
+      "Research Assistant"
     ],
 
     roadmap: [
-      "Degree",
-      "Competitive Exams",
-      "Career"
+      "Complete Degree",
+      "Develop Communication Skills",
+      "Develop Research Skills",
+      "Complete Internship",
+      "Prepare for Competitive Exams or Jobs",
+      "Build Career"
+    ],
+
+    projects: [
+      "Research Paper",
+      "Historical Research Project",
+      "Political Analysis Project",
+      "Content Writing Portfolio",
+      "Social Research Project"
     ],
 
     higherStudies: [
       "MA",
       "MBA",
-      "LLB"
+      "LLB",
+      "MSW",
+      "M.Ed"
     ],
 
     futureScope: "Good"

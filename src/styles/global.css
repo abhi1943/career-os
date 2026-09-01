@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+/* ======================================================
+   CareerOS Global UI Polish
+   ====================================================== */
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Prevent focused elements from being hidden behind
+   sticky navigation when navigating with keyboard */
+:focus {
+  scroll-margin-top: 6rem;
+}

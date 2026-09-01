@@ -53,9 +53,7 @@ function JobTracker() {
     async function loadApplications(
         isManualRefresh = false
     ) {
-        console.log(
-            "CareerOS: JobTracker loading applications..."
-        );
+        
 
         if (isManualRefresh) {
             setRefreshing(true);
@@ -69,10 +67,7 @@ function JobTracker() {
             const data =
                 await getApplications();
 
-            console.log(
-                "CareerOS: JobTracker received applications:",
-                data
-            );
+            
 
             setApplications(
                 Array.isArray(data)
@@ -98,9 +93,7 @@ function JobTracker() {
             );
 
         } finally {
-            console.log(
-                "CareerOS: JobTracker loading finished."
-            );
+            
 
             setLoading(false);
             setRefreshing(false);
@@ -115,9 +108,7 @@ function JobTracker() {
         let cancelled = false;
 
         async function loadInitialApplications() {
-            console.log(
-                "CareerOS: JobTracker mounted. Loading applications..."
-            );
+            
 
             try {
                 const data =
@@ -127,10 +118,7 @@ function JobTracker() {
                     return;
                 }
 
-                console.log(
-                    "CareerOS: JobTracker received applications:",
-                    data
-                );
+                
 
                 setApplications(
                     Array.isArray(data)
@@ -163,9 +151,7 @@ function JobTracker() {
 
             } finally {
                 if (!cancelled) {
-                    console.log(
-                        "CareerOS: JobTracker loading finished."
-                    );
+                    
 
                     setLoading(false);
                 }
@@ -177,9 +163,7 @@ function JobTracker() {
         return () => {
             cancelled = true;
 
-            console.log(
-                "CareerOS: JobTracker unmounted."
-            );
+            
         };
     }, []);
 

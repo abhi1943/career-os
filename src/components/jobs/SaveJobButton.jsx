@@ -1,5 +1,3 @@
-// # SaveJobButton.jsx
-
 import {
     useEffect,
     useState,
@@ -52,20 +50,20 @@ function SaveJobButton({
 
     const jobId = job
         ? String(
-              job.id ||
-                  job.redirect_url ||
-                  job.redirectUrl ||
-                  `${job.title || ""}-${
-                      typeof job.company ===
-                      "string"
-                          ? job.company
-                          : job.company
-                                ?.display_name ||
-                            job.company?.name ||
-                            ""
-                  }`
-          ).trim()
+            job.id ||
+            job.redirect_url ||
+            job.redirectUrl ||
+            `${job.title || ""}-${typeof job.company ===
+                "string"
+                ? job.company
+                : job.company
+                    ?.display_name ||
+                job.company?.name ||
+                ""
+            }`
+        ).trim()
         : "";
+
 
     // ======================================================
     // CHECK SAVED STATUS
@@ -76,9 +74,9 @@ function SaveJobButton({
 
         const checkSavedStatus =
             async () => {
-                // --------------------------------------------------
-                // Wait for Firebase authentication state
-                // --------------------------------------------------
+                // ==================================================
+                // WAIT FOR FIREBASE AUTH
+                // ==================================================
 
                 if (authLoading) {
                     if (mounted) {
@@ -88,9 +86,9 @@ function SaveJobButton({
                     return;
                 }
 
-                // --------------------------------------------------
-                // No authenticated user
-                // --------------------------------------------------
+                // ==================================================
+                // NO AUTHENTICATED USER
+                // ==================================================
 
                 if (!userId || !jobId) {
                     if (mounted) {
@@ -106,11 +104,14 @@ function SaveJobButton({
                         setChecking(true);
                     }
 
+
+
                     const result =
                         await isJobSaved(
-                            jobId,
-                            userId
+                            jobId
                         );
+
+                
 
                     if (mounted) {
                         setSaved(
@@ -163,19 +164,23 @@ function SaveJobButton({
                 const changedSaved =
                     detail?.saved;
 
-                // --------------------------------------------------
-                // Ignore events belonging to another user
-                // --------------------------------------------------
+                // ==================================================
+                // IGNORE OTHER USER EVENTS
+                // ==================================================
 
                 if (
                     changedUserId &&
                     String(
                         changedUserId
                     ) !==
-                        String(userId)
+                    String(userId)
                 ) {
                     return;
                 }
+
+                // ==================================================
+                // IGNORE OTHER JOB EVENTS
+                // ==================================================
 
                 if (!changedJobId) {
                     return;
@@ -189,6 +194,10 @@ function SaveJobButton({
                 ) {
                     return;
                 }
+
+                // ==================================================
+                // VALID SAVED STATE REQUIRED
+                // ==================================================
 
                 if (
                     typeof changedSaved !==
@@ -224,17 +233,17 @@ function SaveJobButton({
 
     const handleToggle =
         async () => {
-            // --------------------------------------------------
-            // Do not allow actions while Firebase is resolving
-            // --------------------------------------------------
+            // ==================================================
+            // AUTH STILL LOADING
+            // ==================================================
 
             if (authLoading) {
                 return;
             }
 
-            // --------------------------------------------------
-            // Require authenticated Firebase user
-            // --------------------------------------------------
+            // ==================================================
+            // USER NOT LOGGED IN
+            // ==================================================
 
             if (!userId) {
                 console.warn(
@@ -243,6 +252,10 @@ function SaveJobButton({
 
                 return;
             }
+
+            // ==================================================
+            // PREVENT DUPLICATE REQUESTS
+            // ==================================================
 
             if (
                 !jobId ||
@@ -256,23 +269,22 @@ function SaveJobButton({
                 setSaving(true);
 
                 const normalizedJob =
-                    {
-                        ...job,
-                        id: jobId,
-                    };
+                {
+                    ...job,
+                    id: jobId,
+                };
 
                 let newSavedState =
                     false;
 
                 // ==================================================
-                // REMOVE
+                // REMOVE SAVED JOB
                 // ==================================================
 
                 if (saved) {
                     const removed =
                         await removeSavedJob(
-                            jobId,
-                            userId
+                            jobId
                         );
 
                     if (!removed) {
@@ -286,14 +298,13 @@ function SaveJobButton({
                 }
 
                 // ==================================================
-                // SAVE
+                // SAVE JOB
                 // ==================================================
 
                 else {
                     const savedJob =
                         await saveJob(
-                            normalizedJob,
-                            userId
+                            normalizedJob
                         );
 
                     if (!savedJob) {
@@ -377,14 +388,14 @@ function SaveJobButton({
         authLoading
             ? "Checking..."
             : checking
-            ? "Checking..."
-            : saving
-            ? saved
-                ? "Removing..."
-                : "Saving..."
-            : saved
-            ? "Saved"
-            : "Save Job";
+                ? "Checking..."
+                : saving
+                    ? saved
+                        ? "Removing..."
+                        : "Saving..."
+                    : saved
+                        ? "Saved"
+                        : "Save Job";
 
     // ======================================================
     // RENDER
@@ -401,23 +412,23 @@ function SaveJobButton({
                 authLoading
                     ? "Checking authentication..."
                     : !userId
-                    ? "Login to save jobs"
-                    : checking
-                    ? "Checking saved status..."
-                    : saved
-                    ? "Remove saved job"
-                    : "Save job"
+                        ? "Login to save jobs"
+                        : checking
+                            ? "Checking saved status..."
+                            : saved
+                                ? "Remove saved job"
+                                : "Save job"
             }
             aria-label={
                 authLoading
                     ? "Checking authentication"
                     : !userId
-                    ? "Login to save jobs"
-                    : checking
-                    ? "Checking saved status"
-                    : saved
-                    ? "Remove saved job"
-                    : "Save job"
+                        ? "Login to save jobs"
+                        : checking
+                            ? "Checking saved status"
+                            : saved
+                                ? "Remove saved job"
+                                : "Save job"
             }
             aria-pressed={saved}
             className={
@@ -427,16 +438,14 @@ function SaveJobButton({
                         rounded-lg
                         border
                         transition
-                        ${
-                            saved
-                                ? "bg-blue-50 border-blue-200 text-blue-600"
-                                : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
-                        }
-                        ${
-                            disabled
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                        }
+                        ${saved
+                        ? "bg-blue-50 border-blue-200 text-blue-600"
+                        : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                    }
+                        ${disabled
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }
                     `
                     : `
                         flex
@@ -449,16 +458,14 @@ function SaveJobButton({
                         border
                         font-semibold
                         transition
-                        ${
-                            saved
-                                ? "bg-blue-50 border-blue-200 text-blue-700"
-                                : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-                        }
-                        ${
-                            disabled
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                        }
+                        ${saved
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                    }
+                        ${disabled
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }
                     `
             }
         >

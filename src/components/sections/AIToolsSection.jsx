@@ -27,7 +27,7 @@ const aiTools = [
         link: "/chatbot",
     },
     {
-        title: "Career Assessment",
+        title: "Career Finder",
         description:
             "Discover career paths that match your interests and strengths.",
         icon: ClipboardCheck,

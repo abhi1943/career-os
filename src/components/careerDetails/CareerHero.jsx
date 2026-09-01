@@ -30,81 +30,155 @@ function CareerHero({
       ? career.rating
       : 4.5;
 
-  return (
-    <div className="bg-gradient-to-r from-blue-700 via-cyan-600 to-indigo-700 rounded-3xl text-white p-10 shadow-xl">
+  const handleShare = async () => {
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(
+          window.location.href
+        );
 
-      <div className="flex flex-col lg:flex-row justify-between gap-10">
+        alert("Career link copied!");
+      }
+    } catch {
+      // Clipboard access may be unavailable.
+    }
+  };
+
+  return (
+    <section
+      aria-labelledby="career-title"
+      className="
+        bg-gradient-to-r
+        from-blue-700
+        via-cyan-600
+        to-indigo-700
+        rounded-2xl
+        sm:rounded-3xl
+        text-white
+        p-5
+        sm:p-7
+        lg:p-10
+        shadow-xl
+      "
+    >
+      <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-10">
 
         {/* Career Information */}
+        <div className="flex-1 min-w-0">
 
-        <div className="flex-1">
-
-          <h1 className="text-5xl font-bold">
+          <h1
+            id="career-title"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold break-words"
+          >
             {career.icon} {career.name}
           </h1>
 
-          <p className="text-xl mt-5 text-blue-100">
-            {career.description}
-          </p>
+          {career.description && (
+            <p className="text-base sm:text-lg lg:text-xl mt-4 sm:mt-5 text-blue-100 leading-relaxed">
+              {career.description}
+            </p>
+          )}
 
-          <div className="flex flex-wrap gap-4 mt-8">
+          <div
+            className="flex flex-wrap gap-3 sm:gap-4 mt-6 sm:mt-8"
+            aria-label="Career information"
+          >
 
-            <span className="bg-white/20 px-5 py-2 rounded-full flex items-center gap-2">
-              <Clock3 size={18} />
-              {career.duration}
+            {career.duration && (
+              <span className="bg-white/20 px-4 sm:px-5 py-2 rounded-full flex items-center gap-2 text-sm sm:text-base">
+                <Clock3
+                  size={18}
+                  aria-hidden="true"
+                />
+                <span>{career.duration}</span>
+              </span>
+            )}
+
+            {career.eligibility && (
+              <span className="bg-white/20 px-4 sm:px-5 py-2 rounded-full text-sm sm:text-base">
+                🎯 {career.eligibility}
+              </span>
+            )}
+
+            <span className="bg-white/20 px-4 sm:px-5 py-2 rounded-full flex items-center gap-2 text-sm sm:text-base">
+              <IndianRupee
+                size={18}
+                aria-hidden="true"
+              />
+              <span>{salary}</span>
             </span>
 
-            <span className="bg-white/20 px-5 py-2 rounded-full">
-              🎯 {career.eligibility}
-            </span>
-
-            <span className="bg-white/20 px-5 py-2 rounded-full flex items-center gap-2">
-              <IndianRupee size={18} />
-              {salary}
-            </span>
-
-            <span className="bg-white/20 px-5 py-2 rounded-full flex items-center gap-2">
-              <TrendingUp size={18} />
-              {career.growth}
-            </span>
+            {career.growth && (
+              <span className="bg-white/20 px-4 sm:px-5 py-2 rounded-full flex items-center gap-2 text-sm sm:text-base">
+                <TrendingUp
+                  size={18}
+                  aria-hidden="true"
+                />
+                <span>{career.growth}</span>
+              </span>
+            )}
 
           </div>
 
         </div>
 
         {/* Actions */}
+        <div className="w-full lg:w-72 lg:flex-shrink-0">
 
-        <div className="lg:w-72">
+          <div className="bg-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-6 backdrop-blur">
 
-          <div className="bg-white/10 rounded-3xl p-6 backdrop-blur">
-
-            <div className="flex items-center gap-2">
-
+            <div
+              className="flex items-center gap-2"
+              aria-label={`Career rating: ${rating} out of 5`}
+            >
               <Star
                 fill="currentColor"
                 className="text-yellow-400"
+                aria-hidden="true"
               />
 
               <span className="text-xl font-bold">
                 {rating}
               </span>
 
+              <span className="sr-only">
+                out of 5
+              </span>
             </div>
 
-            <div className="space-y-4 mt-8">
+            <div className="space-y-3 sm:space-y-4 mt-6 sm:mt-8">
 
               {/* Favorite */}
-
               <button
                 type="button"
-                onClick={() =>
-                  toggleFavorite(career)
-                }
-                className={`w-full rounded-xl py-3 flex items-center justify-center gap-2 ${
+                onClick={() => toggleFavorite(career)}
+                aria-pressed={favorite}
+                aria-label={
                   favorite
-                    ? "bg-red-500"
-                    : "bg-white text-blue-700"
-                }`}
+                    ? `Remove ${career.name} from saved careers`
+                    : `Save ${career.name} to your careers`
+                }
+                className={`
+                  w-full
+                  rounded-xl
+                  py-3
+                  px-4
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  transition
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-white
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-blue-700
+                  ${
+                    favorite
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-white text-blue-700 hover:bg-blue-50"
+                  }
+                `}
               >
                 <Heart
                   fill={
@@ -112,82 +186,136 @@ function CareerHero({
                       ? "currentColor"
                       : "none"
                   }
+                  aria-hidden="true"
                 />
 
-                {favorite
-                  ? "Saved"
-                  : "Save Career"}
+                <span>
+                  {favorite
+                    ? "Saved"
+                    : "Save Career"}
+                </span>
               </button>
 
               {/* Compare */}
-
               <button
                 type="button"
-                onClick={() =>
-                  addToCompare(career)
-                }
+                onClick={() => addToCompare(career)}
                 disabled={compared}
-                className={`w-full rounded-xl py-3 flex items-center justify-center gap-2 ${
+                aria-pressed={compared}
+                aria-label={
                   compared
-                    ? "bg-gray-300 text-gray-700"
-                    : "bg-yellow-400 text-gray-900"
-                }`}
+                    ? `${career.name} is already added to compare`
+                    : `Add ${career.name} to compare`
+                }
+                className={`
+                  w-full
+                  rounded-xl
+                  py-3
+                  px-4
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  transition
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-white
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-blue-700
+                  ${
+                    compared
+                      ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                      : "bg-yellow-400 text-gray-900 hover:bg-yellow-300"
+                  }
+                `}
               >
-                <Scale />
+                <Scale aria-hidden="true" />
 
-                {compared
-                  ? "Added"
-                  : "Compare"}
+                <span>
+                  {compared
+                    ? "Added"
+                    : "Compare"}
+                </span>
               </button>
 
               {/* Share */}
-
               <button
                 type="button"
-                onClick={() => {
-                  if (
-                    navigator.clipboard
-                  ) {
-                    navigator.clipboard.writeText(
-                      window.location.href
-                    );
-
-                    alert(
-                      "Career link copied!"
-                    );
-                  }
-                }}
-                className="w-full rounded-xl py-3 bg-white/20 flex items-center justify-center gap-2"
+                onClick={handleShare}
+                aria-label={`Copy link to ${career.name}`}
+                className="
+                  w-full
+                  rounded-xl
+                  py-3
+                  px-4
+                  bg-white/20
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  hover:bg-white/30
+                  transition
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-white
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-blue-700
+                "
               >
-                <Share2 />
+                <Share2
+                  aria-hidden="true"
+                />
 
-                Share
+                <span>Share</span>
               </button>
 
               {/* Goal */}
-
               <button
                 type="button"
-                onClick={() =>
-                  setGoal(career)
-                }
-                className="w-full rounded-xl py-3 bg-green-600 hover:bg-green-700 transition"
+                onClick={() => setGoal(career)}
+                aria-label={`Set ${career.name} as your career goal`}
+                className="
+                  w-full
+                  rounded-xl
+                  py-3
+                  px-4
+                  bg-green-600
+                  hover:bg-green-700
+                  transition
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-white
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-blue-700
+                "
               >
                 🎯 Set as Career Goal
               </button>
 
               {/* AI Mentor */}
-
               <Link
                 to={`/chatbot?career=${career.id}`}
-                className="block"
+                aria-label={`Ask AI Mentor about ${career.name}`}
+                className="
+                  flex
+                  w-full
+                  rounded-xl
+                  py-3
+                  px-4
+                  bg-purple-600
+                  hover:bg-purple-700
+                  transition
+                  text-white
+                  items-center
+                  justify-center
+                  focus:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-white
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-blue-700
+                "
               >
-                <button
-                  type="button"
-                  className="w-full rounded-xl py-3 bg-purple-600 hover:bg-purple-700 transition text-white"
-                >
-                  🤖 Ask AI Mentor
-                </button>
+                🤖 Ask AI Mentor
               </Link>
 
             </div>
@@ -198,7 +326,7 @@ function CareerHero({
 
       </div>
 
-    </div>
+    </section>
   );
 }
 

@@ -1,49 +1,12 @@
 // ======================================================
 // CareerOS Application Service
 // ======================================================
-//
-// Responsibilities:
-// - Create applications
-// - Get applications
-// - Get one application by job ID
-// - Update application status
-// - Remove applications
-// - Prevent duplicate applications
-// - Track application timestamps
-// - Persist applications between server restarts
-//
-// Storage:
-// - JSON file
-//
+// STEP 20 — Persistent MySQL Application Storage
 // ======================================================
 
-const fs =
-    require("fs");
-
-const path =
-    require("path");
-
-// ======================================================
-// APPLICATION STORAGE FILE
-// ======================================================
-
-const DATA_DIRECTORY =
-    path.join(
-        __dirname,
-        "../data"
-    );
-
-const APPLICATIONS_FILE =
-    path.join(
-        DATA_DIRECTORY,
-        "applications.json"
-    );
-
-// ======================================================
-// IN-MEMORY STORAGE
-// ======================================================
-
-const applications = new Map();
+const {
+    pool,
+} = require("../config/database");
 
 // ======================================================
 // APPLICATION STATUSES
@@ -58,157 +21,20 @@ const APPLICATION_STATUSES = [
 ];
 
 // ======================================================
-// ENSURE STORAGE EXISTS
+// NORMALIZE USER ID
 // ======================================================
 
-function ensureStorage() {
-    try {
-        if (
-            !fs.existsSync(
-                DATA_DIRECTORY
-            )
-        ) {
-            fs.mkdirSync(
-                DATA_DIRECTORY,
-                {
-                    recursive: true,
-                }
-            );
-        }
-
-        if (
-            !fs.existsSync(
-                APPLICATIONS_FILE
-            )
-        ) {
-            fs.writeFileSync(
-                APPLICATIONS_FILE,
-                "[]",
-                "utf8"
-            );
-        }
-    } catch (error) {
-        console.error(
-            "CareerOS: Unable to initialize application storage:",
-            error.message
-        );
-
-        throw error;
+function normalizeUserId(userId) {
+    if (
+        userId === undefined ||
+        userId === null
+    ) {
+        return "";
     }
-}
 
-// ======================================================
-// LOAD APPLICATIONS FROM FILE
-// ======================================================
-
-function loadApplications() {
-    try {
-        ensureStorage();
-
-        const fileData =
-            fs.readFileSync(
-                APPLICATIONS_FILE,
-                "utf8"
-            );
-
-        if (!fileData.trim()) {
-            return;
-        }
-
-        const parsedData =
-            JSON.parse(fileData);
-
-        if (
-            !Array.isArray(
-                parsedData
-            )
-        ) {
-            console.error(
-                "CareerOS: applications.json must contain an array."
-            );
-
-            return;
-        }
-
-        applications.clear();
-
-        parsedData.forEach(
-            (application) => {
-                if (
-                    !application ||
-                    typeof application !==
-                        "object"
-                ) {
-                    return;
-                }
-
-                const jobId =
-                    normalizeJobId(
-                        application
-                    );
-
-                if (!jobId) {
-                    return;
-                }
-
-                const normalizedApplication =
-                    normalizeApplication(
-                        application,
-                        jobId
-                    );
-
-                applications.set(
-                    jobId,
-                    normalizedApplication
-                );
-            }
-        );
-
-        console.log(
-            `CareerOS: Loaded ${applications.size} applications from storage.`
-        );
-    } catch (error) {
-        console.error(
-            "CareerOS: Failed to load applications:",
-            error.message
-        );
-    }
-}
-
-// ======================================================
-// SAVE APPLICATIONS TO FILE
-// ======================================================
-
-function saveApplications() {
-    try {
-        ensureStorage();
-
-        const data =
-            Array.from(
-                applications.values()
-            );
-
-        fs.writeFileSync(
-            APPLICATIONS_FILE,
-            JSON.stringify(
-                data,
-                null,
-                2
-            ),
-            "utf8"
-        );
-
-        console.log(
-            `CareerOS: Saved ${data.length} applications to storage.`
-        );
-    } catch (error) {
-        console.error(
-            "CareerOS: Failed to save applications:",
-            error.message
-        );
-
-        throw error;
-    }
+    return String(
+        userId
+    ).trim();
 }
 
 // ======================================================
@@ -321,7 +147,10 @@ function normalizeJobId(
 function cloneData(
     data
 ) {
-    if (!data) {
+    if (
+        data === null ||
+        data === undefined
+    ) {
         return null;
     }
 
@@ -373,84 +202,100 @@ function normalizeStatus(
 }
 
 // ======================================================
-// NORMALIZE APPLICATION
+// MYSQL DATE FORMAT
 // ======================================================
 
-function normalizeApplication(
-    application,
-    jobId
+function toMySQLDateTime(
+    value = new Date()
 ) {
+    const date =
+        value instanceof Date
+            ? value
+            : new Date(value);
+
     if (
-        !application ||
-        typeof application !==
-            "object"
+        Number.isNaN(
+            date.getTime()
+        )
     ) {
         return null;
     }
 
-    const normalizedJobId =
-        jobId ||
-        normalizeJobId(
-            application
+    return date
+        .toISOString()
+        .slice(0, 19)
+        .replace(
+            "T",
+            " "
         );
+}
 
-    if (!normalizedJobId) {
+// ======================================================
+// MAP DATABASE ROW
+// ======================================================
+
+function mapApplicationRow(
+    row
+) {
+    if (!row) {
         return null;
     }
 
-    const sourceJob =
-        application.job &&
-        typeof application.job ===
-            "object"
-            ? cloneData(
-                application.job
-            )
-            : cloneData(
-                application
+    let job = null;
+
+    if (row.job_data) {
+        try {
+            job =
+                typeof row.job_data ===
+                "string"
+                    ? JSON.parse(
+                        row.job_data
+                    )
+                    : row.job_data;
+        } catch (error) {
+            console.error(
+                "CareerOS: Failed to parse application job data:",
+                error.message
             );
 
-    const job =
-        sourceJob || {};
+            job = null;
+        }
+    }
+
+    job =
+        job || {};
 
     job.id =
         job.id ||
         job.jobId ||
         job.job_id ||
-        normalizedJobId;
-
-    const now =
-        new Date().toISOString();
+        row.job_id;
 
     return {
-        ...application,
-
         id:
-            application.id ||
-            normalizedJobId,
+            row.id,
+
+        userId:
+            row.user_id,
 
         jobId:
-            normalizedJobId,
+            row.job_id,
 
         job,
 
         status:
             normalizeStatus(
-                application.status
+                row.status
             ),
 
         appliedAt:
-            application.appliedAt ||
-            application.createdAt ||
-            now,
+            row.applied_at,
 
         createdAt:
-            application.createdAt ||
-            now,
+            row.created_at,
 
         updatedAt:
-            application.updatedAt ||
-            application.createdAt ||
-            now,
+            row.updated_at,
     };
 }
 
@@ -458,9 +303,21 @@ function normalizeApplication(
 // CREATE APPLICATION
 // ======================================================
 
-function createApplication(
-    data
+async function createApplication(
+    data,
+    userId
 ) {
+    const normalizedUserId =
+        normalizeUserId(
+            userId
+        );
+
+    if (!normalizedUserId) {
+        throw new Error(
+            "User ID is required to create an application."
+        );
+    }
+
     if (
         !data ||
         typeof data !==
@@ -479,22 +336,33 @@ function createApplication(
     }
 
     // --------------------------------------------------
-    // Prevent duplicate applications
+    // CHECK EXISTING APPLICATION
     // --------------------------------------------------
 
-    const existing =
-        applications.get(
-            jobId
-        );
+    const [
+        existingRows,
+    ] = await pool.execute(
+        `
+        SELECT *
+        FROM applications
+        WHERE user_id = ?
+          AND job_id = ?
+        LIMIT 1
+        `,
+        [
+            normalizedUserId,
+            jobId,
+        ]
+    );
 
-    if (existing) {
-        return cloneData(
-            existing
+    if (existingRows.length) {
+        return mapApplicationRow(
+            existingRows[0]
         );
     }
 
     // --------------------------------------------------
-    // Extract job
+    // EXTRACT JOB
     // --------------------------------------------------
 
     const sourceJob =
@@ -516,48 +384,80 @@ function createApplication(
         jobId;
 
     // --------------------------------------------------
-    // Timestamps
+    // TIMESTAMPS
     // --------------------------------------------------
 
     const now =
-        new Date().toISOString();
+        toMySQLDateTime();
 
-    const application = {
-        id: jobId,
+    const applicationId =
+        data.id ||
+        `application_${Date.now()}_${Math.random()
+            .toString(36)
+            .substring(2, 10)}`;
 
-        jobId,
+    const status =
+        normalizeStatus(
+            data.status
+        );
 
-        job,
+    // --------------------------------------------------
+    // INSERT
+    // --------------------------------------------------
 
-        status:
-            normalizeStatus(
-                data.status
+    await pool.execute(
+        `
+        INSERT INTO applications (
+            id,
+            user_id,
+            job_id,
+            job_data,
+            status,
+            applied_at,
+            created_at,
+            updated_at
+        )
+        VALUES (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
+        )
+        `,
+        [
+            String(
+                applicationId
             ),
 
-        appliedAt:
-            data.appliedAt ||
+            normalizedUserId,
+
+            jobId,
+
+            JSON.stringify(
+                job
+            ),
+
+            status,
+
+            data.appliedAt
+                ? toMySQLDateTime(
+                    data.appliedAt
+                )
+                : now,
+
             now,
 
-        createdAt:
             now,
-
-        updatedAt:
-            now,
-    };
-
-    applications.set(
-        jobId,
-        application
+        ]
     );
 
-    // --------------------------------------------------
-    // PERSIST
-    // --------------------------------------------------
-
-    saveApplications();
-
-    return cloneData(
-        application
+    return getApplication(
+        jobId,
+        normalizedUserId
     );
 }
 
@@ -565,56 +465,84 @@ function createApplication(
 // GET ALL APPLICATIONS
 // ======================================================
 
-function getApplications() {
-    return Array.from(
-        applications.values()
-    )
-        .sort(
-            (a, b) =>
-                new Date(
-                    b.appliedAt ||
-                    b.createdAt ||
-                    0
-                ) -
-                new Date(
-                    a.appliedAt ||
-                    a.createdAt ||
-                    0
-                )
-        )
-        .map(
-            (application) =>
-                cloneData(
-                    application
-                )
+async function getApplications(
+    userId
+) {
+    const normalizedUserId =
+        normalizeUserId(
+            userId
         );
+
+    if (!normalizedUserId) {
+        return [];
+    }
+
+    const [
+        rows,
+    ] = await pool.execute(
+        `
+        SELECT *
+        FROM applications
+        WHERE user_id = ?
+        ORDER BY applied_at DESC
+        `,
+        [
+            normalizedUserId,
+        ]
+    );
+
+    return rows.map(
+        mapApplicationRow
+    );
 }
 
 // ======================================================
 // GET ONE APPLICATION
 // ======================================================
 
-function getApplication(
-    jobId
+async function getApplication(
+    jobId,
+    userId
 ) {
+    const normalizedUserId =
+        normalizeUserId(
+            userId
+        );
+
     const normalizedJobId =
         normalizeJobId(
             jobId
         );
 
-    if (!normalizedJobId) {
+    if (
+        !normalizedUserId ||
+        !normalizedJobId
+    ) {
         return null;
     }
 
-    const application =
-        applications.get(
-            normalizedJobId
-        );
+    const [
+        rows,
+    ] = await pool.execute(
+        `
+        SELECT *
+        FROM applications
+        WHERE user_id = ?
+          AND job_id = ?
+        LIMIT 1
+        `,
+        [
+            normalizedUserId,
+            normalizedJobId,
+        ]
+    );
 
-    return (
-        cloneData(
-            application
-        ) || null
+    if (!rows.length) {
+        return null;
+    }
+
+    return mapApplicationRow(
+        rows[0]
     );
 }
 
@@ -622,20 +550,18 @@ function getApplication(
 // CHECK APPLICATION
 // ======================================================
 
-function isApplicationCreated(
-    jobId
+async function isApplicationCreated(
+    jobId,
+    userId
 ) {
-    const normalizedJobId =
-        normalizeJobId(
-            jobId
+    const application =
+        await getApplication(
+            jobId,
+            userId
         );
 
-    if (!normalizedJobId) {
-        return false;
-    }
-
-    return applications.has(
-        normalizedJobId
+    return Boolean(
+        application
     );
 }
 
@@ -643,25 +569,25 @@ function isApplicationCreated(
 // UPDATE APPLICATION STATUS
 // ======================================================
 
-function updateApplicationStatus(
+async function updateApplicationStatus(
     jobId,
-    status
+    status,
+    userId
 ) {
+    const normalizedUserId =
+        normalizeUserId(
+            userId
+        );
+
     const normalizedJobId =
         normalizeJobId(
             jobId
         );
 
-    if (!normalizedJobId) {
-        return null;
-    }
-
-    const application =
-        applications.get(
-            normalizedJobId
-        );
-
-    if (!application) {
+    if (
+        !normalizedUserId ||
+        !normalizedJobId
+    ) {
         return null;
     }
 
@@ -670,25 +596,41 @@ function updateApplicationStatus(
             status
         );
 
-    application.status =
-        normalizedStatus;
+    const now =
+        toMySQLDateTime();
 
-    application.updatedAt =
-        new Date().toISOString();
+    const [
+        result,
+    ] = await pool.execute(
+        `
+        UPDATE applications
+        SET
+            status = ?,
+            updated_at = ?
+        WHERE user_id = ?
+          AND job_id = ?
+        `,
+        [
+            normalizedStatus,
 
-    applications.set(
-        normalizedJobId,
-        application
+            now,
+
+            normalizedUserId,
+
+            normalizedJobId,
+        ]
     );
 
-    // --------------------------------------------------
-    // PERSIST UPDATED STATUS
-    // --------------------------------------------------
+    if (
+        result.affectedRows ===
+        0
+    ) {
+        return null;
+    }
 
-    saveApplications();
-
-    return cloneData(
-        application
+    return getApplication(
+        normalizedJobId,
+        normalizedUserId
     );
 }
 
@@ -696,58 +638,111 @@ function updateApplicationStatus(
 // REMOVE APPLICATION
 // ======================================================
 
-function removeApplication(
-    jobId
+async function removeApplication(
+    jobId,
+    userId
 ) {
+    const normalizedUserId =
+        normalizeUserId(
+            userId
+        );
+
     const normalizedJobId =
         normalizeJobId(
             jobId
         );
 
-    if (!normalizedJobId) {
+    if (
+        !normalizedUserId ||
+        !normalizedJobId
+    ) {
         return false;
     }
 
-    const removed =
-        applications.delete(
-            normalizedJobId
-        );
+    const [
+        result,
+    ] = await pool.execute(
+        `
+        DELETE FROM applications
+        WHERE user_id = ?
+          AND job_id = ?
+        `,
+        [
+            normalizedUserId,
+            normalizedJobId,
+        ]
+    );
 
-    if (removed) {
-        saveApplications();
-    }
-
-    return removed;
+    return (
+        result.affectedRows >
+        0
+    );
 }
 
 // ======================================================
 // GET APPLICATION COUNT
 // ======================================================
 
-function getApplicationCount() {
-    return applications.size;
+async function getApplicationCount(
+    userId
+) {
+    const normalizedUserId =
+        normalizeUserId(
+            userId
+        );
+
+    if (!normalizedUserId) {
+        return 0;
+    }
+
+    const [
+        rows,
+    ] = await pool.execute(
+        `
+        SELECT COUNT(*) AS count
+        FROM applications
+        WHERE user_id = ?
+        `,
+        [
+            normalizedUserId,
+        ]
+    );
+
+    return Number(
+        rows[0]?.count || 0
+    );
 }
 
 // ======================================================
 // CLEAR APPLICATIONS
 // ======================================================
 
-function clearApplications() {
-    const count =
-        applications.size;
+async function clearApplications(
+    userId
+) {
+    const normalizedUserId =
+        normalizeUserId(
+            userId
+        );
 
-    applications.clear();
+    if (!normalizedUserId) {
+        return 0;
+    }
 
-    saveApplications();
+    const [
+        result,
+    ] = await pool.execute(
+        `
+        DELETE FROM applications
+        WHERE user_id = ?
+        `,
+        [
+            normalizedUserId,
+        ]
+    );
 
-    return count;
+    return result.affectedRows;
 }
-
-// ======================================================
-// INITIALIZE STORAGE
-// ======================================================
-
-loadApplications();
 
 // ======================================================
 // EXPORTS

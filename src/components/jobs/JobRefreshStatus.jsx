@@ -12,7 +12,7 @@ function JobRefreshStatus({
     // API BASE URL
     // ======================================================
 
-    const API_BASE_URL = "http://localhost:5000";
+    const API_BASE_URL = "https://career-os-api-1h85.onrender.com";
 
     // ======================================================
     // FETCH REFRESH STATUS

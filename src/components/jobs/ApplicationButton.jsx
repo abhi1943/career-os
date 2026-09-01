@@ -1,5 +1,4 @@
 import {
-    useCallback,
     useEffect,
     useState,
 } from "react";
@@ -49,30 +48,23 @@ function ApplicationButton({
     // JOB ID
     // ==================================================
 
-    const getJobId = useCallback(() => {
-        if (!job) {
-            return "";
-        }
-
-        const id =
-            job.id ||
-            job.job_id ||
-            job.jobId ||
-            job.redirect_url ||
-            job.redirectUrl ||
-            job.url ||
-            `${job.title || ""}-${
-                typeof job.company === "string"
-                    ? job.company
-                    : job.company?.display_name ||
-                      job.company?.name ||
-                      ""
-            }`;
-
-        return String(id).trim();
-    }, [
-        job,
-    ]);
+    const jobId = job
+        ? String(
+              job.id ||
+                  job.job_id ||
+                  job.jobId ||
+                  job.redirect_url ||
+                  job.redirectUrl ||
+                  job.url ||
+                  `${job.title || ""}-${
+                      typeof job.company === "string"
+                          ? job.company
+                          : job.company?.display_name ||
+                            job.company?.name ||
+                            ""
+                  }`
+          ).trim()
+        : "";
 
     // ==================================================
     // CHECK APPLICATION
@@ -82,8 +74,6 @@ function ApplicationButton({
         let mounted = true;
 
         const checkApplication = async () => {
-            const jobId = getJobId();
-
             if (!jobId) {
                 if (mounted) {
                     setApplication(null);
@@ -134,9 +124,7 @@ function ApplicationButton({
         return () => {
             mounted = false;
         };
-    }, [
-        getJobId,
-    ]);
+    }, [jobId]);
 
     // ==================================================
     // APPLY
@@ -147,7 +135,9 @@ function ApplicationButton({
             return;
         }
 
-        const jobId = getJobId();
+        // IMPORTANT:
+        // Use the component-level jobId.
+        // Do NOT write: const jobId = jobId;
 
         if (!jobId) {
             setError(
@@ -179,7 +169,10 @@ function ApplicationButton({
                 createdApplication
             );
 
-            if (onApplicationChange) {
+            if (
+                typeof onApplicationChange ===
+                "function"
+            ) {
                 onApplicationChange(
                     createdApplication,
                     true

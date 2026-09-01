@@ -1,62 +1,105 @@
 import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
+    ReactFlow,
+    Background,
+    Controls,
+    MiniMap,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
 
-function RoadmapFlow({ roadmap = [] }) {
-  const nodes = roadmap.map((item, index) => ({
-    id: String(index + 1),
+function RoadmapFlow({
+    roadmap = [],
+}) {
+    const nodes = roadmap.map(
+        (item, index) => ({
+            id: String(
+                item?.id ??
+                index + 1
+            ),
 
-    position: {
-      x: 250,
-      y: index * 140,
-    },
+            position: {
+                x: 250,
+                y: index * 180,
+            },
 
-    data: {
-      label:
-        typeof item === "string" ? (
-          <div className="font-semibold">{item}</div>
-        ) : (
-          <div className="p-2">
-            <h3 className="font-bold text-blue-600">
-              Step {item.step}
-            </h3>
+            data: {
+                label: (
+                    <div className="p-3 min-w-[220px]">
 
-            <h4 className="font-semibold">
-              {item.title}
-            </h4>
+                        <div className="font-bold text-blue-600">
+                            Step {index + 1}
+                        </div>
 
-            <p className="text-sm text-gray-600">
-              {item.description}
-            </p>
-          </div>
-        ),
-    },
-  }));
+                        <h3 className="font-semibold mt-1">
+                            {item?.title ||
+                                "Roadmap Stage"}
+                        </h3>
 
-  const edges = roadmap.slice(1).map((_, index) => ({
-    id: `e${index + 1}`,
-    source: String(index + 1),
-    target: String(index + 2),
-  }));
+                        {item?.duration && (
+                            <p className="text-sm text-gray-500 mt-1">
+                                {item.duration}
+                            </p>
+                        )}
 
-  return (
-    <div style={{ width: "100%", height: "700px" }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        fitView
-      >
-        <MiniMap />
-        <Controls />
-        <Background />
-      </ReactFlow>
-    </div>
-  );
+                        {Array.isArray(
+                            item?.skills
+                        ) &&
+                            item.skills.length >
+                                0 && (
+
+                                <div className="mt-2 text-xs text-gray-600">
+                                    {item.skills.join(
+                                        " • "
+                                    )}
+                                </div>
+                            )}
+
+                    </div>
+                ),
+            },
+        })
+    );
+
+    const edges = roadmap
+        .slice(1)
+        .map((item, index) => ({
+            id: `e${index + 1}`,
+
+            source: String(
+                roadmap[index]?.id ??
+                index + 1
+            ),
+
+            target: String(
+                item?.id ??
+                index + 2
+            ),
+        }));
+
+    if (roadmap.length === 0) {
+        return null;
+    }
+
+    return (
+        <div
+            style={{
+                width: "100%",
+                height: "700px",
+            }}
+        >
+            <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                fitView
+            >
+                <MiniMap />
+
+                <Controls />
+
+                <Background />
+            </ReactFlow>
+        </div>
+    );
 }
 
 export default RoadmapFlow;

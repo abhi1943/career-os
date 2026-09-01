@@ -3,7 +3,6 @@ import { CareerContext } from "../../context/CareerContext";
 
 import {
   GraduationCap,
-  Heart,
   Target,
   Code2,
   MapPin,
@@ -11,7 +10,258 @@ import {
   ArrowLeft,
   CheckCircle2,
   Sparkles,
+  Heart,
 } from "lucide-react";
+
+/* =========================================================
+   CAREER ID ALIASES
+   ---------------------------------------------------------
+   Display names used by the form are intentionally kept
+   separate from database / career-engine IDs.
+========================================================= */
+
+const CAREER_ID_ALIASES = {
+  /* =====================================================
+     TECHNOLOGY
+  ===================================================== */
+
+  "Software Engineer": "software-engineer",
+  "Frontend Developer": "frontend-developer",
+  "Backend Developer": "backend-developer",
+  "Full Stack Developer": "full-stack-developer",
+  "Cloud Engineer": "cloud-engineer",
+  "DevOps Engineer": "devops-engineer",
+  "QA Engineer": "qa-engineer",
+  "Mobile App Developer": "mobile-app-developer",
+
+  /* =====================================================
+     DATA / AI
+  ===================================================== */
+
+  "AI Engineer": "ai-engineer",
+  "Machine Learning Engineer": "machine-learning-engineer",
+  "Data Scientist": "data-scientist",
+  "Data Analyst": "data-analyst",
+  "Business Analyst": "business-analyst",
+  "Research Analyst": "research-analyst",
+  "Research Engineer": "research-engineer",
+
+  /* =====================================================
+     CYBER SECURITY
+  ===================================================== */
+
+  "Cyber Security Engineer": "cyber-security-engineer",
+  "Ethical Hacker": "ethical-hacker",
+  "SOC Analyst": "soc-analyst",
+  "Security Consultant": "security-consultant",
+  "Cyber Security Analyst": "cyber-security-analyst",
+
+  /* =====================================================
+     ENGINEERING
+  ===================================================== */
+
+  "Embedded Engineer": "embedded-engineer",
+  "VLSI Engineer": "vlsi-engineer",
+  "IoT Engineer": "iot-engineer",
+  "Electronics Engineer": "electronics-engineer",
+  "Hardware Engineer": "hardware-engineer",
+
+  "Electrical Engineer": "electrical-engineer",
+  "Power Systems Engineer": "power-systems-engineer",
+  "Electrical Design Engineer": "electrical-design-engineer",
+  "Electrical Maintenance Engineer":
+    "electrical-maintenance-engineer",
+
+  "Mechanical Engineer": "mechanical-engineer",
+  "Automobile Engineer": "automobile-engineer",
+  "Production Engineer": "production-engineer",
+  "Design Engineer": "design-engineer",
+  "Maintenance Engineer": "maintenance-engineer",
+
+  "Civil Engineer": "civil-engineer",
+  "Structural Engineer": "structural-engineer",
+  "Construction Engineer": "construction-engineer",
+  "Site Engineer": "site-engineer",
+
+  /* =====================================================
+     COMMERCE / BUSINESS
+  ===================================================== */
+
+  Accountant: "accountant",
+  "Financial Analyst": "financial-analyst",
+  "Bank Officer": "bank-officer",
+  "Chartered Accountant": "chartered-accountant",
+  "Marketing Manager": "marketing-manager",
+  "HR Manager": "hr-manager",
+  "Business Executive": "business-executive",
+  Entrepreneur: "entrepreneur",
+
+  /* =====================================================
+     ARTS / SOCIAL
+  ===================================================== */
+
+  "Government Officer": "government-officer",
+  Lawyer: "lawyer",
+  Journalist: "journalist",
+  Teacher: "teacher",
+  "Content Writer": "content-writer",
+
+  /* =====================================================
+     MEDICAL
+  ===================================================== */
+
+  Doctor: "doctor",
+  "Medical Researcher": "medical-researcher",
+  "Medical Officer": "medical-officer",
+  "Healthcare Administrator": "healthcare-administrator",
+
+  Dentist: "dentist",
+  "Dental Surgeon": "dental-surgeon",
+  "Dental Researcher": "dental-researcher",
+
+  "Ayurvedic Doctor": "ayurvedic-doctor",
+  "Homeopathic Doctor": "homeopathic-doctor",
+
+  Pharmacist: "pharmacist",
+  "Clinical Researcher": "clinical-researcher",
+  "Drug Safety Associate": "drug-safety-associate",
+  "Pharmaceutical Analyst": "pharmaceutical-analyst",
+
+  /* =====================================================
+     ITI / TECHNICAL
+  ===================================================== */
+
+  "Electrical Technician": "electrical-technician",
+  "Maintenance Technician": "maintenance-technician",
+  "Electrical Assistant": "electrical-assistant",
+
+  "Fitter Technician": "fitter-technician",
+  "Production Technician": "production-technician",
+
+  "Computer Operator": "computer-operator",
+  "IT Support Specialist": "it-support-specialist",
+  "Web Developer": "web-developer",
+
+  "Electronics Technician": "electronics-technician",
+  "IoT Technician": "iot-technician",
+
+  "Automobile Technician": "automobile-technician",
+  "Mechanical Technician": "mechanical-technician",
+  "Service Engineer": "service-engineer",
+
+  /* =====================================================
+     GOVERNMENT
+  ===================================================== */
+
+  "SSC CGL Officer": "ssc-cgl",
+  "SSC CHSL Officer": "ssc-chsl",
+  "Probationary Officer": "bank-po",
+  "Bank Clerk": "bank-clerk",
+
+  "Railway Officer": "rrb-je",
+  "Railway Technician": "railway-technician",
+  "Railway Engineer": "railway-engineer",
+
+  "IAS Officer": "upsc",
+  "IPS Officer": "upsc",
+
+  "State Government Officer": "state-government",
+  "Public Service Officer": "state-government",
+
+  /* =====================================================
+     GENERIC / PATH OPTIONS
+  ===================================================== */
+
+  "Skill-based Employment": "skill-based-employment",
+  Technician: "technician",
+  Apprentice: "apprentice",
+  "Technical Specialist": "technical-specialist",
+};
+
+/* =========================================================
+   DATABASE COURSE / CAREER IDS
+   ---------------------------------------------------------
+   These are the established education-path IDs.
+========================================================= */
+
+const EDUCATION_CAREER_IDS = {
+  /* Polytechnic */
+  CSE: "diploma-cse",
+  ECE: "diploma-ece",
+  EEE: "diploma-eee",
+  Mechanical: "diploma-mechanical",
+  Civil: "diploma-civil",
+
+  /* ITI */
+  Electrician: "iti-electrician",
+  Fitter: "iti-fitter",
+  "Computer Operator": "iti-copa",
+  Electronics: "iti-copa",
+  Mechanic: "iti-fitter",
+
+  /* Medical */
+  MBBS: "mbbs",
+  BDS: "bds",
+  "B.Pharmacy": "bpharm",
+};
+
+/* =========================================================
+   INTEREST MAP
+   ---------------------------------------------------------
+   IMPORTANT:
+   These values are the stable keys consumed by the
+   career-engine interest matching logic.
+========================================================= */
+
+const interestMap = {
+  Technology: "technology",
+  "Data & Analytics": "data",
+  "Artificial Intelligence": "artificial-intelligence",
+  Business: "business",
+  Finance: "finance",
+  Healthcare: "healthcare",
+  "Design & Creativity": "design",
+  "Government & Public Service": "government",
+  Engineering: "engineering",
+  Research: "research",
+};
+
+/* =========================================================
+   NORMALIZE CAREER ID
+========================================================= */
+
+const getCareerId = (career) => {
+  if (!career) return "";
+
+  return (
+    CAREER_ID_ALIASES[career] ||
+    career
+      .trim()
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+  );
+};
+
+/* =========================================================
+   EDUCATION + SPECIALIZATION KEY
+========================================================= */
+
+const getEducationSpecializationKey = (
+  education,
+  specialization
+) => {
+  if (!education || !specialization) {
+    return "";
+  }
+
+  return `${education}:${specialization}`;
+};
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 function StudentForm() {
   const { setStudent } = useContext(CareerContext);
@@ -23,15 +273,15 @@ function StudentForm() {
     age: "",
     education: "",
     specialization: "",
-    interest: "",
     dreamCareer: "",
+    interest: "",
     state: "",
     skills: [],
   });
 
-  /* ==================================================
+  /* ======================================================
      SPECIALIZATION / BRANCH OPTIONS
-  ================================================== */
+  ====================================================== */
 
   const specializationOptions = {
     after10th: ["General"],
@@ -99,30 +349,14 @@ function StudentForm() {
     ],
   };
 
-  /* ==================================================
-     CAREER / PATH OPTIONS
-
-     10th
-     → Higher education / entry paths
-
-     Intermediate
-     → Degree / professional education
-
-     Polytechnic / ITI
-     → Career directions
-
-     B.Tech / Degree / Medical
-     → Professional careers
-
-     Government
-     → Government career paths
-  ================================================== */
+  /* ======================================================
+     CAREER / JOB ROLE OPTIONS
+     ------------------------------------------------------
+     These remain display labels.
+     Stable IDs are generated separately.
+  ====================================================== */
 
   const careerPathOptions = {
-    /* ==================================================
-       AFTER 10TH
-    ================================================== */
-
     after10th: [
       "Intermediate - MPC",
       "Intermediate - BiPC",
@@ -134,66 +368,54 @@ function StudentForm() {
       "Government Jobs",
     ],
 
-    /* ==================================================
-       INTERMEDIATE
-    ================================================== */
-
     MPC: [
-      "B.Tech / Engineering",
-      "B.Sc Computer Science",
-      "B.Sc Data Science",
-      "BCA",
-      "B.Sc Mathematics",
-      "B.Sc Physics",
+      "Software Engineer",
+      "Data Analyst",
+      "Data Scientist",
+      "Frontend Developer",
+      "Backend Developer",
+      "Full Stack Developer",
     ],
 
     BiPC: [
-      "MBBS",
-      "BDS",
-      "B.Pharmacy",
-      "B.Sc Nursing",
-      "B.Sc Biotechnology",
-      "B.Sc Agriculture",
+      "Doctor",
+      "Dentist",
+      "Pharmacist",
+      "Medical Researcher",
+      "Healthcare Administrator",
     ],
 
     MEC: [
-      "B.Com",
-      "BBA",
-      "CA",
-      "B.Com Computer Applications",
-      "B.Sc Economics",
-      "Banking & Finance",
+      "Accountant",
+      "Financial Analyst",
+      "Business Analyst",
+      "Bank Officer",
+      "Chartered Accountant",
     ],
 
     CEC: [
-      "BA",
-      "BBA",
-      "B.Com",
-      "Law",
-      "Journalism",
-      "Government Exam Preparation",
+      "Government Officer",
+      "Lawyer",
+      "Journalist",
+      "Teacher",
+      "Content Writer",
     ],
 
     HEC: [
-      "BA",
-      "B.Ed",
-      "Journalism",
-      "Law",
-      "Political Science",
-      "Government Exam Preparation",
+      "Government Officer",
+      "Teacher",
+      "Journalist",
+      "Lawyer",
+      "Content Writer",
     ],
 
     Vocational: [
-      "Diploma / Polytechnic",
       "Skill-based Employment",
-      "Apprenticeship",
-      "Higher Vocational Studies",
-      "Entrepreneurship",
+      "Technician",
+      "Apprentice",
+      "Technical Specialist",
+      "Entrepreneur",
     ],
-
-    /* ==================================================
-       POLYTECHNIC
-    ================================================== */
 
     CSE: [
       "Software Engineer",
@@ -202,12 +424,15 @@ function StudentForm() {
       "Full Stack Developer",
       "Cloud Engineer",
       "DevOps Engineer",
+      "QA Engineer",
+      "Mobile App Developer",
     ],
 
     "AI & ML": [
       "AI Engineer",
       "Machine Learning Engineer",
       "Data Scientist",
+      "Data Analyst",
       "Research Engineer",
     ],
 
@@ -215,7 +440,9 @@ function StudentForm() {
       "Data Scientist",
       "Data Analyst",
       "Business Analyst",
+      "Machine Learning Engineer",
       "AI Engineer",
+      "Research Analyst",
     ],
 
     "Cyber Security": [
@@ -223,6 +450,7 @@ function StudentForm() {
       "Ethical Hacker",
       "SOC Analyst",
       "Security Consultant",
+      "Cyber Security Analyst",
     ],
 
     ECE: [
@@ -230,36 +458,41 @@ function StudentForm() {
       "VLSI Engineer",
       "IoT Engineer",
       "Electronics Engineer",
+      "Hardware Engineer",
     ],
 
     EEE: [
       "Electrical Engineer",
       "Power Systems Engineer",
       "Electrical Design Engineer",
+      "Electrical Maintenance Engineer",
     ],
 
     Mechanical: [
       "Mechanical Engineer",
       "Automobile Engineer",
       "Production Engineer",
+      "Design Engineer",
+      "Maintenance Engineer",
     ],
 
     Civil: [
       "Civil Engineer",
       "Structural Engineer",
       "Construction Engineer",
+      "Site Engineer",
+      "Design Engineer",
     ],
 
     IT: [
       "Software Engineer",
+      "Frontend Developer",
       "Backend Developer",
-      "Cloud Engineer",
       "Full Stack Developer",
+      "Cloud Engineer",
+      "DevOps Engineer",
+      "QA Engineer",
     ],
-
-    /* ==================================================
-       DEGREE
-    ================================================== */
 
     "B.Sc": [
       "Data Scientist",
@@ -301,10 +534,6 @@ function StudentForm() {
       "Data Analyst",
     ],
 
-    /* ==================================================
-       MEDICAL
-    ================================================== */
-
     MBBS: [
       "Doctor",
       "Medical Researcher",
@@ -337,10 +566,6 @@ function StudentForm() {
       "Pharmaceutical Analyst",
     ],
 
-    /* ==================================================
-       ITI
-    ================================================== */
-
     Electrician: [
       "Electrical Technician",
       "Maintenance Technician",
@@ -370,10 +595,6 @@ function StudentForm() {
       "Mechanical Technician",
       "Service Engineer",
     ],
-
-    /* ==================================================
-       GOVERNMENT
-    ================================================== */
 
     SSC: [
       "Government Officer",
@@ -406,9 +627,26 @@ function StudentForm() {
     ],
   };
 
-  /* ==================================================
+  /* ======================================================
+     OPTIONAL INTEREST OPTIONS
+  ====================================================== */
+
+  const interestOptions = [
+    "Technology",
+    "Data & Analytics",
+    "Artificial Intelligence",
+    "Business",
+    "Finance",
+    "Healthcare",
+    "Design & Creativity",
+    "Government & Public Service",
+    "Engineering",
+    "Research",
+  ];
+
+  /* ======================================================
      CAREER SKILLS
-  ================================================== */
+  ====================================================== */
 
   const careerSkillOptions = {
     "Frontend Developer": [
@@ -661,9 +899,9 @@ function StudentForm() {
     ],
   };
 
-  /* ==================================================
+  /* ======================================================
      HANDLE FORM CHANGE
-  ================================================== */
+  ====================================================== */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -674,6 +912,7 @@ function StudentForm() {
         education: value,
         specialization: "",
         dreamCareer: "",
+        interest: "",
         skills: [],
       }));
 
@@ -701,15 +940,24 @@ function StudentForm() {
       return;
     }
 
+    if (name === "interest") {
+      setFormData((prev) => ({
+        ...prev,
+        interest: value,
+      }));
+
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  /* ==================================================
+  /* ======================================================
      SKILL CHANGE
-  ================================================== */
+  ====================================================== */
 
   const handleSkillChange = (e) => {
     const { value, checked } = e.target;
@@ -722,27 +970,24 @@ function StudentForm() {
     }));
   };
 
-  /* ==================================================
+  /* ======================================================
      STEP VALIDATION
-  ================================================== */
+  ====================================================== */
 
-  const canGoToStep2 =
+  const canGoToStep2 = Boolean(
     formData.name.trim() &&
-    formData.age &&
-    formData.education;
+      formData.age &&
+      formData.education &&
+      formData.specialization
+  );
 
-  const canGoToStep3 =
-    canGoToStep2 &&
-    formData.specialization;
+  const canGoToStep3 = Boolean(
+    canGoToStep2 && formData.dreamCareer
+  );
 
-  const canGoToStep4 =
-    canGoToStep3 &&
-    formData.interest &&
-    formData.dreamCareer;
-
-  /* ==================================================
+  /* ======================================================
      NEXT
-  ================================================== */
+  ====================================================== */
 
   const handleNext = () => {
     if (step === 1 && canGoToStep2) {
@@ -752,17 +997,12 @@ function StudentForm() {
 
     if (step === 2 && canGoToStep3) {
       setStep(3);
-      return;
-    }
-
-    if (step === 3 && canGoToStep4) {
-      setStep(4);
     }
   };
 
-  /* ==================================================
+  /* ======================================================
      BACK
-  ================================================== */
+  ====================================================== */
 
   const handleBack = () => {
     if (step > 1) {
@@ -770,25 +1010,73 @@ function StudentForm() {
     }
   };
 
-  /* ==================================================
+  /* ======================================================
      SUBMIT
-  ================================================== */
+     ------------------------------------------------------
+     IMPORTANT:
+     Student receives both:
+       dreamCareer      = display label
+       careerId         = stable engine/database ID
+       interest         = display label
+       interestKey      = stable interestMap key
+  ====================================================== */
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (
-      !formData.name ||
+      !formData.name.trim() ||
       !formData.age ||
       !formData.education ||
       !formData.specialization ||
-      !formData.interest ||
       !formData.dreamCareer
     ) {
       return;
     }
 
-    setStudent(formData);
+    const careerId = getCareerId(formData.dreamCareer);
+
+    const interestKey = formData.interest
+      ? interestMap[formData.interest] || ""
+      : "";
+
+    const educationSpecializationKey =
+      getEducationSpecializationKey(
+        formData.education,
+        formData.specialization
+      );
+
+    /*
+     * Preserve the original form fields while adding
+     * normalized fields required by the career engine.
+     */
+    setStudent({
+      ...formData,
+
+      /* Original display values */
+      dreamCareer: formData.dreamCareer,
+      interest: formData.interest || "",
+
+      /* Stable career-engine/database values */
+      careerId,
+      dreamCareerId: careerId,
+      selectedCareerId: careerId,
+
+      /* Stable interest value */
+      interestKey,
+
+      /* Education + specialization identity */
+      educationId: formData.education,
+      specializationId: formData.specialization,
+      educationSpecializationKey,
+
+      /*
+       * Keep an explicit mapping available to downstream
+       * consumers without changing the existing form API.
+       */
+      specializationCareerId:
+        EDUCATION_CAREER_IDS[formData.specialization] || "",
+    });
 
     window.scrollTo({
       top: 0,
@@ -796,9 +1084,9 @@ function StudentForm() {
     });
   };
 
-  /* ==================================================
+  /* ======================================================
      STEPS
-  ================================================== */
+  ====================================================== */
 
   const steps = [
     {
@@ -808,37 +1096,33 @@ function StudentForm() {
     },
     {
       number: 2,
-      title: "Interests",
-      icon: Heart,
-    },
-    {
-      number: 3,
       title: "Career Path",
       icon: Target,
     },
     {
-      number: 4,
+      number: 3,
       title: "Skills",
       icon: Code2,
     },
   ];
 
-  /* ==================================================
+  /* ======================================================
      CURRENT CAREER OPTIONS
-  ================================================== */
+     ------------------------------------------------------
+     Education is now part of the selection logic.
+  ====================================================== */
 
   const currentCareerOptions =
     formData.education === "after10th"
       ? careerPathOptions.after10th
       : careerPathOptions[formData.specialization] || [];
 
-  /* ==================================================
+  /* ======================================================
      RENDER
-  ================================================== */
+  ====================================================== */
 
   return (
     <section className="bg-slate-100 py-20">
-
       <div className="max-w-5xl mx-auto px-6">
 
         {/* HEADER */}
@@ -846,11 +1130,8 @@ function StudentForm() {
         <div className="text-center mb-10">
 
           <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
-
             <Sparkles size={16} />
-
             Personalized Career Planning
-
           </div>
 
           <h2 className="text-4xl lg:text-5xl font-extrabold text-slate-800 mt-5">
@@ -858,9 +1139,9 @@ function StudentForm() {
           </h2>
 
           <p className="text-slate-500 mt-4 max-w-2xl mx-auto">
-            Tell CareerOS about yourself and we'll use your education,
-            interests, career goals and skills to create your personalized
-            career journey.
+            Tell CareerOS about yourself and we'll use your
+            education, career goals and skills to create your
+            personalized career journey.
           </p>
 
         </div>
@@ -952,7 +1233,6 @@ function StudentForm() {
             ================================================== */}
 
             {step === 1 && (
-
               <div>
 
                 <div className="mb-8">
@@ -1100,7 +1380,6 @@ function StudentForm() {
                 {/* SPECIALIZATION */}
 
                 {specializationOptions[formData.education] && (
-
                   <div className="mt-6">
 
                     <label className="block font-semibold text-slate-700 mb-2">
@@ -1122,21 +1401,71 @@ function StudentForm() {
                       {specializationOptions[
                         formData.education
                       ].map((item) => (
-
                         <option
                           key={item}
                           value={item}
                         >
                           {item}
                         </option>
-
                       ))}
 
                     </select>
 
                   </div>
-
                 )}
+
+                {/* OPTIONAL INTEREST */}
+
+                <div className="mt-6">
+
+                  <label className="block font-semibold text-slate-700 mb-2">
+
+                    <span className="inline-flex items-center gap-2">
+
+                      <Heart
+                        size={18}
+                        className="text-pink-500"
+                      />
+
+                      Area of Interest
+
+                      <span className="text-sm font-normal text-slate-400">
+                        (Optional)
+                      </span>
+
+                    </span>
+
+                  </label>
+
+                  <select
+                    name="interest"
+                    value={formData.interest}
+                    onChange={handleChange}
+                    className="w-full border border-slate-200 p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+
+                    <option value="">
+                      Prefer not to specify
+                    </option>
+
+                    {interestOptions.map((interest) => (
+                      <option
+                        key={interest}
+                        value={interest}
+                      >
+                        {interest}
+                      </option>
+                    ))}
+
+                  </select>
+
+                  <p className="text-xs text-slate-400 mt-2">
+                    This is optional. If you select an interest,
+                    CareerOS may use it to improve career ranking.
+                    It will not replace your selected career path.
+                  </p>
+
+                </div>
 
               </div>
             )}
@@ -1146,87 +1475,6 @@ function StudentForm() {
             ================================================== */}
 
             {step === 2 && (
-
-              <div>
-
-                <div className="mb-8">
-
-                  <h3 className="text-2xl font-bold text-slate-800">
-                    What interests you?
-                  </h3>
-
-                  <p className="text-slate-500 mt-2">
-                    Your interests help CareerOS understand which direction
-                    may suit you.
-                  </p>
-
-                </div>
-
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-
-                  {[
-                    "Technology",
-                    "Medical",
-                    "Government Jobs",
-                    "Business",
-                    "Arts",
-                  ].map((interest) => (
-
-                    <label
-                      key={interest}
-                      className={`cursor-pointer border-2 rounded-2xl p-5 transition ${
-                        formData.interest === interest
-                          ? "border-blue-600 bg-blue-50"
-                          : "border-slate-200 hover:border-blue-300"
-                      }`}
-                    >
-
-                      <input
-                        type="radio"
-                        name="interest"
-                        value={interest}
-                        checked={formData.interest === interest}
-                        onChange={handleChange}
-                        className="sr-only"
-                      />
-
-                      <div className="flex items-center gap-3">
-
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            formData.interest === interest
-                              ? "border-blue-600"
-                              : "border-slate-300"
-                          }`}
-                        >
-
-                          {formData.interest === interest && (
-                            <div className="w-2.5 h-2.5 bg-blue-600 rounded-full" />
-                          )}
-
-                        </div>
-
-                        <span className="font-semibold">
-                          {interest}
-                        </span>
-
-                      </div>
-
-                    </label>
-
-                  ))}
-
-                </div>
-
-              </div>
-            )}
-
-            {/* ==================================================
-                STEP 3
-            ================================================== */}
-
-            {step === 3 && (
-
               <div>
 
                 <div className="mb-8">
@@ -1237,96 +1485,98 @@ function StudentForm() {
 
                   <p className="text-slate-500 mt-2">
                     Based on your education and specialization,
-                    choose the path you want to explore.
+                    choose the job role you want to explore.
                   </p>
 
                 </div>
 
                 {currentCareerOptions.length > 0 ? (
-
                   <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
 
-                    {currentCareerOptions.map((career) => (
+                    {currentCareerOptions.map((career) => {
 
-                      <label
-                        key={career}
-                        className={`cursor-pointer border-2 rounded-2xl p-5 transition ${
-                          formData.dreamCareer === career
-                            ? "border-blue-600 bg-blue-50 shadow-md"
-                            : "border-slate-200 hover:border-blue-300"
-                        }`}
-                      >
+                      const careerId = getCareerId(career);
 
-                        <input
-                          type="radio"
-                          name="dreamCareer"
-                          value={career}
-                          checked={
+                      return (
+                        <label
+                          key={careerId}
+                          className={`cursor-pointer border-2 rounded-2xl p-5 transition ${
                             formData.dreamCareer === career
-                          }
-                          onChange={handleChange}
-                          className="sr-only"
-                        />
+                              ? "border-blue-600 bg-blue-50 shadow-md"
+                              : "border-slate-200 hover:border-blue-300"
+                          }`}
+                        >
 
-                        <div className="flex items-start gap-3">
-
-                          <Target
-                            size={21}
-                            className={
+                          <input
+                            type="radio"
+                            name="dreamCareer"
+                            value={career}
+                            checked={
                               formData.dreamCareer === career
-                                ? "text-blue-600"
-                                : "text-slate-400"
                             }
+                            onChange={handleChange}
+                            className="sr-only"
                           />
 
-                          <div>
+                          <div className="flex items-start gap-3">
 
-                            <p className="font-semibold text-slate-800">
-                              {career}
-                            </p>
+                            <Target
+                              size={21}
+                              className={
+                                formData.dreamCareer === career
+                                  ? "text-blue-600"
+                                  : "text-slate-400"
+                              }
+                            />
 
-                            {formData.dreamCareer === career && (
-                              <p className="text-xs text-blue-600 mt-1">
-                                Selected
+                            <div>
+
+                              <p className="font-semibold text-slate-800">
+                                {career}
                               </p>
-                            )}
+
+                              {formData.dreamCareer === career && (
+                                <p className="text-xs text-blue-600 mt-1">
+                                  Selected
+                                </p>
+                              )}
+
+                              <p className="text-[10px] text-slate-400 mt-1">
+                                {careerId}
+                              </p>
+
+                            </div>
 
                           </div>
 
-                        </div>
-
-                      </label>
-
-                    ))}
+                        </label>
+                      );
+                    })}
 
                   </div>
-
                 ) : (
-
                   <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
 
                     <p className="font-semibold text-blue-800">
-                      No career paths are available for this selection yet.
+                      No job roles are available for this selection yet.
                     </p>
 
                     <p className="text-sm text-blue-600 mt-2">
-                      Please go back and choose another education or
-                      specialization.
+                      Please go back and choose another education
+                      or specialization.
                     </p>
 
                   </div>
-
                 )}
 
               </div>
             )}
 
             {/* ==================================================
-                STEP 4
+                STEP 3
             ================================================== */}
 
-            {step === 4 && (
-
+            {step === 3 && (
               <div>
 
                 <div className="mb-8">
@@ -1336,25 +1586,29 @@ function StudentForm() {
                   </h3>
 
                   <p className="text-slate-500 mt-2">
-                    Select the skills you already have. You can update
-                    them later from your profile.
+                    Select the skills you already have. You can
+                    update them later from your profile.
                   </p>
 
                 </div>
 
                 {formData.dreamCareer &&
                 careerSkillOptions[formData.dreamCareer] ? (
-
                   <div>
 
                     <div className="bg-blue-50 rounded-2xl p-5 mb-6">
 
                       <p className="text-sm text-blue-600 font-semibold">
-                        Selected Career / Path
+                        Selected Career / Job Role
                       </p>
 
                       <p className="text-xl font-bold text-blue-800 mt-1">
                         {formData.dreamCareer}
+                      </p>
+
+                      <p className="text-xs text-blue-500 mt-1">
+                        Career ID:{" "}
+                        {getCareerId(formData.dreamCareer)}
                       </p>
 
                     </div>
@@ -1369,7 +1623,6 @@ function StudentForm() {
                           formData.skills.includes(skill);
 
                         return (
-
                           <label
                             key={skill}
                             className={`cursor-pointer border rounded-xl p-3 transition ${
@@ -1400,7 +1653,6 @@ function StudentForm() {
                             </div>
 
                           </label>
-
                         );
                       })}
 
@@ -1409,14 +1661,15 @@ function StudentForm() {
                     <p className="text-sm text-slate-500 mt-5">
 
                       {formData.skills.length} skill
-                      {formData.skills.length !== 1 ? "s" : ""} selected
+                      {formData.skills.length !== 1
+                        ? "s"
+                        : ""}{" "}
+                      selected
 
                     </p>
 
                   </div>
-
                 ) : (
-
                   <div className="bg-slate-50 rounded-2xl p-8 text-center">
 
                     <Code2
@@ -1425,16 +1678,16 @@ function StudentForm() {
                     />
 
                     <p className="text-slate-500">
-                      This path does not require technical skills
-                      selection yet.
+                      This path does not require technical
+                      skills selection yet.
                     </p>
 
                     <p className="text-sm text-slate-400 mt-2">
-                      You can continue and update your skills later.
+                      You can continue and update your skills
+                      later.
                     </p>
 
                   </div>
-
                 )}
 
               </div>
@@ -1445,8 +1698,6 @@ function StudentForm() {
             ================================================== */}
 
             <div className="flex justify-between items-center mt-10 pt-7 border-t">
-
-              {/* BACK */}
 
               <button
                 type="button"
@@ -1465,22 +1716,17 @@ function StudentForm() {
 
               </button>
 
-              {/* NEXT / SUBMIT */}
-
-              {step < 4 ? (
-
+              {step < 3 ? (
                 <button
                   type="button"
                   onClick={handleNext}
                   disabled={
                     (step === 1 && !canGoToStep2) ||
-                    (step === 2 && !canGoToStep3) ||
-                    (step === 3 && !canGoToStep4)
+                    (step === 2 && !canGoToStep3)
                   }
                   className={`flex items-center gap-2 px-7 py-3 rounded-xl font-semibold transition ${
                     (step === 1 && !canGoToStep2) ||
-                    (step === 2 && !canGoToStep3) ||
-                    (step === 3 && !canGoToStep4)
+                    (step === 2 && !canGoToStep3)
                       ? "bg-slate-200 text-slate-400 cursor-not-allowed"
                       : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
                   }`}
@@ -1491,9 +1737,7 @@ function StudentForm() {
                   <ArrowRight size={18} />
 
                 </button>
-
               ) : (
-
                 <button
                   type="submit"
                   className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-7 py-3 rounded-xl font-semibold hover:scale-[1.02] transition shadow-lg"
@@ -1506,7 +1750,6 @@ function StudentForm() {
                   <ArrowRight size={18} />
 
                 </button>
-
               )}
 
             </div>
@@ -1516,7 +1759,6 @@ function StudentForm() {
         </div>
 
       </div>
-
     </section>
   );
 }

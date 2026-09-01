@@ -1,18 +1,10 @@
 // ======================================================
 // CareerOS Firebase Admin
 // ======================================================
-//
-// Responsibilities:
-// - Initialize Firebase Admin SDK
-// - Provide Firebase Admin Auth
-//
-// The backend uses this to verify Firebase ID tokens.
-//
-// ======================================================
 
 const {
     initializeApp,
-    applicationDefault,
+    cert,
     getApps,
 } = require("firebase-admin/app");
 
@@ -21,20 +13,66 @@ const {
 } = require("firebase-admin/auth");
 
 // ======================================================
-// INITIALIZE FIREBASE ADMIN
+// FIREBASE ADMIN CONFIGURATION
 // ======================================================
-//
-// GOOGLE_APPLICATION_CREDENTIALS should point to the
-// Firebase service-account JSON file.
-//
+
+const projectId =
+    process.env.FIREBASE_PROJECT_ID;
+
+const clientEmail =
+    process.env.FIREBASE_CLIENT_EMAIL;
+
+const privateKey =
+    process.env.FIREBASE_PRIVATE_KEY
+        ? process.env.FIREBASE_PRIVATE_KEY.replace(
+              /\\n/g,
+              "\n"
+          )
+        : undefined;
+
+// ======================================================
+// VALIDATE FIREBASE CONFIGURATION
+// ======================================================
+
+if (
+    !projectId ||
+    !clientEmail ||
+    !privateKey
+) {
+    console.error(
+        "❌ Firebase Admin configuration is missing."
+    );
+
+    console.error(
+        "Required environment variables:"
+    );
+
+    console.error(
+        "FIREBASE_PROJECT_ID"
+    );
+
+    console.error(
+        "FIREBASE_CLIENT_EMAIL"
+    );
+
+    console.error(
+        "FIREBASE_PRIVATE_KEY"
+    );
+}
+
+// ======================================================
+// INITIALIZE FIREBASE ADMIN
 // ======================================================
 
 const firebaseAdminApp =
     getApps().length > 0
         ? getApps()[0]
         : initializeApp({
-              credential:
-                  applicationDefault(),
+              credential: cert({
+                  projectId,
+                  clientEmail,
+                  privateKey,
+              }),
           });
 
 // ======================================================
@@ -52,6 +90,5 @@ const adminAuth =
 
 module.exports = {
     firebaseAdminApp,
-
     adminAuth,
 };

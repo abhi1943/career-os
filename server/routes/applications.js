@@ -1,28 +1,24 @@
 // ======================================================
 // CareerOS Applications Routes
 // ======================================================
-//
-// Routes:
-//
-// GET    /api/applications
-// GET    /api/applications/:jobId
-// POST   /api/applications
-// PATCH  /api/applications/:jobId
-// DELETE /api/applications/:jobId
-//
-// ======================================================
 
 const express =
     require("express");
 
 const {
+    verifyFirebaseToken,
+} = require(
+    "../middleware/firebaseAuth"
+);
+
+const {
     createApplication,
     getApplications,
     getApplication,
-    isApplicationCreated,
     updateApplicationStatus,
     removeApplication,
     getApplicationCount,
+    clearApplications,
     APPLICATION_STATUSES,
 } =
     require(
@@ -33,18 +29,59 @@ const router =
     express.Router();
 
 // ======================================================
+// FIREBASE AUTHENTICATION
+// ======================================================
+
+//
+// ======================================================
+
+router.use(
+    verifyFirebaseToken
+);
+
+// ======================================================
+// GET VERIFIED USER ID
+// ======================================================
+
+//
+// ======================================================
+
+function getUserId(req) {
+    return String(
+        req.user?.uid ||
+        ""
+    ).trim();
+}
+
+// ======================================================
 // GET ALL APPLICATIONS
 // GET /api/applications
 // ======================================================
 
 router.get(
     "/",
-    (req, res) => {
+    async (req, res) => {
         try {
-            const applications =
-                getApplications();
+            const userId =
+                getUserId(req);
 
-            res.json({
+            if (!userId) {
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
+
+                        message:
+                            "Authenticated user ID is unavailable.",
+                    });
+            }
+
+            const applications =
+                await getApplications(
+                    userId
+                );
+
+            return res.json({
                 success: true,
 
                 count:
@@ -52,21 +89,24 @@ router.get(
 
                 applications,
             });
+
         } catch (error) {
             console.error(
                 "Get Applications Error:",
                 error.message
             );
 
-            res.status(500).json({
-                success: false,
+            return res
+                .status(500)
+                .json({
+                    success: false,
 
-                message:
-                    "Failed to get applications",
+                    message:
+                        "Failed to get applications",
 
-                error:
-                    error.message,
-            });
+                    error:
+                        error.message,
+                });
         }
     }
 );
@@ -78,29 +118,50 @@ router.get(
 
 router.get(
     "/count",
-    (req, res) => {
+    async (req, res) => {
         try {
-            res.json({
+            const userId =
+                getUserId(req);
+
+            if (!userId) {
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
+
+                        message:
+                            "Authenticated user ID is unavailable.",
+                    });
+            }
+
+            const count =
+                await getApplicationCount(
+                    userId
+                );
+
+            return res.json({
                 success: true,
 
-                count:
-                    getApplicationCount(),
+                count,
             });
+
         } catch (error) {
             console.error(
                 "Get Application Count Error:",
                 error.message
             );
 
-            res.status(500).json({
-                success: false,
+            return res
+                .status(500)
+                .json({
+                    success: false,
 
-                message:
-                    "Failed to get application count",
+                    message:
+                        "Failed to get application count",
 
-                error:
-                    error.message,
-            });
+                    error:
+                        error.message,
+                });
         }
     }
 );
@@ -113,7 +174,7 @@ router.get(
 router.get(
     "/statuses",
     (req, res) => {
-        res.json({
+        return res.json({
             success: true,
 
             statuses:
@@ -129,11 +190,14 @@ router.get(
 
 router.get(
     "/:jobId",
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 jobId,
             } = req.params;
+
+            const userId =
+                getUserId(req);
 
             if (!jobId) {
                 return res
@@ -146,44 +210,53 @@ router.get(
                     });
             }
 
-            const application =
-                getApplication(
-                    jobId
-                );
+            if (!userId) {
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
 
-            // --------------------------------------------------
-            // IMPORTANT:
-            // A job that has not been applied to is NOT a
-            // server error. Return 200 with application null.
-            // This prevents the frontend from showing 404
-            // errors for every job.
-            // --------------------------------------------------
+                        message:
+                            "Authenticated user ID is unavailable.",
+                    });
+            }
+
+            const application =
+                await getApplication(
+                    jobId,
+                    userId
+                );
 
             return res.json({
                 success: true,
 
                 applied:
-                    isApplicationCreated(
-                        jobId
+                    Boolean(
+                        application
                     ),
 
-                application,
+                application:
+                    application ||
+                    null,
             });
+
         } catch (error) {
             console.error(
                 "Get Application Error:",
                 error.message
             );
 
-            return res.status(500).json({
-                success: false,
+            return res
+                .status(500)
+                .json({
+                    success: false,
 
-                message:
-                    "Failed to get application",
+                    message:
+                        "Failed to get application",
 
-                error:
-                    error.message,
-            });
+                    error:
+                        error.message,
+                });
         }
     }
 );
@@ -195,10 +268,24 @@ router.get(
 
 router.post(
     "/",
-    (req, res) => {
+    async (req, res) => {
         try {
             const data =
                 req.body;
+
+            const userId =
+                getUserId(req);
+
+            if (!userId) {
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
+
+                        message:
+                            "Authenticated user ID is unavailable.",
+                    });
+            }
 
             if (
                 !data ||
@@ -215,9 +302,24 @@ router.post(
                     });
             }
 
+            // --------------------------------------------------
+            // IGNORE CLIENT-PROVIDED USER ID
+            // --------------------------------------------------
+            //
+            // Even if the client sends:
+            //
+            // {
+            //     userId: "another-user"
+            // }
+            //
+            // the backend uses the verified Firebase UID.
+            //
+            // --------------------------------------------------
+
             const application =
-                createApplication(
-                    data
+                await createApplication(
+                    data,
+                    userId
                 );
 
             if (!application) {
@@ -231,29 +333,34 @@ router.post(
                     });
             }
 
-            res.status(201).json({
-                success: true,
+            return res
+                .status(201)
+                .json({
+                    success: true,
 
-                message:
-                    "Application created successfully",
+                    message:
+                        "Application created successfully",
 
-                application,
-            });
+                    application,
+                });
+
         } catch (error) {
             console.error(
                 "Create Application Error:",
                 error.message
             );
 
-            res.status(500).json({
-                success: false,
+            return res
+                .status(500)
+                .json({
+                    success: false,
 
-                message:
-                    "Failed to create application",
+                    message:
+                        "Failed to create application",
 
-                error:
-                    error.message,
-            });
+                    error:
+                        error.message,
+                });
         }
     }
 );
@@ -265,7 +372,7 @@ router.post(
 
 router.patch(
     "/:jobId",
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 jobId,
@@ -273,7 +380,11 @@ router.patch(
 
             const {
                 status,
-            } = req.body || {};
+            } =
+                req.body || {};
+
+            const userId =
+                getUserId(req);
 
             if (!jobId) {
                 return res
@@ -283,6 +394,17 @@ router.patch(
 
                         message:
                             "Job ID is required",
+                    });
+            }
+
+            if (!userId) {
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
+
+                        message:
+                            "Authenticated user ID is unavailable.",
                     });
             }
 
@@ -301,9 +423,10 @@ router.patch(
             }
 
             const application =
-                updateApplicationStatus(
+                await updateApplicationStatus(
                     jobId,
-                    status
+                    status,
+                    userId
                 );
 
             if (!application) {
@@ -317,7 +440,7 @@ router.patch(
                     });
             }
 
-            res.json({
+            return res.json({
                 success: true,
 
                 message:
@@ -325,21 +448,82 @@ router.patch(
 
                 application,
             });
+
         } catch (error) {
             console.error(
                 "Update Application Error:",
                 error.message
             );
 
-            res.status(500).json({
-                success: false,
+            return res
+                .status(500)
+                .json({
+                    success: false,
+
+                    message:
+                        "Failed to update application",
+
+                    error:
+                        error.message,
+                });
+        }
+    }
+);
+
+// ======================================================
+// CLEAR USER APPLICATIONS
+// DELETE /api/applications
+// ======================================================
+
+router.delete(
+    "/",
+    async (req, res) => {
+        try {
+            const userId =
+                getUserId(req);
+
+            if (!userId) {
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
+
+                        message:
+                            "Authenticated user ID is unavailable.",
+                    });
+            }
+
+            const count =
+                await clearApplications(
+                    userId
+                );
+
+            return res.json({
+                success: true,
 
                 message:
-                    "Failed to update application",
+                    "Applications cleared successfully",
 
-                error:
-                    error.message,
+                count,
             });
+
+        } catch (error) {
+            console.error(
+                "Clear Applications Error:",
+                error.message
+            );
+
+            return res
+                .status(500)
+                .json({
+                    success: false,
+
+                    message:
+                        "Failed to clear applications",
+
+                    error:
+                        error.message,
+                });
         }
     }
 );
@@ -351,11 +535,14 @@ router.patch(
 
 router.delete(
     "/:jobId",
-    (req, res) => {
+    async (req, res) => {
         try {
             const {
                 jobId,
             } = req.params;
+
+            const userId =
+                getUserId(req);
 
             if (!jobId) {
                 return res
@@ -368,9 +555,21 @@ router.delete(
                     });
             }
 
+            if (!userId) {
+                return res
+                    .status(401)
+                    .json({
+                        success: false,
+
+                        message:
+                            "Authenticated user ID is unavailable.",
+                    });
+            }
+
             const removed =
-                removeApplication(
-                    jobId
+                await removeApplication(
+                    jobId,
+                    userId
                 );
 
             if (!removed) {
@@ -384,27 +583,30 @@ router.delete(
                     });
             }
 
-            res.json({
+            return res.json({
                 success: true,
 
                 message:
                     "Application removed successfully",
             });
+
         } catch (error) {
             console.error(
                 "Remove Application Error:",
                 error.message
             );
 
-            res.status(500).json({
-                success: false,
+            return res
+                .status(500)
+                .json({
+                    success: false,
 
-                message:
-                    "Failed to remove application",
+                    message:
+                        "Failed to remove application",
 
-                error:
-                    error.message,
-            });
+                    error:
+                        error.message,
+                });
         }
     }
 );

@@ -1,3 +1,4 @@
+
 import HeroSection from "../../components/sections/HeroSection";
 import StudentForm from "../../components/forms/StudentForm";
 import CareerExplorer from "../../components/careers/CareerExplorer";
@@ -7,32 +8,32 @@ import CategoriesSection from "../../components/sections/CategoriesSection";
 import ExamsSection from "../../components/sections/ExamsSection";
 
 function Home() {
-return ( <main>
+  return (
+    <main aria-label="CareerOS home page">
 
-  {/* Main introduction */}
-  <HeroSection />
+      {/* Main introduction */}
+      <HeroSection />
 
-  {/* CareerOS platform statistics */}
-  <StatsSection />
+      {/* CareerOS platform statistics */}
+      <StatsSection />
 
-  {/* Personalized career profile */}
-  <StudentForm />
+      {/* Personalized career profile */}
+      <StudentForm />
 
-  {/* Recommended career paths */}
-  <CareerExplorer />
+      {/* Recommended career paths */}
+      <CareerExplorer />
 
-  {/* Career categories */}
-  <CategoriesSection />
+      {/* Career categories */}
+      <CategoriesSection />
 
-  {/* Companies & opportunities */}
-  <CompaniesSection />
+      {/* Companies & opportunities */}
+      <CompaniesSection />
 
-  {/* Education & entrance exams */}
-  <ExamsSection />
+      {/* Education & entrance exams */}
+      <ExamsSection />
 
-</main>
-
-);
+    </main>
+  );
 }
 
 export default Home;

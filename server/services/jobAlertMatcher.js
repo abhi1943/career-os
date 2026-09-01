@@ -1,28 +1,6 @@
 // ======================================================
 // CareerOS Job Alert Matcher
 // ======================================================
-//
-// STEP 19 — SAVED JOB ALERTS
-// STEP 19.7 — USER-SPECIFIC JOB ALERTS
-// STEP 20 — PERSISTENT DATABASE
-// STEP 20.5 — MYSQL ASYNC ALERT MATCHING
-//
-// Responsibilities:
-// - Match newly fetched jobs against enabled alerts
-// - Read alerts from MySQL
-// - Support user-specific matching
-// - Support global/background matching
-// - Avoid duplicate job IDs
-// - Record successful matches in MySQL
-// - Provide matching information
-//
-// IMPORTANT:
-// jobAlertsService now uses MySQL and therefore returns
-// Promises for database operations.
-//
-// Therefore all alert retrieval/matching functions in
-// this file that access the database are async.
-//
 // ======================================================
 
 const {
@@ -42,8 +20,6 @@ function normalizeText(value = "") {
         .trim()
         .replace(/\s+/g, " ");
 }
-
-
 // ======================================================
 // GET JOB ID
 // ======================================================
@@ -143,16 +119,7 @@ async function getEnabledAlerts(
 // ======================================================
 // MATCH ONE JOB
 // ======================================================
-//
-// Returns all enabled alerts that match the supplied job.
-//
-// If userId is supplied:
-//     only that user's alerts are checked.
-//
-// If userId is omitted:
-//     all active alerts are checked.
-//
-// ======================================================
+
 
 async function matchJobAgainstAlerts(
     job,
@@ -344,16 +311,7 @@ async function matchAndRecordJob(
 // ======================================================
 // MATCH MANY JOBS
 // ======================================================
-//
-// Useful after an automatic Adzuna refresh.
-//
-// userId supplied:
-//     Match only this user's alerts.
-//
-// userId omitted:
-//     Match all active users' alerts.
-//
-// ======================================================
+
 
 async function matchJobsAgainstAlerts(
     jobs,

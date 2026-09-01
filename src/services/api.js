@@ -6,7 +6,7 @@ import axios from "axios";
 
 const API_BASE_URL =
     import.meta.env.VITE_API_URL ||
-    "http://localhost:5000/api";
+    "https://career-os-api-1h85.onrender.com/api";
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -17,30 +17,43 @@ const api = axios.create({
 });
 
 // ======================================================
-// ADD USER ID TO API REQUESTS
+// FIREBASE AUTHENTICATION
 // ======================================================
 //
-// CareerOS currently uses the temporary x-user-id header
-// until full backend authentication middleware is connected.
+// Firebase provides the authenticated user's ID token.
 //
-// Firebase provides the authenticated user's UID.
+// The token is sent to the backend using the standard
+// Authorization header:
+//
+// Authorization: Bearer <Firebase ID token>
+//
+// The user's UID is NOT sent through x-user-id.
+// The backend extracts the verified UID from req.user.uid.
 //
 // ======================================================
 
 api.interceptors.request.use(
     async (config) => {
         try {
-            const { auth } = await import("../firebase/firebase");
+            const { auth } =
+                await import("../firebase/firebase");
 
-            const currentUser = auth.currentUser;
+            const currentUser =
+                auth.currentUser;
 
             if (currentUser) {
-                config.headers["x-user-id"] =
-                    currentUser.uid;
+                const token =
+                    await currentUser.getIdToken();
+
+                config.headers =
+                    config.headers || {};
+
+                config.headers.Authorization =
+                    `Bearer ${token}`;
             }
         } catch (error) {
             console.error(
-                "API authentication header error:",
+                "API Firebase authentication error:",
                 error
             );
         }

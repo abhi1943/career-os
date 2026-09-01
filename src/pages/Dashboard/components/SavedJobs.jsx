@@ -7,7 +7,12 @@ import {
 
 import {
     Bookmark,
+    ArrowRight,
 } from "lucide-react";
+
+import {
+    Link,
+} from "react-router-dom";;
 
 import SaveJobButton from "../../../components/jobs/SaveJobButton";
 
@@ -49,15 +54,14 @@ function SavedJobs() {
 
         return String(
             job?.id ||
-                job?.redirect_url ||
-                job?.redirectUrl ||
-                `${job?.title || ""}-${
-                    typeof job?.company === "string"
-                        ? job.company
-                        : job?.company?.display_name ||
-                          job?.company?.name ||
-                          ""
-                }`
+            job?.redirect_url ||
+            job?.redirectUrl ||
+            `${job?.title || ""}-${typeof job?.company === "string"
+                ? job.company
+                : job?.company?.display_name ||
+                job?.company?.name ||
+                ""
+            }`
         ).trim();
     }, []);
 
@@ -104,8 +108,8 @@ function SavedJobs() {
                 const normalizedJobs =
                     Array.isArray(jobs)
                         ? removeDuplicateJobs(
-                              jobs
-                          )
+                            jobs
+                        )
                         : [];
 
                 setSavedJobs(
@@ -325,7 +329,7 @@ function SavedJobs() {
 
     if (loading) {
         return (
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center h-full flex flex-col items-center justify-center">
 
                 <div className="text-3xl mb-3">
                     🔄
@@ -340,30 +344,62 @@ function SavedJobs() {
     }
 
     // ======================================================
-    // EMPTY
-    // ======================================================
+// EMPTY STATE
+// ======================================================
 
-    if (savedJobs.length === 0) {
-        return (
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+if (savedJobs.length === 0) {
+    return (
+        <div className="bg-white rounded-3xl shadow-lg p-8 h-full min-h-full flex flex-col">
 
-                <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <Bookmark size={26} />
-                </div>
+            {/* HEADER */}
 
-                <h2 className="text-xl font-bold text-gray-900 mt-4">
-                    No Saved Jobs
-                </h2>
+            <div className="mb-6">
 
-                <p className="text-gray-500 mt-2">
-                    Save interesting jobs from
-                    the Jobs page and they will
-                    appear here.
+                <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+                    CareerOS
                 </p>
 
+                <h2 className="text-2xl font-bold text-gray-900 mt-1">
+                    Saved Jobs
+                </h2>
+
             </div>
-        );
-    }
+
+            {/* EMPTY STATE */}
+
+            <div className="flex-1 flex items-center justify-center text-center">
+
+                <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6 w-full">
+
+                    <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <Bookmark size={26} />
+                    </div>
+
+                    <h3 className="mt-4 text-lg font-bold text-gray-800">
+                        No Saved Jobs Yet
+                    </h3>
+
+                    <p className="text-sm text-gray-500 mt-2 max-w-sm mx-auto">
+                        Save interesting jobs from the Jobs page
+                        and they will appear here.
+                    </p>
+
+                    <Link
+                        to="/jobs"
+                        className="inline-flex items-center justify-center gap-2 mt-5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
+                    >
+                        Explore Jobs
+
+                        <ArrowRight size={16} />
+                    </Link>
+
+                </div>
+
+            </div>
+
+        </div>
+    );
+}
 
     // ======================================================
     // SORT JOBS BY MATCH
@@ -375,17 +411,17 @@ function SavedJobs() {
                 const scoreA =
                     student
                         ? calculateJobMatch(
-                              a,
-                              student
-                          )?.score || 0
+                            a,
+                            student
+                        )?.score || 0
                         : 0;
 
                 const scoreB =
                     student
                         ? calculateJobMatch(
-                              b,
-                              student
-                          )?.score || 0
+                            b,
+                            student
+                        )?.score || 0
                         : 0;
 
                 return (
@@ -394,18 +430,20 @@ function SavedJobs() {
             }
         );
 
+    const previewJobs = sortedJobs.slice(0, 4);
+
     // ======================================================
     // RENDER
     // ======================================================
 
     return (
-        <section>
+        <section className="h-full min-h-0 flex flex-col">
 
             {/* ==================================================
                 HEADER
             ================================================== */}
 
-            <div className="flex items-center justify-between mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
 
                 <div>
 
@@ -418,17 +456,29 @@ function SavedJobs() {
                     </h2>
 
                     <p className="text-gray-500 mt-1">
-                        Your best CareerOS matches
-                        appear first.
+                        Your best CareerOS matches appear first.
                     </p>
 
                 </div>
 
-                <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-semibold">
-                    {savedJobs.length}{" "}
-                    {savedJobs.length === 1
-                        ? "Job"
-                        : "Jobs"}
+                <div className="flex items-center gap-3">
+
+                    <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full font-semibold">
+                        {savedJobs.length}{" "}
+                        {savedJobs.length === 1
+                            ? "Job"
+                            : "Jobs"}
+                    </div>
+
+                    <Link
+                        to="/jobs/saved"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition"
+                    >
+                        View All
+
+                        <ArrowRight size={16} />
+                    </Link>
+
                 </div>
 
             </div>
@@ -437,9 +487,9 @@ function SavedJobs() {
                 JOB GRID
             ================================================== */}
 
-            <div className="grid md:grid-cols-2 gap-5">
+            <div className="grid md:grid-cols-2 gap-5 flex-1 min-h-0 items-stretch">
 
-                {sortedJobs.map(
+                {previewJobs.map(
                     (job) => {
 
                         const jobId =
@@ -452,16 +502,16 @@ function SavedJobs() {
                         const match =
                             student
                                 ? calculateJobMatch(
-                                      job,
-                                      student
-                                  )
+                                    job,
+                                    student
+                                )
                                 : null;
 
                         const matchLabel =
                             match
                                 ? getMatchLabel(
-                                      match.score
-                                  )
+                                    match.score
+                                )
                                 : "";
 
                         const companyName =
@@ -469,23 +519,23 @@ function SavedJobs() {
                                 "string"
                                 ? job.company
                                 : job.company
-                                      ?.display_name ||
-                                  job.company?.name ||
-                                  "Company not specified";
+                                    ?.display_name ||
+                                job.company?.name ||
+                                "Company not specified";
 
                         const locationName =
                             typeof job.location ===
                                 "string"
                                 ? job.location
                                 : job.location
-                                      ?.display_name ||
-                                  job.location?.name ||
-                                  "Location not specified";
+                                    ?.display_name ||
+                                job.location?.name ||
+                                "Location not specified";
 
                         return (
                             <div
                                 key={jobId}
-                                className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition"
+                                className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition h-full flex flex-col"
                             >
 
                                 {/* ==================================================
@@ -597,7 +647,7 @@ function SavedJobs() {
                                     ACTIONS
                                 ================================================== */}
 
-                                <div className="flex gap-3 mt-5">
+                                <div className="flex gap-3 mt-auto pt-5">
 
                                     <button
                                         type="button"

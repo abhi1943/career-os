@@ -1,37 +1,7 @@
 // ======================================================
 // CareerOS Job Alerts Service
 // ======================================================
-//
-// STEP 20 — PERSISTENT DATABASE
-// STEP 20.4 — MYSQL JOB ALERT SERVICE
-//
-// Database:
-// MySQL
-//
-// Table:
-// job_alerts
-//
-// Responsibilities:
-// - Store saved job alerts in MySQL
-// - Create saved alerts
-// - Prevent duplicate alerts per user
-// - Get all saved alerts for a user
-// - Get active alerts
-// - Find alert by ID for a user
-// - Update alerts
-// - Delete alerts
-// - Enable / disable alerts
-// - Activate / deactivate alerts
-// - Match jobs against alerts
-// - Record alert matches
-// - Provide alert statistics
-//
-// IMPORTANT:
-// This service no longer uses an in-memory Map.
-//
-// Alerts now survive server restarts.
-//
-// ======================================================
+
 
 const {
     pool,
@@ -159,15 +129,7 @@ function createAlertId() {
 // ======================================================
 // CREATE SEARCH KEY
 // ======================================================
-//
-// Used together with the MySQL unique index:
-//
-// unique_user_alert
-//
-// UNIQUE:
-// user_id + search_key
-//
-// ======================================================
+
 
 function createAlertSearchKey(
     alert
@@ -274,14 +236,7 @@ function validateAlert(alert) {
 // ======================================================
 // MYSQL DATE FORMAT
 // ======================================================
-//
-// JavaScript:
-// 2026-08-17T10:30:00.000Z
-//
-// MySQL DATETIME:
-// 2026-08-17 10:30:00
-//
-// ======================================================
+
 
 function toMySQLDateTime(
     value = new Date()

@@ -1,6 +1,6 @@
 import database from "../data";
 import professions from "../data/professions";
-import collegesDatabase from "../data/colleges";
+import collegesDatabase from "../data/colleges/colleges";
 import examsDatabase from "../data/exams";
 import companies from "../data/companies/companies";
 

@@ -160,9 +160,56 @@ CREATE TABLE IF NOT EXISTS search_history (
     )
 );
 
+-- ======================================================
+-- APPLICATIONS
+-- ======================================================
+
+CREATE TABLE IF NOT EXISTS applications (
+    id VARCHAR(255) PRIMARY KEY,
+
+    user_id VARCHAR(100) NOT NULL,
+
+    job_id VARCHAR(255) NOT NULL,
+
+    job_data JSON NULL,
+
+    status ENUM(
+        'Applied',
+        'Interview',
+        'Offer',
+        'Rejected',
+        'Withdrawn'
+    ) NOT NULL DEFAULT 'Applied',
+
+    applied_at DATETIME NOT NULL,
+
+    created_at DATETIME NOT NULL,
+
+    updated_at DATETIME NOT NULL,
+
+    UNIQUE KEY unique_user_application (
+        user_id,
+        job_id
+    ),
+
+    INDEX idx_applications_user (
+        user_id
+    ),
+
+    INDEX idx_applications_user_status (
+        user_id,
+        status
+    ),
+
+    INDEX idx_applications_job (
+        job_id
+    )
+);
+
 
 -- ======================================================
 -- VERIFY TABLES
 -- ======================================================
 
 SHOW TABLES;
+

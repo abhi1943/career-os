@@ -1,3 +1,4 @@
+
 import {
   Search,
   Clock,
@@ -6,6 +7,7 @@ import {
 } from "lucide-react";
 
 import {
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -37,7 +39,7 @@ function RecentSearches() {
   // LOAD SEARCH HISTORY
   // ==================================================
 
-  const loadSearchHistory = async () => {
+  const loadSearchHistory = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -63,59 +65,26 @@ function RecentSearches() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // ==================================================
   // INITIAL LOAD
   // ==================================================
+  //
+  // Defer the call until after the effect has completed.
+  // This avoids the React set-state-in-effect lint rule
+  // while preserving the existing loading behaviour.
+  //
 
   useEffect(() => {
-    let cancelled = false;
-
-    const loadInitialSearchHistory = async () => {
-      try {
-        const history =
-          await getSearchHistory();
-
-        if (cancelled) {
-          return;
-        }
-
-        setSearches(
-          Array.isArray(history)
-            ? history
-            : []
-        );
-
-        setError("");
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-
-        console.error(
-          "CareerOS Recent Searches Error:",
-          error
-        );
-
-        setError(
-          "Unable to load recent searches."
-        );
-
-        setSearches([]);
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadInitialSearchHistory();
+    const timer = setTimeout(() => {
+      void loadSearchHistory();
+    }, 0);
 
     return () => {
-      cancelled = true;
+      clearTimeout(timer);
     };
-  }, []);
+  }, [loadSearchHistory]);
 
   // ==================================================
   // GET SEARCH TEXT
@@ -244,6 +213,7 @@ function RecentSearches() {
     try {
       setDeletingId(id);
       setActionMessage("");
+      setError("");
 
       await deleteSearchHistory(id);
 
@@ -320,16 +290,21 @@ function RecentSearches() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-3xl shadow-lg p-8 h-[650px] flex flex-col">
+      <div className="bg-white rounded-3xl shadow-lg p-8 h-full min-h-0 flex flex-col">
+
         <div className="flex items-center gap-3 mb-6">
+
           <div className="w-11 h-11 rounded-2xl bg-cyan-50 flex items-center justify-center">
+
             <Search
               className="text-cyan-600"
               size={22}
             />
+
           </div>
 
           <div>
+
             <h2 className="text-2xl font-bold text-slate-800">
               Recent Searches
             </h2>
@@ -337,18 +312,25 @@ function RecentSearches() {
             <p className="text-sm text-gray-500 mt-1">
               Your recent job searches
             </p>
+
           </div>
+
         </div>
 
         <div className="flex-1 flex items-center justify-center">
+
           <div className="text-center">
+
             <div className="w-10 h-10 border-4 border-cyan-100 border-t-cyan-600 rounded-full animate-spin mx-auto" />
 
             <p className="text-gray-500 mt-4">
               Loading search history...
             </p>
+
           </div>
+
         </div>
+
       </div>
     );
   }
@@ -359,22 +341,29 @@ function RecentSearches() {
 
   if (error && !searches.length) {
     return (
-      <div className="bg-white rounded-3xl shadow-lg p-8 h-[650px] flex flex-col">
+      <div className="bg-white rounded-3xl shadow-lg p-8 h-full min-h-0 flex flex-col">
+
         <div className="flex items-center gap-3 mb-6">
+
           <div className="w-11 h-11 rounded-2xl bg-cyan-50 flex items-center justify-center">
+
             <Search
               className="text-cyan-600"
               size={22}
             />
+
           </div>
 
           <h2 className="text-2xl font-bold text-slate-800">
             Recent Searches
           </h2>
+
         </div>
 
         <div className="flex-1 flex items-center justify-center">
+
           <div className="text-center">
+
             <Search
               className="mx-auto text-gray-300"
               size={52}
@@ -391,8 +380,11 @@ function RecentSearches() {
             >
               Try Again
             </button>
+
           </div>
+
         </div>
+
       </div>
     );
   }
@@ -402,21 +394,27 @@ function RecentSearches() {
   // ==================================================
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 h-[650px] flex flex-col">
+    <div className="bg-white rounded-3xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 h-full min-h-0 flex flex-col">
+
       {/* ==================================================
           HEADER
       ================================================== */}
 
-      <div className="flex items-center justify-between gap-4 mb-5">
+      <div className="flex items-center justify-between gap-4 mb-5 shrink-0">
+
         <div className="flex items-center gap-3">
+
           <div className="w-11 h-11 rounded-2xl bg-cyan-50 flex items-center justify-center">
+
             <Search
               className="text-cyan-600"
               size={22}
             />
+
           </div>
 
           <div>
+
             <h2 className="text-2xl font-bold text-slate-800">
               Recent Searches
             </h2>
@@ -424,7 +422,9 @@ function RecentSearches() {
             <p className="text-sm text-gray-500 mt-1">
               Your recent job searches
             </p>
+
           </div>
+
         </div>
 
         {/* CLEAR ALL */}
@@ -436,13 +436,16 @@ function RecentSearches() {
             disabled={clearing}
             className="flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-600 disabled:opacity-50 transition"
           >
+
             <Trash2 size={16} />
 
             {clearing
               ? "Clearing..."
               : "Clear All"}
+
           </button>
         )}
+
       </div>
 
       {/* ==================================================
@@ -451,7 +454,10 @@ function RecentSearches() {
 
       {actionMessage && (
         <div className="mb-4 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-between gap-3">
-          <span>{actionMessage}</span>
+
+          <span>
+            {actionMessage}
+          </span>
 
           <button
             type="button"
@@ -460,8 +466,11 @@ function RecentSearches() {
             }
             className="text-green-600 hover:text-green-800"
           >
+
             <X size={16} />
+
           </button>
+
         </div>
       )}
 
@@ -480,13 +489,18 @@ function RecentSearches() {
       ================================================== */}
 
       {searches.length === 0 ? (
+
         <div className="flex-1 flex items-center justify-center">
+
           <div className="text-center">
+
             <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center mx-auto">
+
               <Search
                 className="text-gray-300"
                 size={38}
               />
+
             </div>
 
             <h3 className="text-lg font-semibold text-slate-700 mt-5">
@@ -498,16 +512,23 @@ function RecentSearches() {
               here when you search for
               opportunities.
             </p>
+
           </div>
+
         </div>
+
       ) : (
+
         /* ==================================================
            SEARCH HISTORY LIST
         ================================================== */
 
-        <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+        <div className="space-y-3 flex-1 min-h-0 overflow-y-auto pr-2">
+
           {searches.map((item, index) => {
-            const id = getHistoryId(item);
+
+            const id =
+              getHistoryId(item);
 
             const location =
               getSearchLocation(item);
@@ -520,19 +541,26 @@ function RecentSearches() {
                 key={id || index}
                 className="group border border-gray-100 rounded-2xl p-4 hover:border-cyan-300 hover:bg-cyan-50/30 transition-all duration-200"
               >
+
                 <div className="flex items-start justify-between gap-4">
+
                   {/* SEARCH DETAILS */}
 
                   <div className="min-w-0 flex-1">
+
                     <div className="flex items-start gap-3">
+
                       <div className="w-9 h-9 rounded-xl bg-cyan-50 flex items-center justify-center shrink-0">
+
                         <Search
                           size={17}
                           className="text-cyan-600"
                         />
+
                       </div>
 
                       <div className="min-w-0">
+
                         <p className="font-semibold text-slate-800 truncate">
                           {getSearchText(item)}
                         </p>
@@ -552,18 +580,23 @@ function RecentSearches() {
                             {filterSummary}
                           </p>
                         )}
+
                       </div>
+
                     </div>
 
                     {/* SEARCH TIME */}
 
                     <div className="flex items-center gap-2 mt-3 text-xs text-gray-400">
+
                       <Clock size={14} />
 
                       <span>
                         {getSearchTime(item)}
                       </span>
+
                     </div>
+
                   </div>
 
                   {/* DELETE BUTTON */}
@@ -580,21 +613,33 @@ function RecentSearches() {
                       title="Delete search"
                       className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-50 transition shrink-0"
                     >
+
                       {deletingId === id ? (
+
                         <div className="w-4 h-4 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin" />
+
                       ) : (
+
                         <Trash2 size={17} />
+
                       )}
+
                     </button>
                   )}
+
                 </div>
+
               </div>
             );
           })}
+
         </div>
+
       )}
+
     </div>
   );
 }
 
 export default RecentSearches;
+  

@@ -1,3 +1,4 @@
+
 import {
   GraduationCap,
   Mail,
@@ -7,17 +8,23 @@ import { Link } from "react-router-dom";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 function Footer() {
+  const footerLinkClass =
+    "text-slate-400 hover:text-white focus-visible:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded transition";
+
   return (
     <footer className="bg-slate-900 text-white mt-20">
 
       <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-2 lg:grid-cols-4 gap-10">
 
-        {/* Logo */}
+        {/* Logo / About */}
 
         <div>
           <div className="flex items-center gap-3">
 
-            <GraduationCap className="w-10 h-10 text-blue-400" />
+            <GraduationCap
+              className="w-10 h-10 text-blue-400"
+              aria-hidden="true"
+            />
 
             <h2 className="text-3xl font-bold">
               CareerOS
@@ -36,7 +43,6 @@ function Footer() {
         {/* Quick Links */}
 
         <div>
-
           <h3 className="text-xl font-semibold mb-5">
             Quick Links
           </h3>
@@ -44,43 +50,56 @@ function Footer() {
           <ul className="space-y-3 text-slate-400">
 
             <li>
-              <Link to="/" className="hover:text-white">
+              <Link
+                to="/"
+                className={footerLinkClass}
+              >
                 Home
               </Link>
             </li>
 
             <li>
-              <Link to="/careers" className="hover:text-white">
+              <Link
+                to="/careers"
+                className={footerLinkClass}
+              >
                 Careers
               </Link>
             </li>
 
             <li>
-              <Link to="/colleges" className="hover:text-white">
+              <Link
+                to="/colleges"
+                className={footerLinkClass}
+              >
                 Colleges
               </Link>
             </li>
 
             <li>
-              <Link to="/companies" className="hover:text-white">
+              <Link
+                to="/companies"
+                className={footerLinkClass}
+              >
                 Companies
               </Link>
             </li>
 
             <li>
-              <Link to="/exams" className="hover:text-white">
+              <Link
+                to="/exams"
+                className={footerLinkClass}
+              >
                 Exams
               </Link>
             </li>
 
           </ul>
-
         </div>
 
-        {/* Dashboard */}
+        {/* Student */}
 
         <div>
-
           <h3 className="text-xl font-semibold mb-5">
             Student
           </h3>
@@ -88,44 +107,58 @@ function Footer() {
           <ul className="space-y-3 text-slate-400">
 
             <li>
-              <Link to="/dashboard" className="hover:text-white">
+              <Link
+                to="/dashboard"
+                className={footerLinkClass}
+              >
                 Dashboard
               </Link>
             </li>
 
             <li>
-              <Link to="/search" className="hover:text-white">
+              <Link
+                to="/search"
+                className={footerLinkClass}
+              >
                 Search
               </Link>
             </li>
 
             <li>
-              <Link to="/chatbot" className="hover:text-white">
+              <Link
+                to="/chatbot"
+                className={footerLinkClass}
+              >
                 AI Mentor
               </Link>
             </li>
 
           </ul>
-
         </div>
 
-        {/* Contact */}
+        {/* Connect */}
 
         <div>
-
           <h3 className="text-xl font-semibold mb-5">
             Connect
           </h3>
 
-          <div className="space-y-4">
+          <div
+            className="space-y-4"
+            aria-label="Social and contact links"
+          >
 
             <a
               href="https://github.com/abhi1943"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-3 text-slate-400 hover:text-white"
+              aria-label="CareerOS GitHub profile (opens in a new tab)"
+              className={`flex items-center gap-3 ${footerLinkClass}`}
             >
-              <FaGithub size={20} />
+              <FaGithub
+                size={20}
+                aria-hidden="true"
+              />
               GitHub
             </a>
 
@@ -133,22 +166,29 @@ function Footer() {
               href="https://linkedin.com/in/abhishekreddy1943"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-3 text-slate-400 hover:text-white"
+              aria-label="CareerOS LinkedIn profile (opens in a new tab)"
+              className={`flex items-center gap-3 ${footerLinkClass}`}
             >
-              <FaLinkedin size={20} />
+              <FaLinkedin
+                size={20}
+                aria-hidden="true"
+              />
               LinkedIn
             </a>
 
             <a
               href="mailto:abhishekreddycar@gmail.com"
-              className="flex items-center gap-3 text-slate-400 hover:text-white"
+              aria-label="Send an email to CareerOS"
+              className={`flex items-center gap-3 ${footerLinkClass}`}
             >
-              <Mail size={20} />
+              <Mail
+                size={20}
+                aria-hidden="true"
+              />
               Email
             </a>
 
           </div>
-
         </div>
 
       </div>
@@ -164,9 +204,18 @@ function Footer() {
           </p>
 
           <p className="flex items-center gap-2 text-slate-400">
-            Made with
-            <Heart className="text-red-500" size={18} fill="currentColor" />
-            by Abhishek Reddy
+
+            <span>Made with</span>
+
+            <Heart
+              className="text-red-500"
+              size={18}
+              fill="currentColor"
+              aria-hidden="true"
+            />
+
+            <span>by Abhishek Reddy</span>
+
           </p>
 
         </div>

@@ -1,54 +1,120 @@
+import { skillsMatch } from "../../utils/skillEngine";
+
 function CareerSkills({ career, skillLibrary }) {
+  if (!career || !skillLibrary) {
+    return null;
+  }
 
-  if (!career || !skillLibrary) return null;
+  const careerSkills = Array.isArray(career.skills)
+    ? career.skills
+    : [];
 
-  const technical = skillLibrary.technical.filter((skill) =>
-    career.skills?.includes(skill.name)
-  );
+  const technicalSkills = Array.isArray(
+    skillLibrary.technical
+  )
+    ? skillLibrary.technical
+    : [];
+
+  const matchedTechnicalSkills =
+    technicalSkills.filter(
+      (skill) =>
+        careerSkills.some((careerSkill) =>
+          skillsMatch(
+            careerSkill,
+            skill?.name
+          )
+        )
+    );
+
+  if (matchedTechnicalSkills.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="mt-20">
+    <section
+      aria-labelledby="career-skills-heading"
+      className="mt-12 sm:mt-20"
+    >
 
-      <h2 className="text-3xl font-bold mb-8">
+      <h2
+        id="career-skills-heading"
+        className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-slate-800"
+      >
         🚀 Skills Required
       </h2>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
 
-        {technical.map(skill => (
+        {matchedTechnicalSkills.map(
+          (skill, index) => (
+            <article
+              key={
+                skill?.id ||
+                skill?.name ||
+                `skill-${index}`
+              }
+              className="
+                bg-white
+                rounded-2xl
+                shadow-lg
+                p-5
+                sm:p-6
+                border
+                border-gray-100
+                hover:shadow-xl
+                transition
+              "
+            >
 
-          <div
-            key={skill.id}
-            className="bg-white rounded-2xl shadow-lg p-6"
-          >
+              <h3 className="text-lg sm:text-xl font-bold text-slate-800 break-words">
+                {skill?.name || "Skill"}
+              </h3>
 
-            <h3 className="text-xl font-bold">
-              {skill.name}
-            </h3>
+              {skill?.category && (
+                <p className="text-gray-500 mt-2">
+                  {skill.category}
+                </p>
+              )}
 
-            <p className="text-gray-500 mt-2">
-              {skill.category}
-            </p>
+              <div className="mt-4 flex flex-wrap gap-2">
 
-            <div className="mt-4 flex justify-between">
+                {skill?.level && (
+                  <span className="
+                    bg-blue-100
+                    text-blue-700
+                    px-3
+                    py-1
+                    rounded-full
+                    text-sm
+                    font-medium
+                  ">
+                    {skill.level}
+                  </span>
+                )}
 
-              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
-                {skill.level}
-              </span>
+                {skill?.demand && (
+                  <span className="
+                    bg-green-100
+                    text-green-700
+                    px-3
+                    py-1
+                    rounded-full
+                    text-sm
+                    font-medium
+                  ">
+                    {skill.demand}
+                  </span>
+                )}
 
-              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                {skill.demand}
-              </span>
+              </div>
 
-            </div>
-
-          </div>
-
-        ))}
+            </article>
+          )
+        )}
 
       </div>
 
-    </div>
+    </section>
   );
 }
 

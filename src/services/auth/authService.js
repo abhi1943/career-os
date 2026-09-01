@@ -1,14 +1,6 @@
 // ======================================================
 // CareerOS Authentication Service
 // ======================================================
-//
-// Firebase is now the single source of truth for
-// authentication.
-//
-// This service provides a small application-level wrapper
-// around Firebase Authentication.
-//
-// ======================================================
 
 import {
     createUserWithEmailAndPassword,

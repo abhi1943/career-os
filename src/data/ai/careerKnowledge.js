@@ -1,3 +1,4 @@
+
 const careerKnowledge = {
   "software-engineer": {
     introduction:
@@ -29,6 +30,31 @@ const careerKnowledge = {
       "Operating Systems",
       "Networking",
       "DSA",
+    ],
+
+    /* ==================================================
+       SALARY
+    ================================================== */
+
+    averageSalary:
+      "₹6 LPA - ₹30 LPA",
+
+    growth:
+      "Excellent",
+
+    /* ==================================================
+       COMPANIES
+    ================================================== */
+
+    topCompanies: [
+      "TCS",
+      "Infosys",
+      "Wipro",
+      "Accenture",
+      "Cognizant",
+      "Amazon",
+      "Microsoft",
+      "Google",
     ],
 
     advice:
@@ -112,3 +138,4 @@ const careerKnowledge = {
 };
 
 export default careerKnowledge;
+

@@ -1,3 +1,4 @@
+
 import {
     useEffect,
     useState,
@@ -120,8 +121,7 @@ function Login() {
                 err
             );
 
-            let message =
-                "Unable to login. Please try again.";
+            let message;
 
             switch (err?.code) {
                 case "auth/invalid-credential":
@@ -206,8 +206,7 @@ function Login() {
                 err
             );
 
-            let message =
-                "Unable to send password reset email.";
+            let message;
 
             switch (err?.code) {
                 case "auth/user-not-found":
@@ -789,3 +788,4 @@ function Login() {
 }
 
 export default Login;
+  

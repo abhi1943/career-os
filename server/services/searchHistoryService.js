@@ -1,44 +1,33 @@
 // ======================================================
 // CareerOS Search History Service
 // ======================================================
-//
-// Responsibilities:
-// - Add search history
-// - Get search history
-// - Get one history item
-// - Delete one history item
-// - Clear history
-// - Get history count
-// - Prevent unnecessary duplicate searches
-//
-// ======================================================
+
+const {
+    pool,
+} = require("../config/database");
 
 // ======================================================
 // CONFIGURATION
 // ======================================================
 
-// Maximum number of history entries to keep.
-//
-// This prevents the in-memory store from growing
-// indefinitely during long-term usage.
 const MAX_SEARCH_HISTORY = 50;
-
-// ======================================================
-// IN-MEMORY STORAGE
-// ======================================================
-
-const searchHistory = new Map();
 
 // ======================================================
 // NORMALIZE TEXT
 // ======================================================
 
 function normalizeText(value) {
-    return String(
-        value ?? ""
-    )
+    return String(value ?? "")
         .trim()
         .replace(/\s+/g, " ");
+}
+
+// ======================================================
+// NORMALIZE USER ID
+// ======================================================
+
+function normalizeUserId(uid) {
+    return normalizeText(uid);
 }
 
 // ======================================================
@@ -52,31 +41,12 @@ function normalizeFilter(
     const normalized =
         normalizeText(value);
 
-    return (
-        normalized ||
-        defaultValue
-    );
+    return normalized || defaultValue;
 }
 
 // ======================================================
 // CREATE SEARCH SIGNATURE
 // ======================================================
-//
-// The signature identifies whether two searches have
-// the same search parameters.
-//
-// Example:
-//
-// React Developer
-// India
-// Fresher / 0 years
-// Full-time
-// Remote
-// Any Salary
-//
-// will produce the same signature even if the user
-// changes capitalization or adds extra spaces.
-//
 
 function createSearchSignature({
     query,
@@ -87,34 +57,44 @@ function createSearchSignature({
     salary,
 }) {
     return [
-        normalizeText(query)
-            .toLowerCase(),
+        normalizeText(query).toLowerCase(),
 
-        normalizeText(location)
-            .toLowerCase(),
+        normalizeText(location).toLowerCase(),
 
-        normalizeText(experience)
-            .toLowerCase(),
+        normalizeText(experience).toLowerCase(),
 
-        normalizeText(jobType)
-            .toLowerCase(),
+        normalizeText(jobType).toLowerCase(),
 
-        normalizeText(workMode)
-            .toLowerCase(),
+        normalizeText(workMode).toLowerCase(),
 
-        normalizeText(salary)
-            .toLowerCase(),
+        normalizeText(salary).toLowerCase(),
     ].join("|");
 }
 
 // ======================================================
-// CREATE HISTORY ID
+// MYSQL DATE FORMAT
 // ======================================================
 
-function createHistoryId() {
-    return `${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2, 10)}`;
+function toMySQLDateTime(
+    value = new Date()
+) {
+    const date =
+        value instanceof Date
+            ? value
+            : new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return null;
+    }
+
+    return date
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
 }
 
 // ======================================================
@@ -130,11 +110,8 @@ function cloneHistoryItem(item) {
         return JSON.parse(
             JSON.stringify(item)
         );
-    } catch (error) {
-        console.error(
-            "Clone Search History Error:",
-            error.message
-        );
+    } catch {
+        
 
         return {
             ...item,
@@ -143,10 +120,69 @@ function cloneHistoryItem(item) {
 }
 
 // ======================================================
+// MAP DATABASE ROW
+// ======================================================
+
+function mapSearchHistoryRow(row) {
+    if (!row) {
+        return null;
+    }
+
+    return {
+        id:
+            row.id,
+
+        userId:
+            row.user_id,
+
+        query:
+            row.query,
+
+        location:
+            row.location,
+
+        experience:
+            row.experience,
+
+        jobType:
+            row.job_type,
+
+        workMode:
+            row.work_mode,
+
+        salary:
+            row.salary,
+
+        resultCount:
+            Number(
+                row.result_count || 0
+            ),
+
+        searchedAt:
+            row.searched_at,
+
+        createdAt:
+            row.created_at,
+
+        updatedAt:
+            row.updated_at,
+
+        searchCount:
+            Number(
+                row.search_count || 1
+            ),
+
+        signature:
+            row.signature,
+    };
+}
+
+// ======================================================
 // ADD SEARCH HISTORY
 // ======================================================
 
-function addSearchHistory({
+async function addSearchHistory({
+    uid,
     query = "",
     location = "India",
     experience = "Any Experience",
@@ -155,8 +191,25 @@ function addSearchHistory({
     salary = "Any Salary",
     resultCount = 0,
 } = {}) {
+
+
     // --------------------------------------------------
-    // Normalize values
+    // USER REQUIRED
+    // --------------------------------------------------
+
+    const normalizedUid =
+        normalizeUserId(uid);
+
+    if (!normalizedUid) {
+        console.warn(
+            "CareerOS Search History: uid is required."
+        );
+
+        return null;
+    }
+
+    // --------------------------------------------------
+    // NORMALIZE VALUES
     // --------------------------------------------------
 
     const normalizedQuery =
@@ -199,15 +252,17 @@ function addSearchHistory({
         );
 
     // --------------------------------------------------
-    // Ignore empty searches
+    // IGNORE EMPTY SEARCHES
     // --------------------------------------------------
 
     if (!normalizedQuery) {
+        
+
         return null;
     }
 
     // --------------------------------------------------
-    // Create signature
+    // CREATE SIGNATURE
     // --------------------------------------------------
 
     const signature =
@@ -232,162 +287,234 @@ function addSearchHistory({
         });
 
     // --------------------------------------------------
-    // Check for existing identical search
-    // --------------------------------------------------
-
-    let existingId = null;
-    let existingItem = null;
-
-    for (
-        const [id, item]
-        of searchHistory.entries()
-    ) {
-        if (
-            item.signature ===
-            signature
-        ) {
-            existingId = id;
-            existingItem = item;
-            break;
-        }
-    }
-
-    // --------------------------------------------------
-    // If same search exists:
-    // update it and move it to the top.
-    // --------------------------------------------------
-
-    if (
-        existingId &&
-        existingItem
-    ) {
-        searchHistory.delete(
-            existingId
-        );
-
-        const updatedItem = {
-            ...existingItem,
-
-            query:
-                normalizedQuery,
-
-            location:
-                normalizedLocation,
-
-            experience:
-                normalizedExperience,
-
-            jobType:
-                normalizedJobType,
-
-            workMode:
-                normalizedWorkMode,
-
-            salary:
-                normalizedSalary,
-
-            resultCount:
-                normalizedResultCount,
-
-            searchedAt:
-                new Date().toISOString(),
-
-            updatedAt:
-                new Date().toISOString(),
-
-            searchCount:
-                Number(
-                    existingItem.searchCount
-                ) + 1,
-        };
-
-        searchHistory.set(
-            existingId,
-            updatedItem
-        );
-
-        return cloneHistoryItem(
-            updatedItem
-        );
-    }
-
-    // --------------------------------------------------
-    // Create new history item
+    // CURRENT TIME
     // --------------------------------------------------
 
     const now =
-        new Date().toISOString();
+        toMySQLDateTime();
 
-    const historyItem = {
-        id:
-            createHistoryId(),
+    // --------------------------------------------------
+    // CHECK EXISTING SEARCH
+    // --------------------------------------------------
 
-        query:
-            normalizedQuery,
-
-        location:
-            normalizedLocation,
-
-        experience:
-            normalizedExperience,
-
-        jobType:
-            normalizedJobType,
-
-        workMode:
-            normalizedWorkMode,
-
-        salary:
-            normalizedSalary,
-
-        resultCount:
-            normalizedResultCount,
-
-        searchedAt:
-            now,
-
-        createdAt:
-            now,
-
-        updatedAt:
-            now,
-
-        searchCount:
-            1,
-
-        signature,
-    };
-
-    searchHistory.set(
-        historyItem.id,
-        historyItem
+    const [
+        existingRows,
+    ] = await pool.execute(
+        `
+        SELECT *
+        FROM search_history
+        WHERE user_id = ?
+          AND signature = ?
+        LIMIT 1
+        `,
+        [
+            normalizedUid,
+            signature,
+        ]
     );
 
     // --------------------------------------------------
-    // Limit history size
+    // UPDATE EXISTING SEARCH
     // --------------------------------------------------
 
-    while (
-        searchHistory.size >
-        MAX_SEARCH_HISTORY
-    ) {
-        const oldestId =
-            searchHistory
-                .keys()
-                .next()
-                .value;
+    if (existingRows.length > 0) {
 
-        if (!oldestId) {
-            break;
-        }
+        const existing =
+            existingRows[0];
 
-        searchHistory.delete(
-            oldestId
+        const newSearchCount =
+            Number(
+                existing.search_count || 0
+            ) + 1;
+
+        await pool.execute(
+            `
+            UPDATE search_history
+            SET
+                query = ?,
+                location = ?,
+                experience = ?,
+                job_type = ?,
+                work_mode = ?,
+                salary = ?,
+                result_count = ?,
+                searched_at = ?,
+                updated_at = ?,
+                search_count = ?
+            WHERE id = ?
+              AND user_id = ?
+            `,
+            [
+                normalizedQuery,
+
+                normalizedLocation,
+
+                normalizedExperience,
+
+                normalizedJobType,
+
+                normalizedWorkMode,
+
+                normalizedSalary,
+
+                normalizedResultCount,
+
+                now,
+
+                now,
+
+                newSearchCount,
+
+                existing.id,
+
+                normalizedUid,
+            ]
+        );
+
+        
+        return getSearchHistoryById(
+            normalizedUid,
+            existing.id
         );
     }
 
-    return cloneHistoryItem(
-        historyItem
+    // --------------------------------------------------
+    // CREATE NEW HISTORY ITEM
+    // --------------------------------------------------
+    //
+    // IMPORTANT:
+    // id is BIGINT AUTO_INCREMENT.
+    // DO NOT generate a string ID here.
+    //
+    // --------------------------------------------------
+
+    const [
+        insertResult,
+    ] = await pool.execute(
+        `
+        INSERT INTO search_history (
+            user_id,
+            query,
+            location,
+            experience,
+            job_type,
+            work_mode,
+            salary,
+            result_count,
+            searched_at,
+            created_at,
+            updated_at,
+            search_count,
+            signature
+        )
+        VALUES (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
+        )
+        `,
+        [
+            normalizedUid,
+
+            normalizedQuery,
+
+            normalizedLocation,
+
+            normalizedExperience,
+
+            normalizedJobType,
+
+            normalizedWorkMode,
+
+            normalizedSalary,
+
+            normalizedResultCount,
+
+            now,
+
+            now,
+
+            now,
+
+            1,
+
+            signature,
+        ]
+    );
+
+    // --------------------------------------------------
+    // MYSQL GENERATED ID
+    // --------------------------------------------------
+
+    const insertedId =
+        insertResult.insertId;
+
+    
+
+    // --------------------------------------------------
+    // LIMIT USER HISTORY TO 50
+    // --------------------------------------------------
+
+    const [
+        historyRows,
+    ] = await pool.execute(
+        `
+        SELECT id
+        FROM search_history
+        WHERE user_id = ?
+        ORDER BY searched_at DESC, id DESC
+        LIMIT 18446744073709551615
+        OFFSET ?
+        `,
+        [
+            normalizedUid,
+
+            MAX_SEARCH_HISTORY,
+        ]
+    );
+
+    if (historyRows.length > 0) {
+
+        const idsToDelete =
+            historyRows.map(
+                (row) => row.id
+            );
+
+        await pool.execute(
+            `
+            DELETE FROM search_history
+            WHERE user_id = ?
+              AND id IN (
+                  ${idsToDelete
+                      .map(() => "?")
+                      .join(",")}
+              )
+            `,
+            [
+                normalizedUid,
+
+                ...idsToDelete,
+            ]
+        );
+    }
+
+    // --------------------------------------------------
+    // RETURN CREATED ITEM
+    // --------------------------------------------------
+
+    return getSearchHistoryById(
+        normalizedUid,
+        insertedId
     );
 }
 
@@ -395,57 +522,144 @@ function addSearchHistory({
 // GET SEARCH HISTORY
 // ======================================================
 
-function getSearchHistory() {
-    return Array.from(
-        searchHistory.values()
-    )
-        .sort(
-            (a, b) =>
-                new Date(
-                    b.searchedAt ||
-                        b.createdAt ||
-                        0
-                ) -
-                new Date(
-                    a.searchedAt ||
-                        a.createdAt ||
-                        0
-                )
-        )
-        .map(
-            cloneHistoryItem
-        );
+async function getSearchHistory(uid) {
+
+    const normalizedUid =
+        normalizeUserId(uid);
+
+    if (!normalizedUid) {
+        return [];
+    }
+
+    const [
+        rows,
+    ] = await pool.execute(
+        `
+        SELECT
+            id,
+            user_id,
+            query,
+            location,
+            experience,
+            job_type,
+            work_mode,
+            salary,
+            result_count,
+            searched_at,
+            created_at,
+            updated_at,
+            search_count,
+            signature
+        FROM search_history
+        WHERE user_id = ?
+        ORDER BY searched_at DESC, id DESC
+        LIMIT ${MAX_SEARCH_HISTORY}
+        `,
+        [
+            normalizedUid,
+        ]
+    );
+
+    return rows
+        .map(mapSearchHistoryRow)
+        .map(cloneHistoryItem);
 }
 
 // ======================================================
 // GET SEARCH HISTORY COUNT
 // ======================================================
 
-function getSearchHistoryCount() {
-    return searchHistory.size;
+async function getSearchHistoryCount(uid) {
+
+    const normalizedUid =
+        normalizeUserId(uid);
+
+    if (!normalizedUid) {
+        return 0;
+    }
+
+    const [
+        rows,
+    ] = await pool.execute(
+        `
+        SELECT COUNT(*) AS count
+        FROM search_history
+        WHERE user_id = ?
+        `,
+        [
+            normalizedUid,
+        ]
+    );
+
+    return Number(
+        rows[0]?.count || 0
+    );
 }
 
 // ======================================================
 // GET ONE SEARCH HISTORY ITEM
 // ======================================================
 
-function getSearchHistoryById(id) {
-    const normalizedId =
-        normalizeText(id);
+async function getSearchHistoryById(
+    uid,
+    id
+) {
 
-    if (!normalizedId) {
+    const normalizedUid =
+        normalizeUserId(uid);
+
+    const normalizedId =
+        Number(id);
+
+    if (
+        !normalizedUid ||
+        !Number.isInteger(
+            normalizedId
+        ) ||
+        normalizedId <= 0
+    ) {
         return null;
     }
 
-    const item =
-        searchHistory.get(
-            normalizedId
-        );
+    const [
+        rows,
+    ] = await pool.execute(
+        `
+        SELECT
+            id,
+            user_id,
+            query,
+            location,
+            experience,
+            job_type,
+            work_mode,
+            salary,
+            result_count,
+            searched_at,
+            created_at,
+            updated_at,
+            search_count,
+            signature
+        FROM search_history
+        WHERE id = ?
+          AND user_id = ?
+        LIMIT 1
+        `,
+        [
+            normalizedId,
 
-    return (
-        item
-            ? cloneHistoryItem(item)
-            : null
+            normalizedUid,
+        ]
+    );
+
+    if (!rows.length) {
+        return null;
+    }
+
+    return cloneHistoryItem(
+        mapSearchHistoryRow(
+            rows[0]
+        )
     );
 }
 
@@ -453,16 +667,44 @@ function getSearchHistoryById(id) {
 // DELETE SEARCH HISTORY ITEM
 // ======================================================
 
-function deleteSearchHistory(id) {
-    const normalizedId =
-        normalizeText(id);
+async function deleteSearchHistory(
+    uid,
+    id
+) {
 
-    if (!normalizedId) {
+    const normalizedUid =
+        normalizeUserId(uid);
+
+    const normalizedId =
+        Number(id);
+
+    if (
+        !normalizedUid ||
+        !Number.isInteger(
+            normalizedId
+        ) ||
+        normalizedId <= 0
+    ) {
         return false;
     }
 
-    return searchHistory.delete(
-        normalizedId
+    const [
+        result,
+    ] = await pool.execute(
+        `
+        DELETE FROM search_history
+        WHERE id = ?
+          AND user_id = ?
+        `,
+        [
+            normalizedId,
+
+            normalizedUid,
+        ]
+    );
+
+    return (
+        result.affectedRows > 0
     );
 }
 
@@ -470,13 +712,28 @@ function deleteSearchHistory(id) {
 // CLEAR SEARCH HISTORY
 // ======================================================
 
-function clearSearchHistory() {
-    const removed =
-        searchHistory.size;
+async function clearSearchHistory(uid) {
 
-    searchHistory.clear();
+    const normalizedUid =
+        normalizeUserId(uid);
 
-    return removed;
+    if (!normalizedUid) {
+        return 0;
+    }
+
+    const [
+        result,
+    ] = await pool.execute(
+        `
+        DELETE FROM search_history
+        WHERE user_id = ?
+        `,
+        [
+            normalizedUid,
+        ]
+    );
+
+    return result.affectedRows;
 }
 
 // ======================================================

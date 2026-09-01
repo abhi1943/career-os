@@ -1,70 +1,108 @@
 import {
-  GraduationCap,
-  BookOpen,
-  Calendar,
-  Trophy,
+    GraduationCap,
+    Bookmark,
+    Calendar,
+    Trophy,
 } from "lucide-react";
 
-const stats = [
-  {
-    title: "Careers Explored",
-    value: "24",
-    icon: GraduationCap,
-    color: "text-blue-600",
-    bg: "bg-blue-100",
-  },
-  {
-    title: "Saved Colleges",
-    value: "8",
-    icon: BookOpen,
-    color: "text-green-600",
-    bg: "bg-green-100",
-  },
-  {
-    title: "Upcoming Exams",
-    value: "3",
-    icon: Calendar,
-    color: "text-red-600",
-    bg: "bg-red-100",
-  },
-  {
-    title: "Roadmaps Completed",
-    value: "5",
-    icon: Trophy,
-    color: "text-amber-600",
-    bg: "bg-amber-100",
-  },
-];
+function QuickStats({
+    careersExplored = 0,
+    savedJobs = 0,
+    upcomingExams = 0,
+    roadmapsCompleted = 0,
+}) {
+    const stats = [
+        {
+            title: "Careers Explored",
+            value: careersExplored,
+            icon: GraduationCap,
+            iconClass:
+                "bg-blue-50 text-blue-600",
+        },
+        {
+            title: "Saved Jobs",
+            value: savedJobs,
+            icon: Bookmark,
+            iconClass:
+                "bg-purple-50 text-purple-600",
+        },
+        {
+            title: "Upcoming Exams",
+            value: upcomingExams,
+            icon: Calendar,
+            iconClass:
+                "bg-red-50 text-red-600",
+        },
+        {
+            title: "Roadmaps Completed",
+            value: roadmapsCompleted,
+            icon: Trophy,
+            iconClass:
+                "bg-green-50 text-green-600",
+        },
+    ];
 
-function QuickStats() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-      {stats.map((stat) => {
-        const Icon = stat.icon;
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
 
-        return (
-          <div
-            key={stat.title}
-            className="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
-          >
-            <div
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center ${stat.bg}`}
-            >
-              <Icon className={stat.color} size={28} />
-            </div>
+            {stats.map((stat) => {
+                const Icon = stat.icon;
 
-            <h2 className="mt-5 text-3xl font-bold">
-              {stat.value}
-            </h2>
+                return (
+                    <div
+                        key={stat.title}
+                        className="
+                            h-[140px]
+                            bg-white
+                            rounded-3xl
+                            shadow-sm
+                            border border-gray-100
+                            p-6
+                            hover:shadow-lg
+                            transition-all
+                            duration-300
+                            flex
+                            items-center
+                        "
+                    >
 
-            <p className="mt-1 text-gray-500">
-              {stat.title}
-            </p>
-          </div>
-        );
-      })}
-    </div>
-  );
+                        <div className="flex items-center justify-between gap-4 w-full">
+
+                            <div className="min-w-0">
+
+                                <p className="text-sm text-gray-500 truncate">
+                                    {stat.title}
+                                </p>
+
+                                <p className="text-3xl font-bold text-gray-900 mt-2">
+                                    {stat.value}
+                                </p>
+
+                            </div>
+
+                            <div
+                                className={`
+                                    w-12
+                                    h-12
+                                    rounded-2xl
+                                    flex
+                                    items-center
+                                    justify-center
+                                    shrink-0
+                                    ${stat.iconClass}
+                                `}
+                            >
+                                <Icon size={23} />
+                            </div>
+
+                        </div>
+
+                    </div>
+                );
+            })}
+
+        </div>
+    );
 }
 
 export default QuickStats;
