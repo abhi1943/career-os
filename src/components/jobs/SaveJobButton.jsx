@@ -1,3 +1,4 @@
+
 import {
     useEffect,
     useState,
@@ -9,7 +10,7 @@ import {
 } from "lucide-react";
 
 import {
-    isJobSaved,
+    getSavedJobs,
     saveJob,
     removeSavedJob,
 } from "../../services/savedJobsService";
@@ -17,6 +18,151 @@ import {
 import {
     useAuth,
 } from "../../context/AuthContext";
+
+// ======================================================
+// CAREEROS SAVED JOB CACHE
+// ======================================================
+
+
+let savedJobIdsCache = null;
+let savedJobsCacheUserId = "";
+let savedJobsLoadPromise = null;
+
+// ======================================================
+// GET SAVED JOB ID
+// ======================================================
+
+function getSavedJobId(job) {
+    if (!job) {
+        return "";
+    }
+
+    return String(
+        job.id ||
+            job.jobId ||
+            job.job_id ||
+            job.redirect_url ||
+            job.redirectUrl ||
+            job.url ||
+            `${job.title || ""}-${
+                typeof job.company ===
+                "string"
+                    ? job.company
+                    : job.company?.display_name ||
+                      job.company?.name ||
+                      ""
+            }`
+    ).trim();
+}
+
+// ======================================================
+// LOAD SAVED JOBS ONCE
+// ======================================================
+
+async function loadSavedJobsOnce(
+    userId
+) {
+    const normalizedUserId =
+        String(
+            userId || ""
+        ).trim();
+
+    if (!normalizedUserId) {
+        savedJobIdsCache =
+            new Set();
+
+        savedJobsCacheUserId = "";
+
+        return savedJobIdsCache;
+    }
+
+    // --------------------------------------------------
+    // RETURN EXISTING CACHE
+    // --------------------------------------------------
+
+    if (
+        savedJobIdsCache &&
+        savedJobsCacheUserId ===
+            normalizedUserId
+    ) {
+        return savedJobIdsCache;
+    }
+
+    // --------------------------------------------------
+    // RETURN EXISTING REQUEST
+    // --------------------------------------------------
+
+    if (
+        savedJobsLoadPromise &&
+        savedJobsCacheUserId ===
+            normalizedUserId
+    ) {
+        return savedJobsLoadPromise;
+    }
+
+    // --------------------------------------------------
+    // LOAD COMPLETE SAVED JOB LIST
+    // --------------------------------------------------
+
+    savedJobsCacheUserId =
+        normalizedUserId;
+
+    savedJobsLoadPromise =
+        getSavedJobs()
+            .then((jobs) => {
+                const nextIds =
+                    new Set();
+
+                if (
+                    Array.isArray(
+                        jobs
+                    )
+                ) {
+                    jobs.forEach(
+                        (savedJob) => {
+                            const savedJobId =
+                                getSavedJobId(
+                                    savedJob
+                                );
+
+                            if (
+                                savedJobId
+                            ) {
+                                nextIds.add(
+                                    savedJobId
+                                );
+                            }
+                        }
+                    );
+                }
+
+                savedJobIdsCache =
+                    nextIds;
+
+                return nextIds;
+            })
+            .catch((error) => {
+                console.error(
+                    "CareerOS: Failed to load saved job cache:",
+                    error
+                );
+
+                savedJobIdsCache =
+                    new Set();
+
+                return savedJobIdsCache;
+            })
+            .finally(() => {
+                savedJobsLoadPromise =
+                    null;
+            });
+
+    return savedJobsLoadPromise;
+}
+
+// ======================================================
+// SAVE JOB BUTTON
+// ======================================================
 
 function SaveJobButton({
     job,
@@ -37,37 +183,23 @@ function SaveJobButton({
     const [checking, setChecking] =
         useState(true);
 
-    // ======================================================
+    // ==================================================
     // FIREBASE USER ID
-    // ======================================================
+    // ==================================================
 
     const userId =
         user?.uid || "";
 
-    // ======================================================
+    // ==================================================
     // STABLE JOB ID
-    // ======================================================
+    // ==================================================
 
-    const jobId = job
-        ? String(
-            job.id ||
-            job.redirect_url ||
-            job.redirectUrl ||
-            `${job.title || ""}-${typeof job.company ===
-                "string"
-                ? job.company
-                : job.company
-                    ?.display_name ||
-                job.company?.name ||
-                ""
-            }`
-        ).trim()
-        : "";
+    const jobId =
+        getSavedJobId(job);
 
-
-    // ======================================================
-    // CHECK SAVED STATUS
-    // ======================================================
+    // ==================================================
+    // CHECK SAVED STATUS FROM SHARED CACHE
+    // ==================================================
 
     useEffect(() => {
         let mounted = true;
@@ -90,7 +222,10 @@ function SaveJobButton({
                 // NO AUTHENTICATED USER
                 // ==================================================
 
-                if (!userId || !jobId) {
+                if (
+                    !userId ||
+                    !jobId
+                ) {
                     if (mounted) {
                         setSaved(false);
                         setChecking(false);
@@ -104,20 +239,20 @@ function SaveJobButton({
                         setChecking(true);
                     }
 
-
-
-                    const result =
-                        await isJobSaved(
-                            jobId
+                    const savedIds =
+                        await loadSavedJobsOnce(
+                            userId
                         );
 
-                
-
-                    if (mounted) {
-                        setSaved(
-                            Boolean(result)
-                        );
+                    if (!mounted) {
+                        return;
                     }
+
+                    setSaved(
+                        savedIds.has(
+                            jobId
+                        )
+                    );
                 } catch (error) {
                     console.error(
                         "CareerOS saved status error:",
@@ -145,9 +280,9 @@ function SaveJobButton({
         jobId,
     ]);
 
-    // ======================================================
+    // ==================================================
     // GLOBAL SAVED JOB SYNCHRONIZATION
-    // ======================================================
+    // ==================================================
 
     useEffect(() => {
         const handleSavedJobsChanged =
@@ -159,45 +294,44 @@ function SaveJobButton({
                     detail?.userId;
 
                 const changedJobId =
-                    detail?.jobId;
+                    String(
+                        detail?.jobId || ""
+                    ).trim();
 
                 const changedSaved =
                     detail?.saved;
 
-                // ==================================================
-                // IGNORE OTHER USER EVENTS
-                // ==================================================
+                // --------------------------------------------------
+                // IGNORE OTHER USERS
+                // --------------------------------------------------
 
                 if (
                     changedUserId &&
                     String(
                         changedUserId
                     ) !==
-                    String(userId)
+                        String(
+                            userId
+                        )
                 ) {
                     return;
                 }
 
-                // ==================================================
-                // IGNORE OTHER JOB EVENTS
-                // ==================================================
-
-                if (!changedJobId) {
-                    return;
-                }
+                // --------------------------------------------------
+                // IGNORE OTHER JOBS
+                // --------------------------------------------------
 
                 if (
-                    String(
-                        changedJobId
-                    ) !==
-                    String(jobId)
+                    !changedJobId ||
+                    changedJobId !==
+                        String(jobId)
                 ) {
                     return;
                 }
 
-                // ==================================================
-                // VALID SAVED STATE REQUIRED
-                // ==================================================
+                // --------------------------------------------------
+                // VALID STATE REQUIRED
+                // --------------------------------------------------
 
                 if (
                     typeof changedSaved !==
@@ -209,6 +343,26 @@ function SaveJobButton({
                 setSaved(
                     changedSaved
                 );
+
+                // --------------------------------------------------
+                // UPDATE SHARED CACHE
+                // --------------------------------------------------
+
+                if (
+                    savedJobIdsCache
+                ) {
+                    if (
+                        changedSaved
+                    ) {
+                        savedJobIdsCache.add(
+                            changedJobId
+                        );
+                    } else {
+                        savedJobIdsCache.delete(
+                            changedJobId
+                        );
+                    }
+                }
             };
 
         window.addEventListener(
@@ -227,9 +381,9 @@ function SaveJobButton({
         jobId,
     ]);
 
-    // ======================================================
+    // ==================================================
     // TOGGLE SAVE
-    // ======================================================
+    // ==================================================
 
     const handleToggle =
         async () => {
@@ -269,10 +423,10 @@ function SaveJobButton({
                 setSaving(true);
 
                 const normalizedJob =
-                {
-                    ...job,
-                    id: jobId,
-                };
+                    {
+                        ...job,
+                        id: jobId,
+                    };
 
                 let newSavedState =
                     false;
@@ -318,6 +472,26 @@ function SaveJobButton({
                 }
 
                 // ==================================================
+                // UPDATE SHARED CACHE
+                // ==================================================
+
+                if (
+                    savedJobIdsCache
+                ) {
+                    if (
+                        newSavedState
+                    ) {
+                        savedJobIdsCache.add(
+                            jobId
+                        );
+                    } else {
+                        savedJobIdsCache.delete(
+                            jobId
+                        );
+                    }
+                }
+
+                // ==================================================
                 // UPDATE LOCAL STATE
                 // ==================================================
 
@@ -329,7 +503,10 @@ function SaveJobButton({
                 // PARENT CALLBACK
                 // ==================================================
 
-                if (onSavedChange) {
+                if (
+                    typeof onSavedChange ===
+                    "function"
+                ) {
                     onSavedChange(
                         jobId,
                         newSavedState,
@@ -366,17 +543,17 @@ function SaveJobButton({
             }
         };
 
-    // ======================================================
+    // ==================================================
     // NO JOB
-    // ======================================================
+    // ==================================================
 
     if (!jobId) {
         return null;
     }
 
-    // ======================================================
+    // ==================================================
     // BUTTON STATE
-    // ======================================================
+    // ==================================================
 
     const disabled =
         authLoading ||
@@ -397,9 +574,9 @@ function SaveJobButton({
                         ? "Saved"
                         : "Save Job";
 
-    // ======================================================
+    // ==================================================
     // RENDER
-    // ======================================================
+    // ==================================================
 
     return (
         <button
@@ -407,7 +584,9 @@ function SaveJobButton({
             onClick={
                 handleToggle
             }
-            disabled={disabled}
+            disabled={
+                disabled
+            }
             title={
                 authLoading
                     ? "Checking authentication..."
@@ -430,7 +609,9 @@ function SaveJobButton({
                                 ? "Remove saved job"
                                 : "Save job"
             }
-            aria-pressed={saved}
+            aria-pressed={
+                saved
+            }
             className={
                 compact
                     ? `
@@ -438,14 +619,16 @@ function SaveJobButton({
                         rounded-lg
                         border
                         transition
-                        ${saved
-                        ? "bg-blue-50 border-blue-200 text-blue-600"
-                        : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
-                    }
-                        ${disabled
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }
+                        ${
+                            saved
+                                ? "bg-blue-50 border-blue-200 text-blue-600"
+                                : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                        }
+                        ${
+                            disabled
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                        }
                     `
                     : `
                         flex
@@ -458,14 +641,16 @@ function SaveJobButton({
                         border
                         font-semibold
                         transition
-                        ${saved
-                        ? "bg-blue-50 border-blue-200 text-blue-700"
-                        : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-                    }
-                        ${disabled
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }
+                        ${
+                            saved
+                                ? "bg-blue-50 border-blue-200 text-blue-700"
+                                : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                        }
+                        ${
+                            disabled
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                        }
                     `
             }
         >

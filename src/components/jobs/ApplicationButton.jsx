@@ -1,3 +1,4 @@
+
 import {
     useEffect,
     useState,
@@ -11,20 +12,148 @@ import {
 
 import {
     createApplication,
-    getApplication,
+    getApplications,
 } from "../../services/applicationService";
 
 // ======================================================
-// APPLICATION BUTTON
+// CAREEROS APPLICATION CACHE
 // ======================================================
-//
-// Purpose:
-// - Show whether a user has applied
-// - Allow user to mark a job as applied
-// - Prevent duplicate applications
-// - Check existing application from backend
-// - Notify parent when application state changes
-//
+
+
+let applicationsCache = null;
+let applicationsCacheUserId = "";
+let applicationsLoadPromise = null;
+
+// ======================================================
+// GET CURRENT FIREBASE USER ID
+// ======================================================
+
+async function getCurrentFirebaseUserId() {
+    try {
+        const { auth } =
+            await import("../../firebase/firebase");
+
+        return String(
+            auth.currentUser?.uid || ""
+        ).trim();
+    } catch (error) {
+        console.error(
+            "CareerOS: Unable to get Firebase user:",
+            error
+        );
+
+        return "";
+    }
+}
+
+// ======================================================
+// LOAD APPLICATIONS ONCE
+// ======================================================
+
+async function loadApplicationsOnce() {
+    const userId =
+        await getCurrentFirebaseUserId();
+
+    if (!userId) {
+        applicationsCache = [];
+        applicationsCacheUserId = "";
+        return [];
+    }
+
+    // --------------------------------------------------
+    // RETURN EXISTING CACHE
+    // --------------------------------------------------
+
+    if (
+        applicationsCache &&
+        applicationsCacheUserId === userId
+    ) {
+        return applicationsCache;
+    }
+
+    // --------------------------------------------------
+    // RETURN EXISTING REQUEST
+    // --------------------------------------------------
+
+    if (
+        applicationsLoadPromise &&
+        applicationsCacheUserId === userId
+    ) {
+        return applicationsLoadPromise;
+    }
+
+    // --------------------------------------------------
+    // LOAD ALL APPLICATIONS
+    // --------------------------------------------------
+
+    applicationsCacheUserId = userId;
+
+    applicationsLoadPromise =
+        getApplications()
+            .then((applications) => {
+                const normalizedApplications =
+                    Array.isArray(
+                        applications
+                    )
+                        ? applications
+                        : [];
+
+                applicationsCache =
+                    normalizedApplications;
+
+                return normalizedApplications;
+            })
+            .catch((error) => {
+                console.error(
+                    "CareerOS: Failed to load application cache:",
+                    error
+                );
+
+                applicationsCache = [];
+
+                return [];
+            })
+            .finally(() => {
+                applicationsLoadPromise =
+                    null;
+            });
+
+    return applicationsLoadPromise;
+}
+
+// ======================================================
+// FIND APPLICATION IN CACHE
+// ======================================================
+
+function findApplication(
+    applications,
+    jobId
+) {
+    if (
+        !Array.isArray(applications) ||
+        !jobId
+    ) {
+        return null;
+    }
+
+    const normalizedJobId =
+        String(jobId).trim();
+
+    return (
+        applications.find(
+            (application) =>
+                String(
+                    application?.jobId ||
+                        application?.job_id ||
+                        ""
+                ).trim() ===
+                normalizedJobId
+        ) || null
+    );
+}
+
+// ======================================================
+// APPLICATION BUTTON
 // ======================================================
 
 function ApplicationButton({
@@ -67,7 +196,7 @@ function ApplicationButton({
         : "";
 
     // ==================================================
-    // CHECK APPLICATION
+    // CHECK APPLICATION FROM SHARED CACHE
     // ==================================================
 
     useEffect(() => {
@@ -87,12 +216,18 @@ function ApplicationButton({
             setError("");
 
             try {
-                const existingApplication =
-                    await getApplication(jobId);
+                const applications =
+                    await loadApplicationsOnce();
 
                 if (!mounted) {
                     return;
                 }
+
+                const existingApplication =
+                    findApplication(
+                        applications,
+                        jobId
+                    );
 
                 setApplication(
                     existingApplication
@@ -127,6 +262,51 @@ function ApplicationButton({
     }, [jobId]);
 
     // ==================================================
+    // GLOBAL APPLICATION SYNCHRONIZATION
+    // ==================================================
+
+    useEffect(() => {
+        const handleApplicationChanged =
+            (event) => {
+                const detail =
+                    event?.detail || {};
+
+                const changedJobId =
+                    String(
+                        detail?.jobId || ""
+                    ).trim();
+
+                const changedApplication =
+                    detail?.application ||
+                    null;
+
+                if (
+                    !changedJobId ||
+                    changedJobId !==
+                        String(jobId)
+                ) {
+                    return;
+                }
+
+                setApplication(
+                    changedApplication
+                );
+            };
+
+        window.addEventListener(
+            "careerOS:applicationsChanged",
+            handleApplicationChanged
+        );
+
+        return () => {
+            window.removeEventListener(
+                "careerOS:applicationsChanged",
+                handleApplicationChanged
+            );
+        };
+    }, [jobId]);
+
+    // ==================================================
     // APPLY
     // ==================================================
 
@@ -134,10 +314,6 @@ function ApplicationButton({
         if (!job || submitting) {
             return;
         }
-
-        // IMPORTANT:
-        // Use the component-level jobId.
-        // Do NOT write: const jobId = jobId;
 
         if (!jobId) {
             setError(
@@ -169,6 +345,46 @@ function ApplicationButton({
                 createdApplication
             );
 
+            // --------------------------------------------------
+            // UPDATE SHARED APPLICATION CACHE
+            // --------------------------------------------------
+
+            if (
+                Array.isArray(
+                    applicationsCache
+                )
+            ) {
+                const existingIndex =
+                    applicationsCache.findIndex(
+                        (item) =>
+                            String(
+                                item?.jobId ||
+                                    item?.job_id ||
+                                    ""
+                            ).trim() ===
+                            String(
+                                jobId
+                            ).trim()
+                    );
+
+                if (
+                    existingIndex >= 0
+                ) {
+                    applicationsCache[
+                        existingIndex
+                    ] =
+                        createdApplication;
+                } else {
+                    applicationsCache.push(
+                        createdApplication
+                    );
+                }
+            }
+
+            // --------------------------------------------------
+            // PARENT CALLBACK
+            // --------------------------------------------------
+
             if (
                 typeof onApplicationChange ===
                 "function"
@@ -178,6 +394,24 @@ function ApplicationButton({
                     true
                 );
             }
+
+            // --------------------------------------------------
+            // GLOBAL EVENT
+            // --------------------------------------------------
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "careerOS:applicationsChanged",
+                    {
+                        detail: {
+                            jobId,
+                            application:
+                                createdApplication,
+                            applied: true,
+                        },
+                    }
+                )
+            );
         } catch (err) {
             console.error(
                 "CareerOS: Apply job error:",
@@ -187,6 +421,7 @@ function ApplicationButton({
             const serverMessage =
                 err?.response?.data?.message ||
                 err?.response?.data?.error ||
+                err?.message ||
                 "";
 
             setError(
@@ -304,3 +539,4 @@ function ApplicationButton({
 }
 
 export default ApplicationButton;
+
