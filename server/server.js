@@ -331,6 +331,7 @@ const allowedOrigins = [
     configuredFrontendUrl,
 
     "https://career-os13.vercel.app",
+    "https://career-os-peach.vercel.app",
 
     "https://career-5bszfhdpl-career-os13.vercel.app",
 
