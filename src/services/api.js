@@ -1,12 +1,21 @@
+  
 import axios from "axios";
 
 // ======================================================
 // CareerOS API Client
 // ======================================================
 
-const API_BASE_URL =
+const RAW_API_URL =
     import.meta.env.VITE_API_URL ||
     "https://career-os-api-1h85.onrender.com/api";
+
+// Always normalize API URL to:
+// https://career-os-api-1h85.onrender.com/api
+const API_BASE_URL =
+    RAW_API_URL
+        .replace(/\/+$/, "")
+        .replace(/\/api$/i, "") +
+    "/api";
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -18,18 +27,6 @@ const api = axios.create({
 
 // ======================================================
 // FIREBASE AUTHENTICATION
-// ======================================================
-//
-// Firebase provides the authenticated user's ID token.
-//
-// The token is sent to the backend using the standard
-// Authorization header:
-//
-// Authorization: Bearer <Firebase ID token>
-//
-// The user's UID is NOT sent through x-user-id.
-// The backend extracts the verified UID from req.user.uid.
-//
 // ======================================================
 
 api.interceptors.request.use(
@@ -70,3 +67,4 @@ api.interceptors.request.use(
 // ======================================================
 
 export default api;
+  
