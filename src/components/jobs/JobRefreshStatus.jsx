@@ -1,5 +1,8 @@
-
-import { useEffect, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
 
 function JobRefreshStatus({ onJobsRefreshed }) {
     const [status, setStatus] = useState(null);
@@ -19,12 +22,12 @@ function JobRefreshStatus({ onJobsRefreshed }) {
     // FETCH REFRESH STATUS
     // ======================================================
 
-    const fetchStatus = async () => {
+    const fetchStatus = useCallback(async () => {
         try {
             setError("");
 
             const response = await fetch(
-                `${API_BASE_URL}/api/jobs/refresh-status`
+                `${API_BASE_URL}/jobs/refresh-status`
             );
 
             if (!response.ok) {
@@ -56,7 +59,7 @@ function JobRefreshStatus({ onJobsRefreshed }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [API_BASE_URL]);
 
     // ======================================================
     // INITIAL LOAD + AUTO STATUS UPDATE
@@ -75,7 +78,7 @@ function JobRefreshStatus({ onJobsRefreshed }) {
             clearTimeout(initialTimeout);
             clearInterval(interval);
         };
-    }, []);
+    }, [fetchStatus]);
 
     // ======================================================
     // MANUAL REFRESH
@@ -87,7 +90,7 @@ function JobRefreshStatus({ onJobsRefreshed }) {
             setError("");
 
             const response = await fetch(
-                `${API_BASE_URL}/api/jobs/refresh`,
+                `${API_BASE_URL}/jobs/refresh`,
                 {
                     method: "POST",
                     headers: {
@@ -474,4 +477,3 @@ function JobRefreshStatus({ onJobsRefreshed }) {
 }
 
 export default JobRefreshStatus;
-  
