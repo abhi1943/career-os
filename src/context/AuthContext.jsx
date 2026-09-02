@@ -20,24 +20,26 @@ export const AuthContext = createContext(null);
 // ======================================================
 // CAREEROS API BASE URL
 // ======================================================
-
-const RAW_API_URL =
-    import.meta.env.VITE_API_URL ||
-    "https://career-os-api-1h85.onrender.com/api";
+//
+// Vercel environment variable:
+// VITE_API_URL
+//
+// Expected value:
+// https://career-os-api-1h85.onrender.com/api
+//
+// If VITE_API_URL is not configured, use Render directly.
+// ======================================================
 
 const API_BASE_URL =
-    RAW_API_URL
-        .replace(/\/+$/, "")
-        .replace(/\/api$/i, "") +
-    "/api";
+    import.meta.env.VITE_API_URL ||
+    "https://career-os-api-1h85.onrender.com/api";
 
 // ======================================================
 // AUTH PROVIDER
 // ======================================================
 
 export function AuthProvider({ children }) {
-    const [user, setUser] =
-        useState(null);
+    const [user, setUser] = useState(null);
 
     const [authLoading, setAuthLoading] =
         useState(true);
@@ -49,23 +51,38 @@ export function AuthProvider({ children }) {
                 async (currentUser) => {
                     setUser(currentUser);
 
-                    /*
-                     * Warm the backend job store immediately
-                     * after Firebase authentication succeeds.
-                     *
-                     * Authentication must NOT fail if warming
-                     * has an error.
-                     */
+                    // ==================================================
+                    // WARM JOB STORE
+                    // ==================================================
+                    //
+                    // Authentication must NOT fail if the warm request
+                    // fails. Therefore this is completely isolated from
+                    // Firebase authentication.
+                    // ==================================================
+
                     if (currentUser) {
                         try {
+                            const warmUrl =
+                                `${API_BASE_URL}/jobs/warm`;
+
+                            console.log(
+                                "[CareerOS] Warming job store:",
+                                warmUrl
+                            );
+
                             const response =
-                                await fetch(
-                                    `${API_BASE_URL}/jobs/warm`
-                                );
+                                await fetch(warmUrl, {
+                                    method: "GET",
+                                    headers: {
+                                        Accept:
+                                            "application/json",
+                                    },
+                                    cache: "no-store",
+                                });
 
                             if (!response.ok) {
                                 throw new Error(
-                                    `Job warm request failed: ${response.status}`
+                                    `Job warm request failed: ${response.status} ${response.statusText}`
                                 );
                             }
 
@@ -137,4 +154,3 @@ export function AuthProvider({ children }) {
 export function useAuth() {
     return useContext(AuthContext);
 }
-
