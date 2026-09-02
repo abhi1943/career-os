@@ -38,33 +38,27 @@ const pool = mysql.createPool({
         process.env.DB_NAME ||
         "career_os",
 
-    // --------------------------------------------------
+    // ==================================================
     // CONNECTION POOL
-    // --------------------------------------------------
+    // ==================================================
 
     waitForConnections: true,
 
-    // Keep the pool small because the hosting database
-    // has a limited max_user_connections value.
-    connectionLimit: 3,
+    // Keep the number of simultaneous MySQL connections
+    // very small because the database has a strict
+    // max_user_connections limit.
+    connectionLimit: 2,
 
-    // Do not allow an unlimited queue of requests.
+    // Prevent an unlimited number of waiting requests.
     queueLimit: 20,
 
-    // --------------------------------------------------
-    // IDLE CONNECTION MANAGEMENT
-    // --------------------------------------------------
-
-    // Close idle connections after 30 seconds.
-    idleTimeout: 30000,
-
-    // --------------------------------------------------
-    // KEEP ALIVE
-    // --------------------------------------------------
+    // ==================================================
+    // CONNECTION KEEP-ALIVE
+    // ==================================================
 
     enableKeepAlive: true,
 
-    keepAliveInitialDelay: 0,
+    keepAliveInitialDelay: 10000,
 });
 
 // ======================================================
