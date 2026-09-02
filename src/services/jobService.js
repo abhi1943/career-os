@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 import {
@@ -16,10 +17,32 @@ import {
 // ======================================================
 // API CONFIGURATION
 // ======================================================
+//
+// Backend mounts Jobs at:
+//
+// /api/jobs
+//
+// VITE_API_URL may be configured as either:
+//
+// https://career-os-api-1h85.onrender.com
+//
+// OR:
+//
+// https://career-os-api-1h85.onrender.com/api
+//
+// This normalization guarantees that the frontend always
+// calls the correct /api backend path.
+// ======================================================
 
-const API_URL =
+const RAW_API_URL =
     import.meta.env.VITE_API_URL ||
     "https://career-os-api-1h85.onrender.com/api";
+
+const API_URL =
+    RAW_API_URL
+        .replace(/\/+$/, "")
+        .replace(/\/api$/i, "") +
+    "/api";
 
 // ======================================================
 // FRONTEND REQUEST CACHE
@@ -1194,3 +1217,4 @@ export async function getJobRefreshStatus() {
         );
     }
 }
+  
