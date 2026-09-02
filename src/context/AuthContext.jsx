@@ -1,3 +1,4 @@
+
 /* eslint-disable react-refresh/only-export-components */
 
 import {
@@ -16,6 +17,24 @@ import { auth } from "../firebase/firebase";
 
 export const AuthContext = createContext(null);
 
+// ======================================================
+// CAREEROS API BASE URL
+// ======================================================
+
+const RAW_API_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://career-os-api-1h85.onrender.com/api";
+
+const API_BASE_URL =
+    RAW_API_URL
+        .replace(/\/+$/, "")
+        .replace(/\/api$/i, "") +
+    "/api";
+
+// ======================================================
+// AUTH PROVIDER
+// ======================================================
+
 export function AuthProvider({ children }) {
     const [user, setUser] =
         useState(null);
@@ -31,18 +50,18 @@ export function AuthProvider({ children }) {
                     setUser(currentUser);
 
                     /*
-                     * Step 3:
                      * Warm the backend job store immediately
                      * after Firebase authentication succeeds.
                      *
-                     * Authentication should NOT fail if warming
-                     * has an error, so the request is intentionally
-                     * handled independently.
+                     * Authentication must NOT fail if warming
+                     * has an error.
                      */
                     if (currentUser) {
                         try {
                             const response =
-                                await fetch("/api/jobs/warm");
+                                await fetch(
+                                    `${API_BASE_URL}/jobs/warm`
+                                );
 
                             if (!response.ok) {
                                 throw new Error(
@@ -72,9 +91,17 @@ export function AuthProvider({ children }) {
         return unsubscribe;
     }, []);
 
+    // ======================================================
+    // LOGOUT
+    // ======================================================
+
     const logout = async () => {
         await signOut(auth);
     };
+
+    // ======================================================
+    // AUTH CONTEXT VALUE
+    // ======================================================
 
     const value = {
         // Firebase authenticated user
@@ -103,6 +130,11 @@ export function AuthProvider({ children }) {
     );
 }
 
+// ======================================================
+// USE AUTH HOOK
+// ======================================================
+
 export function useAuth() {
     return useContext(AuthContext);
 }
+
