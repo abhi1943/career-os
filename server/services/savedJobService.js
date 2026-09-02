@@ -997,13 +997,6 @@ async function getSavedJobCount(
 // ======================================================
 // CLEAR ALL SAVED JOBS
 // ======================================================
-//
-// Development/testing helper.
-//
-// WARNING:
-// Permanently removes all saved jobs for one user.
-//
-// ======================================================
 
 async function clearSavedJobs(
     userId

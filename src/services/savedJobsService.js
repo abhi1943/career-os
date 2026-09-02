@@ -82,29 +82,7 @@ function getSavedJobId(job) {
 // ======================================================
 // ALLOWED SAVED-JOB FIELDS
 // ======================================================
-//
-// IMPORTANT:
-//
-// Jobs returned by CareerOS contain additional internal
-// metadata used by the job store.
-//
-// Examples:
-//
-// careeros_category
-// careeros_search_query
-// firstSeenAt
-// lastUpdatedAt
-// storedAt
-// expiresAt
-// searchText
-// match
-//
-// Those fields must NOT be sent to the saved-jobs API.
-//
-// We keep only the public job fields that the backend
-// saved-job validator accepts.
-//
-// ======================================================
+
 
 const SAVED_JOB_FIELDS = [
     // --------------------------------------------------
@@ -750,4 +728,3 @@ export default {
     normalizeSavedJob,
     sanitizeSavedJob,
 };
-

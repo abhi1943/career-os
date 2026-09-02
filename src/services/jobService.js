@@ -17,22 +17,7 @@ import {
 // ======================================================
 // API CONFIGURATION
 // ======================================================
-//
-// Backend mounts Jobs at:
-//
-// /api/jobs
-//
-// VITE_API_URL may be configured as either:
-//
-// https://career-os-api-1h85.onrender.com
-//
-// OR:
-//
-// https://career-os-api-1h85.onrender.com/api
-//
-// This normalization guarantees that the frontend always
-// calls the correct /api backend path.
-// ======================================================
+
 
 const RAW_API_URL =
     import.meta.env.VITE_API_URL ||

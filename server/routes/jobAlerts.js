@@ -37,10 +37,6 @@ const router = express.Router();
 // ======================================================
 // FIREBASE AUTHENTICATION
 // ======================================================
-//
-// Client-provided user IDs are NOT accepted.
-// All user ownership comes from req.user.uid.
-// ======================================================
 
 router.use(
     verifyFirebaseToken
@@ -49,20 +45,8 @@ router.use(
 // ======================================================
 // JOB ALERT ID VALIDATION
 // ======================================================
-//
-// Validates IDs before they reach service/database
-// operations.
-//
-// Allowed format:
-// - Letters
-// - Numbers
-// - Underscores
-// - Hyphens
-//
-// Maximum length: 128 characters.
-//
-// This protects all /:id routes consistently.
-// ======================================================
+
+
 
 function validateJobAlertId(
     req,
@@ -174,10 +158,6 @@ router.get(
 // ======================================================
 // GET ACTIVE JOB ALERTS
 // GET /api/job-alerts/active
-// ======================================================
-//
-// IMPORTANT:
-// This route must appear before /:id.
 // ======================================================
 
 router.get(
@@ -366,13 +346,7 @@ router.post(
 // MATCH JOB AGAINST USER'S ACTIVE ALERTS
 // POST /api/job-alerts/match
 // ======================================================
-//
-// The service-level findMatchingAlerts()
-// checks all active alerts.
-//
-// This route filters the result to the
-// authenticated user before returning it.
-// ======================================================
+
 
 router.post(
     "/match",
@@ -613,11 +587,6 @@ router.post(
 // ======================================================
 // GET ONE JOB ALERT
 // GET /api/job-alerts/:id
-// ======================================================
-//
-// IMPORTANT:
-// This route is below all named routes.
-// ======================================================
 
 router.get(
     "/:id",

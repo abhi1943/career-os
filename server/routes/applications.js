@@ -32,8 +32,6 @@ const router =
 // FIREBASE AUTHENTICATION
 // ======================================================
 
-//
-// ======================================================
 
 router.use(
     verifyFirebaseToken
@@ -41,9 +39,6 @@ router.use(
 
 // ======================================================
 // GET VERIFIED USER ID
-// ======================================================
-
-//
 // ======================================================
 
 function getUserId(req) {
@@ -305,17 +300,6 @@ router.post(
             // --------------------------------------------------
             // IGNORE CLIENT-PROVIDED USER ID
             // --------------------------------------------------
-            //
-            // Even if the client sends:
-            //
-            // {
-            //     userId: "another-user"
-            // }
-            //
-            // the backend uses the verified Firebase UID.
-            //
-            // --------------------------------------------------
-
             const application =
                 await createApplication(
                     data,

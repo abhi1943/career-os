@@ -452,21 +452,6 @@ function validateJobBody(
     // --------------------------------------------------
     // String fields
     // --------------------------------------------------
-    //
-    // IMPORTANT:
-    // "category" is intentionally NOT here.
-    //
-    // CareerOS category may be either:
-    //
-    // category: "IT"
-    //
-    // or:
-    //
-    // category: {
-    //     label: "IT"
-    // }
-    //
-    // --------------------------------------------------
 
     const stringFields = [
         "url",
@@ -665,19 +650,6 @@ function validateJobBody(
     // --------------------------------------------------
     // Category
     // --------------------------------------------------
-    //
-    // CareerOS supports both:
-    //
-    // category: "IT"
-    //
-    // and:
-    //
-    // category: {
-    //     label: "IT"
-    // }
-    //
-    // --------------------------------------------------
-
     if (
         job.category !==
             undefined &&
@@ -1175,4 +1147,3 @@ router.delete(
 
 module.exports =
     router;
-
