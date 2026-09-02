@@ -38,7 +38,6 @@ const {
 const {
     storeJobs,
     removeStaleJobs,
-    getStoredJobCount,
     getJobStoreStatus,
 } = require("./services/jobService");
 
@@ -313,14 +312,7 @@ async function refreshJobs() {
 //
 // Production frontend:
 // https://career-5bszfhdpl-career-os13.vercel.app
-//
-// Also allows:
-// - career-os13.vercel.app
-// - Vercel preview deployments matching
-//   career-xxxxx-career-os13.vercel.app
-// - localhost development
-//
-// ======================================================
+
 
 function normalizeOrigin(origin) {
     return String(
@@ -428,6 +420,7 @@ const corsOptions = {
         "Content-Type",
         "Authorization",
         "X-User-Id",
+        "X-CareerOS-User-Id",
     ],
 
     exposedHeaders: [
