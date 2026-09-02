@@ -1,3 +1,4 @@
+
 // ======================================================
 // CareerOS Database Configuration
 // ======================================================
@@ -13,8 +14,6 @@ require("dotenv").config();
 // ======================================================
 // DATABASE CONFIGURATION
 // ======================================================
-
-
 
 const pool = mysql.createPool({
     host:
@@ -39,11 +38,29 @@ const pool = mysql.createPool({
         process.env.DB_NAME ||
         "career_os",
 
+    // --------------------------------------------------
+    // CONNECTION POOL
+    // --------------------------------------------------
+
     waitForConnections: true,
 
-    connectionLimit: 10,
+    // Keep the pool small because the hosting database
+    // has a limited max_user_connections value.
+    connectionLimit: 3,
 
-    queueLimit: 0,
+    // Do not allow an unlimited queue of requests.
+    queueLimit: 20,
+
+    // --------------------------------------------------
+    // IDLE CONNECTION MANAGEMENT
+    // --------------------------------------------------
+
+    // Close idle connections after 30 seconds.
+    idleTimeout: 30000,
+
+    // --------------------------------------------------
+    // KEEP ALIVE
+    // --------------------------------------------------
 
     enableKeepAlive: true,
 
@@ -61,9 +78,8 @@ async function testDatabaseConnection() {
         connection =
             await pool.getConnection();
 
-        
-
         return true;
+
     } catch (error) {
         console.error(
             "❌ CareerOS MySQL database connection failed:",
@@ -71,6 +87,7 @@ async function testDatabaseConnection() {
         );
 
         return false;
+
     } finally {
         if (connection) {
             connection.release();
@@ -86,3 +103,4 @@ module.exports = {
     pool,
     testDatabaseConnection,
 };
+  
